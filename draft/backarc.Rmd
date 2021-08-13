@@ -27,7 +27,7 @@ output:
   word_document:
     pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref', '--lua-filter=multiple-bibliographies.lua']
     fig_caption: yes
-    reference_docx: 'template.docx'
+    reference_docx: template.docx
   html_document:
     pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref', '--lua-filter=multiple-bibliographies.lua']
     fig_caption: yes
@@ -227,7 +227,7 @@ summarise(
 
 # Introduction
 
-Heat escaping the solid Earth's surface indicates a dynamically cooling planet. Surface heat flow databases [@pollack1993; @hasterok2008; @lucazeau2019] provide a way to investigate and quantify geodynamics by relating the amount of heat escaping Earth's surface to heat-transferring and heat-generating subsurface processes such as diffusion, hydrothermal circulation, radioactive decay, fault motion, subduction dynamics, and mantle convection [@fourier1827; @parsons1977; @pollack1977; @stein1992; @hasterok2013; @stein1994; @rudnick1998; @furlong2013; @gao2014; @furukawa1993; @wada2009; @kerswell2020; @currie2004; @currie2006]. Surface heat flow observations continue to motivate research, evident by more than 1,393 publications compiled in the most recent heat flow database, although the rate of publications using surface heat flow has declined since the mid 1980's [@jennings2021].
+Heat escaping the solid Earth's surface indicates a dynamically cooling planet. Surface heat flow databases [@pollack1993; @hasterok2008; @lucazeau2019] enable investigations and quantification geodynamics by relating the amount of heat escaping Earth's surface to heat-transferring and heat-generating subsurface processes such as diffusion, hydrothermal circulation, radioactive decay, fault motion, subduction dynamics, and mantle convection [@fourier1827; @parsons1977; @pollack1977; @stein1992; @hasterok2013; @stein1994; @rudnick1998; @furlong2013; @gao2014; @furukawa1993; @wada2009; @kerswell2020; @currie2004; @currie2006]. Surface heat flow observations continue to motivate research, evident by more than 1,393 publications compiled in the most recent heat flow database, although the rate of publications using surface heat flow has declined since the mid 1980's [@jennings2021].
 
 Questions such as calculating the global surface heat flux from continents and oceans require interpolating discrete heat flow observations onto a continuous approximation of Earth's surface. Interpolation attempts commonly use one or more geographic, geologic, geochronologic, or geophysical proxies to predict heat flow at unknown locations by association with similar observation sites [e.g., bathymetry or elevation, proximity to active or ancient orogens, seafloor age, upper mantle shear wave velocities, @chapman1975; @lee1965; @sclater1970; @davies2013; @shapiro2004; @goutorbe2011; @lucazeau2019]. These methods are called *similarity methods* ([@fig:lucahf]) and follow the assumptions embedded in the Third Law of Geography (hereafter referred to as the Third Law): *the more similar the geographic configuration of two points, the more similar their values* [@zhu2018].
 
@@ -516,7 +516,7 @@ All data, code, and heat flow interpolations can be found at `https://doi.org/10
 
 \acknowledgments
 
-We thank D. Hasterok for providing the NGHF references and guidance on citing. This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
+We gratefully acknowledge high-performance computing support of the Borah compute cluster (DOI: [10.18122/oit/3/boisestate](10.18122/oit/3/boisestate)) provided by Boise State University’s Research Computing Department. We thank D. Hasterok for providing the NGHF references and guidance on citing. This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
 
 # References
 
