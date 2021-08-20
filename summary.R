@@ -215,7 +215,6 @@ geom_boxplot(
   width = 0.5,
   outlier.size = 0.5,
   outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
-geom_vline(xintercept = 0, color = 'deeppink') +
 labs(
   x = bquote('Heat flow difference'~(mWm^-2)),
   y = NULL,
