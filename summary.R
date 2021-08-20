@@ -205,23 +205,22 @@ cat('Heat flow difference summary:\n')
 print(hf.diff.summary)
 
 # Visualize
-hf.diff %>%
+d <- hf.diff %>%
 bind_rows(.id = 'segment') %>%
 mutate('segment' = segment %>% stringr::str_replace_all('_', ' ')) %>%
-group_by(segment) %>%
+group_by(segment)
+d %>%
 ggplot() +
 geom_boxplot(
-  aes(x = hf.diff, y = segment, group = segment),
-  width = 0.5,
-  outlier.size = 0.5,
-  outlier.color = rgb(0.5, 0.5, 0.5, 0.1)) +
+  aes(x = hf.diff, y = reorder(segment, -hf.diff, FUN = median), group = segment),
+  width = 0.8,
+  notch = T,
+  outlier.shape = NA) +
+geom_vline(xintercept = 0, size = 0.2) +
 labs(
   x = bquote('Heat flow difference'~(mWm^-2)),
-  y = NULL,
-  title = 'Prediction difference') +
-scale_x_continuous(limits = c(-2*max(hf.diff.summary$IQR), 2*max(hf.diff.summary$IQR))) +
-scale_y_discrete(
-  limits = rev(levels(as.factor(seg.names %>% stringr::str_replace_all('_', ' '))))) +
+  y = NULL) +
+scale_x_continuous(breaks = seq(-20, 40, 10), limits = quantile(d$hf.diff, c(0.1, 0.9))) +
 theme_classic(base_size = 9) +
 theme(strip.background = element_blank()) -> p
 
@@ -233,7 +232,7 @@ ggsave(
   plot = p,
   device = 'png',
   type = 'cairo',
-  width = 4,
+  width = 4.5,
   height = 4)
 
 cat('\nDone\n')
