@@ -1,5 +1,4 @@
 Lon     Lat     H       Tdis    Strike  Dip     AZconv  Vtot    Vcorr   Age     DesRat  Phi/100 Front   Name                              ArcName
-deg     deg     km      km      degN    deg     degN    km/Ma   km/Ma   Ma      km/Ma   km      .       .                                 .
 144.90  20.53   128     190     -31     60      -67     30.2    17.7    148.0   15.3    22.7    y       FARALLON_DE_PAJAROS(URACAS)       North_Marianas
 145.10  20.13   139     200     -33     61      -69     31.6    18.8    148.0   16.4    24.2    y       SUPPLY_REEF                       North_Marianas
 145.00  20.10   162     200     -33     61      -69     31.9    18.7    148.0   16.3    24.1    y       MAUG                              North_Marianas

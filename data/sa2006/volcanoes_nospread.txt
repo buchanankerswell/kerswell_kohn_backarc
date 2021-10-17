@@ -1,5 +1,4 @@
 Lon     Lat     H       Tdis    Strike  Dip     AZconv  Vtot    Vc      Age     DesRat  Phi/100 Front   Name                              ArcName
-deg     deg     km      km      degN    deg     degN    km/Ma   km/Ma   Ma      km/Ma   km      .       .                                 .
 -75.30  5.09    NULL    295     -170    30      77      64.9    59.7    17.0    30.1    5.1     y       CERRO_BRAVO                       Colombia
 -75.32  4.89    NULL    290     -170    31      77      65.0    59.9    16.6    30.9    5.1     y       RUIZ                              Colombia
 -75.37  4.82    NULL    290     -170    31      77      65.1    60.0    16.5    30.9    5.1     y       SANTA_ISABEL                      Colombia
