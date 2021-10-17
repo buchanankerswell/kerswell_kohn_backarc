@@ -73,9 +73,9 @@ cat('\nPlotting world heat flow map')
 ggplot() +
 geom_sf(data = shp.world.robin.pacific, color = NA) +
 geom_sf(data = shp.hf,
-        aes(color = `heat-flow (mW/m2)`), size = 0.1) +
+        aes(color = `heat-flow (mW/m2)`), size = 0.01, shape = 20) +
 viridis.scale.grey +
-labs(title = 'New Global Heat Flow',
+labs(title = 'ThermoGlobe data',
      color = bquote(mWm^-2)) +
 guides(
   color = guide_colorbar(
@@ -84,13 +84,13 @@ guides(
                         st_bbox(shp.world.robin.pacific)$xmin/2.5e6)/5, 'in'))) +
 coord_sf(expand = F) +
 theme_map() +
-theme(axis.text = element_text(),
+theme(axis.text = element_blank(),
       legend.position = 'top',
       legend.direction = 'horizontal',
       legend.justification = 'right',
-      plot.title = element_text(vjust = -6),
+      #plot.title = element_text(vjust = -6),
       panel.grid = element_line(size = 0.2, color = rgb(0,0,0,0.2)),
-      plot.margin = margin(),
+      plot.margin = margin(3,0,3,0),
       panel.ontop = T) -> p.nghf
 
 # Save plot
@@ -114,8 +114,7 @@ geom_sf(data = shp.world.robin.pacific,
         color = rgb(0, 0, 0, 0.7),
         fill = NA,
         size = 0.2) +
-labs(title = 'Predicted Heat Flow',
-     subtitle = 'similarity method',
+labs(title = 'Similarity interpolation',
      color = bquote(mWm^-2)) +
 viridis.scale.white +
 guides(
@@ -125,13 +124,13 @@ guides(
                         st_bbox(shp.world.robin.pacific)$xmin/2.5e6)/5, 'in'))) +
 coord_sf(expand = F) +
 theme_map() +
-theme(axis.text = element_text(),
+theme(axis.text = element_text(size=7),
       legend.position = 'top',
       legend.direction = 'horizontal',
       legend.justification = 'right',
-      plot.title = element_text(vjust = -12),
-      plot.subtitle = element_text(vjust = -15),
-      plot.margin = margin(-12, 0, 0, 0),
+      #plot.title = element_text(vjust = -12),
+      #plot.subtitle = element_text(vjust = -15),
+      plot.margin = margin(3,0,3,0),
       panel.grid = element_line(size = 0.2, color = rgb(1,1,1,0.7)),
       panel.ontop = T) -> p.pred
 
@@ -151,7 +150,16 @@ cat('\nPlotting individual segments')
 # Lucazeau composition
 
 p <- (p.nghf + theme(plot.caption = element_blank())) /
-        p.pred + plot_annotation(tag_levels = 'a')
+        p.pred +
+        plot_layout(guides= 'collect') &
+        guides(color = guide_colorbar(barwidth = unit(8,'lines'))) &
+        theme(
+          plot.title = element_text(size = 12, hjust=0.5),
+          legend.key.height = unit(0.7, 'lines'),
+          legend.title = element_text(size = 10, vjust=1),
+          legend.text = element_text(size = 10),
+          legend.position = 'bottom'
+        )
 
 cat('\nPlotting Lucazeau (2019) composition')
 
@@ -161,10 +169,12 @@ ggsave(
   device = 'png',
   plot = p,
   type = 'cairo',
-  width = abs(st_bbox(shp.world.robin.pacific)$xmax/2.5e6 -
-              st_bbox(shp.world.robin.pacific)$xmin/2.5e6),
-  height = 2*abs(st_bbox(shp.world.robin.pacific)$ymax/2.5e6 -
-                 st_bbox(shp.world.robin.pacific)$ymin/2.5e6))
+  width = 6,
+  height = 7)
+#  width = abs(st_bbox(shp.world.robin.pacific)$xmax/2.5e6 -
+#              st_bbox(shp.world.robin.pacific)$xmin/2.5e6),
+#  height = 2*abs(st_bbox(shp.world.robin.pacific)$ymax/2.5e6 -
+#                 st_bbox(shp.world.robin.pacific)$ymin/2.5e6))
 
 # Individual Segments
 
@@ -285,14 +295,12 @@ geom_sf_label_repel(
   data = shp.sa.segs.robin.pacific %>%
   mutate('segment' = segment %>% stringr::str_replace_all('_', ' ')),
   aes(label = segment),
-      size = 5,
+      size = 3,
       alpha = 0.8,
       max.overlaps = 30) +
-labs(title = 'Subduction Zone Segments',
-     caption = 'after Syracuse & Abers (2006)') +
 coord_sf(expand = F) +
 theme_map(font_size = 18) +
-theme(axis.text = element_text(),
+theme(axis.text = element_blank(),
       legend.position = 'bottom',
       legend.direction = 'horizontal',
       panel.grid = element_line(size = 0.2, color = rgb(0,0,0,0.2)),
@@ -325,21 +333,15 @@ geom_sf(data = shp.van.box.wide %>% st_difference(shp.van.box), fill = 'cornflow
 geom_sf(data = shp.van, size = 1.1) +
 geom_sf(data = shp.sa.contours.robin.pacific %>% filter(segment == 'Vanuatu'), size = 0.2) +
 labs(color = bquote(mWm^-2),
-     title = 'Vanuatu',
-     subtitle = 'Interpolation Domain') +
+     title = 'Interpolation Domain') +
 viridis.scale.grey +
-guides(
-  color = guide_colorbar(
-    title.vjust = 1,
-    barwidth = unit(abs(st_bbox(shp.van.buf)$xmax/1e6 -
-                        st_bbox(shp.van.buf)$xmin/1e6)/1.5, 'in'))) +
 coord_sf(expand = F,
          xlim = c(st_bbox(shp.van.box.wide)$xmin, st_bbox(shp.van.box.wide)$xmax),
          ylim = c(st_bbox(shp.van.box.wide)$ymin, st_bbox(shp.van.box.wide)$ymax)) +
-theme_map(font_size = 18) +
+theme_map() +
 theme(axis.text = element_text(),
       panel.grid = element_line(size = 0.1, color = rgb(0,0,0,0.2)),
-      plot.margin = margin(0, 0, 20, 0),
+      plot.margin=margin(0,4,0,4),
       panel.ontop = T) -> p.van.buf
 
 # With hf
@@ -354,32 +356,39 @@ geom_sf(data = shp.van.hf,
         aes(color = `heat-flow (mW/m2)`),
         size = 1) +
 labs(color = bquote(mWm^-2),
-     title = 'Vanuatu',
-     subtitle = bquote(n==.(nrow(shp.van.hf)))) +
+     title = 'Cropped data') +
 viridis.scale.grey +
 coord_sf(expand = F,
          xlim = c(st_bbox(shp.van.box.wide)$xmin, st_bbox(shp.van.box.wide)$xmax),
          ylim = c(st_bbox(shp.van.box.wide)$ymin, st_bbox(shp.van.box.wide)$ymax)) +
-theme_map(font_size = 18) +
+theme_map() +
 theme(axis.text = element_text(),
+      legend.position='none',
+      plot.margin=margin(0,4,0,4),
       panel.grid = element_line(size = 0.1, color = rgb(0,0,0,0.2)),
       panel.ontop = T) -> p.van
 
 # Plot composition
-p <- p.segs / (p.van.buf + p.van) +
-        plot_annotation(tag_levels = 'a', theme = theme(plot.margin = margin())) +
-        plot_layout(heights = 1)
+p <- p.segs /
+  ((p.van.buf + theme(axis.text=element_text(size=9))) + (p.van+theme(axis.text.y=element_blank(), axis.text.x=element_text(size=9)))) +
+  plot_annotation(tag_levels = 'a') +
+  plot_layout(heights = 1) &
+  theme(
+    plot.title=element_text(size = 12, hjust=0.5)
+  )
 
 # Save plot
 ggsave(filename = paste0('figs/base/segs_comp.png'),
        plot = p,
        device = 'png',
        type = 'cairo',
-       width = 0.9 * abs(st_bbox(shp.world.robin.pacific)$xmax/2.5e6 -
-                   st_bbox(shp.world.robin.pacific)$xmin/2.5e6),
-       height = 1 * (abs(st_bbox(shp.world.robin.pacific)$ymax/2.5e6 -
-                    st_bbox(shp.world.robin.pacific)$ymin/2.5e6) +
-                abs(st_bbox(shp.van.box.wide)$ymax/5e5 -
-                    st_bbox(shp.van.box.wide)$ymin/5e5)))
+       width = 6,
+       height = 7)
+       #width = 0.9 * abs(st_bbox(shp.world.robin.pacific)$xmax/2.5e6 -
+       #            st_bbox(shp.world.robin.pacific)$xmin/2.5e6),
+       #height = 1 * (abs(st_bbox(shp.world.robin.pacific)$ymax/2.5e6 -
+       #             st_bbox(shp.world.robin.pacific)$ymin/2.5e6) +
+       #         abs(st_bbox(shp.van.box.wide)$ymax/5e5 -
+       #             st_bbox(shp.van.box.wide)$ymin/5e5)))
 
 cat('\nDone\n')
