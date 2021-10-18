@@ -271,6 +271,27 @@ walk2(shp.grid.crop, seg.names, ~{
 })
 cat('\n', rep('+', 40), sep='')
 
+# Summarize heat flow data
+cat('\nHeat flow summary:\n')
+hf.summary <-
+  shp.hf.crop %>%
+  map_df(
+    ~st_set_geometry(.x, NULL),
+    .id = 'segment'
+  ) %>%
+  group_by(segment) %>%
+  summarise(
+    n = n(),
+    min = round(min(hf)),
+    max = round(max(hf)),
+    median =round(median(hf)),
+    IQR = round(IQR(hf)),
+    mean = round(mean(hf)),
+    sd = round(sd(hf))
+  )
+
+print(hf.summary)
+
 # Clean up environment
 cat('\n\n', rep('~', 60), sep='')
 cat('\nCleaning up environment ...')
