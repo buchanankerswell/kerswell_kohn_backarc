@@ -391,6 +391,8 @@ plot_vgrm <-
         x = -Inf,
         y = Inf,
         label = paste('Model:', v.mod, '\nCost:', round(cost, 3)),
+        label.padding = unit(0.1, 'lines'),
+        label.r = unit(0, 'lines'),
         alpha = 0.8,
         fill = 'grey90',
         size = 3,
