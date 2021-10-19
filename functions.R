@@ -10,6 +10,7 @@ sshhh <- function(p) {
 
 # Package list
 package.list <- c(
+  'colorspace',
   'tictoc',
   'stringr',
   'tidyr',
@@ -144,10 +145,17 @@ experimental_vgrm <-
 }
 
 # Wrapper function around gstat krige method
-Krige <- function(shp.hf, fitted.vgrm, shp.interp.grid, n.max=200) {
+Krige <-
+  function(
+    shp.hf,
+    fitted.vgrm,
+    shp.interp.grid,
+    n.max=200,
+    seg.name = NULL
+  ) {
   # Print grid and parameters info
   cat(
-    '\nKriging ...',
+    '\nKriging:', seg.name,
     '\nObservations:', nrow(shp.hf),
     '\nGrid size:', length(shp.interp.grid),
     '\nMax nearest points:', n.max,

@@ -6,8 +6,71 @@ source('functions.R')
 load('data/hf.RData')
 
 # Set parallel computing plan
-plan(multisession, workers = 7)
+n.sessions <- 6
+plan(multisession, workers = n.sessions)
+cat('\nParallel computing across', n.sessions, 'R sessions')
+# Counter
+cntr <- 1
+cat('\nSaving results to: data/opt', cntr, '.RData', sep = '')
+cat('\nSaving plots to: figs/vgrms/*', cntr, '.png', sep = '')
+# Define initial values for cost function
+# and nloptr settings
+cat('\n\n', rep('~', 60), sep='')
+cat('\nSetting up constrained nonlinear minimization problem')
+cat('\n            with "nloptr" to fit variogram models ...')
+cat('\n\nsee https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/')
+cat('\nfor information on nloptr and possible algorithms')
+init.vals <-
+  tibble(
+    cutoff.prop = 3,
+    n.lags = 30,
+    lag.start = 5,
+    n.max = 20,
+#    algorithm = 'NLOPT_GN_DIRECT_L',   # Direct global
+#    algorithm = 'NLOPT_LN_SBPLX',      # Local without gradients
+#    algorithm = 'NLOPT_LN_NELDERMEAD', # Local without gradients
+    algorithm = 'NLOPT_LN_BOBYQA',      # Local without gradients
+#    algorithm = 'NLOPT_LN_COBYLA',     # Local without gradients
+    maxeval = 3
+  )
+# Upper and lower bounds for constrained search
+bounds <-
+  tibble(
+    cutoff.prop = c(1, 20),
+    n.lags = c(15, 50),
+    lag.start = c(1, 10),
+    n.max = c(10, 50)
+  )
+# Check init values are within bounds
+pwalk(init.vals, ~{
+  if(
+    ..1 < bounds[1,1] |
+    ..1 > bounds[2,1] |
+    ..2 < bounds[1,2] |
+    ..2 > bounds[2,2] |
+    ..3 < bounds[1,3] |
+    ..3 > bounds[2,3] |
+    ..4 < bounds[1,4] |
+    ..4 > bounds[2,4]
+  ) {
+    stop('One or more initial values out of bounds')
+  }
+})
+# Print settings
+cat(
+  '\n\nnloptr settings:',
+  '\nAlgorithm:       ', init.vals$algorithm,
+  '\nMax evaluations: ', init.vals$maxeval,
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\n~~~~~~~~~~Initial values~~~~~~~~~~~~',
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\nLag cutoff:     ', init.vals$cutoff.prop,
+  '\nNumber of lags: ', init.vals$n.lags,
+  '\nLag shift:      ', init.vals$lag.start,
+  '\nMax local pairs:', init.vals$n.max, '\n'
+)
 
+# Setup cost function and nloptr
 f <- function(segment, v.mod) {
   # Define cost function to minimize with
   # input parameters (x)
@@ -25,54 +88,49 @@ f <- function(segment, v.mod) {
       verbose = T
     )
   }
-  # Using BOBYQA or COBYLA optimization algorithm to minimize cost function
+  # Using nloptr optimization algorithms to minimize cost function
   # by tuning parameters (x) within box constrains
   # (up = upper bound, lb = lower bound)
   # with starting values x0
   # see https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/
-  # for information on nloptr and the BOBYQA algorithm
+  # for information on nloptr and possible algorithms
   nloptr(
-    x0 = c(8, 30, 5, 20),
+    x0 = c(
+      init.vals$cutoff.prop,
+      init.vals$n.lags,
+      init.vals$lag.start,
+      init.vals$n.max
+    ),
     eval_f = opt.fun,
-    lb = c(1, 15, 1, 10),
-    ub = c(20, 50, 10, 50),
+    lb = c(
+      bounds$cutoff.prop[1],
+      bounds$n.lags[1],
+      bounds$lag.start[1],
+      bounds$n.max[1]
+    ),
+    ub = c(
+      bounds$cutoff.prop[2],
+      bounds$n.lags[2],
+      bounds$lag.start[2],
+      bounds$n.max[2]
+    ),
     opts = list(
       print_level = 1,
-#      ftol_rel = 1e-4,
-#      xtol_rel = 1e-4,
-      maxeval = 500,
-#      algorithm = 'NLOPT_LN_BOBYQA'
-#      algorithm = 'NLOPT_LN_COBYLA'
-#      algorithm = 'NLOPT_GN_DIRECT_L'
-      algorithm = 'NLOPT_LN_SBPLX'
+      maxeval = init.vals$maxeval,
+      algorithm = init.vals$algorithm
     )
   )
 }
 
-# Find good variogram models by constrained
-# non-linear optimization
-cat('\n', rep('~', 60), sep='')
-cat('\nOptimizing variogram parameters ...')
-cat(
-  '\nnloptr settings:',
-  '\nAlgorithm:         NLOPT_LN_SBPLX',
-  '\nMax evaluations:   500',
-  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-  '\n~~~~~~~~~Initial values~~~~~~~~~~~',
-  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-  '\n  Lag cutoff:      8',
-  '\n  Number of lags:  30',
-  '\n  Lag shift:       5',
-  '\n  Max local pairs: 20\n'
-)
-
-# Create array of variogram models to optimize for each segment
-# and optimize in parallel
+# Create array of variogram models to optimize
+# for each segment and optimize in parallel
 tic()
 opt.grd <-
-  tibble(expand.grid(c('Sph', 'Exp', 'Gau', 'Bes', 'Lin', 'Cir'), seg.names)) %>%
-  rename(v.mod = Var1, segment = Var2) %>%
-  mutate(across(everything(), as.character)) %>%
+  tibble(expand.grid(
+    segment = seg.names,
+    v.mod = c('Sph', 'Exp', 'Gau', 'Bes', 'Lin', 'Cir'),
+    stringsAsFactors = F
+  )) %>%
   mutate(
     opt =
       future_map2(
@@ -86,14 +144,14 @@ opt.grd <-
 toc()
 
 # Decode optimization output and construct variograms
-cat('\n', rep('~', 60), sep='')
+cat('\n\n', rep('~', 60), sep='')
 cat('\nDecoding optimized solutions ...')
 opt.vgrms <-
   opt.grd %>%
   pmap(
     ~decode_opt(
-      model.vgrm = ..1,
-      shp.hf = shp.hf.crop[[..2]],
+      model.vgrm = ..2,
+      shp.hf = shp.hf.crop[[..1]],
       opt = ..3
     )
   )
@@ -111,16 +169,17 @@ opt.solns <-
   group_by(segment) %>%
   slice(which.min(cost))
 
+# Print lowest-cost solutions
 cat('\nBest solutions for each segment:\n')
 cat('\n', rep('+', 40), sep='')
 pwalk(opt.solns, ~{
   cat(
-    '\nSegment:         ', ..2,
+    '\nSegment:         ', ..1,
     '\nVariogram cutoff:', ..3$solution[1], 
     '\nNumber of lags:  ', ..3$solution[2],
     '\nLag shift:       ', ..3$solution[3],
     '\nMax points:      ', ..3$solution[4],
-    '\nVariogram model: ', ..1,
+    '\nVariogram model: ', ..2,
     '\nCost:            ', ..3$objective,
     '\n'
   )
@@ -131,66 +190,66 @@ cat('\n', rep('+', 40), '\n', sep='')
 cat('\nVariogram summary:\n')
 vgrm.summary <-
   tibble(
-    segment = opt.solns$segment,
-    model.vgrm = opt.solns$v.mod,
-    cutoff.prop = map_dbl(opt.solns$opt, ~.x$solution[1]),
-    n.lags = map_dbl(opt.solns$opt, ~.x$solution[2]),
-    lag.start = map_dbl(opt.solns$opt, ~.x$solution[3]),
-    n.max = map_dbl(opt.solns$opt, ~.x$solution[4]),
-    sill = map_dbl(opt.solns$opt.fit.vgrm, ~.x$psill),
-    range = map_dbl(opt.solns$opt.fit.vgrm, ~.x$range),
-    itr = map_dbl(opt.solns$opt, ~.x$iterations),
-    cost = opt.solns$cost,
+    segment = solns$segment,
+    v.mod = solns$v.mod,
+    cutoff.prop = map_dbl(solns$opt, ~.x$solution[1]),
+    n.lags = map_dbl(solns$opt, ~.x$solution[2]),
+    lag.start = map_dbl(solns$opt, ~.x$solution[3]),
+    n.max = map_dbl(solns$opt, ~.x$solution[4]),
+    sill = map_dbl(solns$opt.fit.vgrm, ~.x$psill),
+    range = map_dbl(solns$opt.fit.vgrm, ~.x$range),
+    itr = map_dbl(solns$opt, ~.x$iterations),
+    cost = solns$cost,
   )
 print(vgrm.summary)
-
-# Plot optimum variogram models
-cat('\nSaving variogram plots to: figs/vgrms/\n')
-dir.create('figs/vgrms', showWarnings = F)
-plts <- pmap(solns, ~plot_vgrm(..4, ..5, ..6, ..1, lineCol = 'firebrick'))
-list(seq(1,73,6), seq(6,78,6), seg.names) %>%
-pwalk(~{
-  p <-
-    wrap_plots(plts[..1:..2], nrow=3, ncol=2) +
-    plot_annotation(title = paste(..3, 'variogram models'))
-  ggsave(
-    paste0('figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms.png'),
-    plot = p,
-    device = 'png',
-    type = 'cairo',
-    width = 6,
-    height = 6
-  )
-  }
-)
 
 # Kriging segments
 cat('\n', rep('~', 60), sep='')
 cat('\nKriging segments ...\n')
 shp.interp.krige <-
   list(
-    shp.hf.crop,
-    opt.solns$opt.fit.vgrm,
-    shp.grid.crop,
-    map(opt.solns$opt, ~.x$solution[4])
+    solns$segment,
+    solns$opt.fit.vgrm,
+    map(solns$opt, ~.x$solution[4])
   ) %>%
-  pmap(~suppressWarnings(Krige(..1, ..2, ..3, ..4)))
+  pmap(~
+    suppressWarnings(
+      Krige(
+       shp.hf = shp.hf.crop[[..1]],
+       fitted.vgrm = ..2,
+       shp.interp.grid = shp.grid.crop[[..1]],
+       n.max = ..3,
+       seg.name = ..1
+      )
+    )
+  ) %>%
+  set_names(solns$segment)
 
 # Calculating interpolation difference
 cat('\n', rep('~', 60), sep='')
 cat('\nComputing differences ...\n')
 shp.interp.diff <-
-  shp.interp.krige %>%
-  map(~suppressWarnings(interp_diff(.x, shp.interp.luca)))
+  pmap(list(shp.interp.krige, solns$segment, solns$v.mod), ~{
+    suppressWarnings({
+      cat('\nSegment:', ..2)
+      cat('\nModel  :', ..3)
+      interp_diff(..1, shp.interp.luca)
+    })
+  })
 
 # Summarise interpolation differences
 interp.diff.summary <-
-  shp.interp.diff %>%
-  map_df(
-    ~st_set_geometry(.x, NULL),
+  pmap_df(
+    list(
+      shp.interp.diff,
+      solns$v.mod,
+      solns$cost
+    ),
+    ~st_set_geometry(..1, NULL) %>%
+    mutate(v.mod = ..2, cost = ..3, .before = est.sim),
     .id = 'segment'
   ) %>%
-  group_by(segment) %>%
+  group_by(segment, v.mod, cost) %>%
   drop_na() %>%
   summarise(
     n = n(),
@@ -199,13 +258,14 @@ interp.diff.summary <-
     median = round(median(est.diff, na.rm = T)),
     IQR = round(IQR(est.diff, na.rm = T)),
     mean = round(mean(est.diff, na.rm = T)),
-    sigma = round(sd(est.diff, na.rm = T))
+    sigma = round(sd(est.diff, na.rm = T)),
+    .groups = 'drop'
   )
 cat('\nHeat flow difference summary:\n')
 print(interp.diff.summary)
 
 cat('\n', rep('~', 60), sep='')
-cat('\nSaving to: data/opt.RData')
+cat('\nSaving to: data/opt', cntr, '.RData', sep = '')
 save(
   list = c(
     'solns',
@@ -214,7 +274,7 @@ save(
     'shp.interp.diff',
     'interp.diff.summary'
   ),
-  file = 'data/opt2.RData'
+  file = paste0('data/opt', cntr, '.RData')
 )
 
 cat('\n\nDone!')

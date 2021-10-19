@@ -38,11 +38,16 @@ walk(~{
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey95') +
       geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.3) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf_label(data = fts, aes(label = label), size = annt.txt.size) +
+      geom_sf_label(
+        data = fts,
+        aes(label = label),
+        size = annt.txt.size,
+        fill = rgb(1, 1, 1, 0.7)
+      ) +
       annotate(
         'label',
         x = -Inf,
@@ -102,7 +107,7 @@ walk(~{
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey95') +
       geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.3) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -153,7 +158,7 @@ walk(~{
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey95') +
       geom_sf(data = dif, aes(color = est.diff), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.3) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -181,11 +186,7 @@ walk(~{
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      scale_color_viridis_c(
-        option = 'rocket',
-        limits = c(-250, 250),
-        na.value = 'white'
-      ) +
+      br.palette +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -208,7 +209,7 @@ walk(~{
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey95') +
       geom_sf(data = dif, aes(color = sigma.diff), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.3) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -237,11 +238,7 @@ walk(~{
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      scale_color_viridis_c(
-        option = 'mako',
-        limits = c(-250, 250),
-        na.value = 'white'
-      ) +
+      berlin.palette +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +

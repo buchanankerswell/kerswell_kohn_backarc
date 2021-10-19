@@ -59,6 +59,40 @@ suppressWarnings(suppressMessages(
 ))
 system('open figs/summary/hf_summary.png', wait = F)
 
+# Plot optimum variogram models
+cat('\nSaving variogram plots to: figs/vgrms/\n')
+dir.create('figs/vgrms', showWarnings = F)
+
+plts <-
+  pmap(solns,
+    ~plot_vgrm(
+      experimental.vgrm = ..4,
+      fitted.vgrm = ..5,
+      cost = ..6,
+      v.mod = ..1,
+      lineCol = 'firebrick'
+    )
+  )
+# Draw composite plots
+list(
+  seq(1, nrow(solns)-(length(unique(solns$v.mod))-1), length(unique(solns$v.mod))),
+  seq(length(unique(solns$v.mod)), nrow(solns), length(unique(solns$v.mod))),
+  seg.names
+) %>%
+pwalk(~{
+  p <-
+    wrap_plots(plts[..1:..2], nrow=3, ncol=2) +
+    plot_annotation(title = paste(..3, 'variogram models'))
+  ggsave(
+    paste0('figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms.png'),
+    plot = p,
+    device = 'png',
+    type = 'cairo',
+    width = 6,
+    height = 6
+  )
+})
+
 # Summarise variogram models
 p2 <-
   vgrm.summary %>%

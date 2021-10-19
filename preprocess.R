@@ -18,6 +18,31 @@ v.scale.grey <-
     na.value = 'grey50'
   )
 
+lisbon.palette <-
+  scale_color_continuous_diverging(
+    palette = 'lisbon',
+    limits = c(-250, 250),
+    na.value = 'grey80'
+  )
+tofino.palette <-
+  scale_color_continuous_diverging(
+    palette = 'tofino',
+    limits = c(-250, 250),
+    na.value = 'grey80'
+  )
+berlin.palette <-
+  scale_color_continuous_diverging(
+    palette = 'berlin',
+    limits = c(-250, 250),
+    na.value = 'grey80'
+  )
+br.palette <-
+  scale_color_continuous_diverging(
+    palette = 'Blue-Red',
+    limits = c(-250, 250),
+    na.value = 'grey80'
+  )
+
 # Projections
 # WGS84
 proj4.wgs <-
