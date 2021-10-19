@@ -10,6 +10,7 @@ sshhh <- function(p) {
 
 # Package list
 package.list <- c(
+  'tictoc',
   'stringr',
   'tidyr',
   'readr',
@@ -33,6 +34,7 @@ package.list <- c(
 
 # auto-load quietly
 sapply(package.list, sshhh)
+rm(package.list, sshhh)
 
 # Don't allow sf to use google's s2 library
 # for spherical geometry
@@ -44,7 +46,7 @@ sf_use_s2(FALSE)
 bbox_widen <-
   function(
     bbox,
-    crs,
+    crs = NULL,
     borders =
       c(
         'left' = 0,
@@ -53,13 +55,16 @@ bbox_widen <-
         'bottom' = 0
       )
   ) {
+  if(is.null(crs)){
+    crs <- st_crs(bbox)
+  }
   b <- bbox # current bounding box
   xrange <- b$xmax - b$xmin # range of x values
   yrange <- b$ymax - b$ymin # range of y values
-  b[1] <- b[1] - (borders['left'] * xrange) # xmin - left
-  b[3] <- b[3] + (borders['right'] * xrange) # xmax - right
-  b[2] <- b[2] - (borders['bottom'] * yrange) # ymin - bottom
-  b[4] <- b[4] + (borders['top'] * yrange) # ymax - top
+  b[1] <- b[1] - (borders[1] * xrange) # xmin - left
+  b[3] <- b[3] + (borders[2] * xrange) # xmax - right
+  b[4] <- b[4] + (borders[3] * yrange) # ymax - top
+  b[2] <- b[2] - (borders[4] * yrange) # ymin - bottom
   box <- st_polygon(
     list(
       matrix(
@@ -161,32 +166,25 @@ Krige <- function(shp.hf, fitted.vgrm, shp.interp.grid, n.max=200) {
   as_tibble() %>%
   st_as_sf() %>%
   rename(
-    est = var1.pred,
-    variance = var1.var
+    est.krige = var1.pred,
+    var.krige = var1.var
   ) %>%
-  mutate(sigma = sqrt(variance), .before = geometry)
+  mutate(
+    sigma.krige = sqrt(var.krige),
+    .before = geometry
+  )
 }
 
 # Take difference
 interp_diff <- function(shp.interp.krige, shp.interp.compare) {
-  suppressWarnings({
-    # Crop Similarity estimates to Kriging bounding box
-    shp.interp.compare %>%
-    select(-obs) %>%
-    st_intersection(shp.interp.krige) %>%
-    # Rename
-    rename(
-      est.similarity = est,
-      sigma.similarity = sigma
-    ) %>%
-    # Add Kriging estimates and compute difference
-    mutate(
-      est.krige = shp.interp.krige$est,
-      sigma.krige = shp.interp.krige$sigma,
-      est.diff = est.similarity - est.krige,
-      .before = geometry
-    )
-  })
+  # Crop Similarity estimates to Kriging bounding box
+  shp.interp.compare %>%
+  select(-obs.sim) %>%
+  st_intersection(shp.interp.krige) %>%
+  mutate(
+    est.diff = est.sim - est.krige,
+    .before = geometry
+  )
 }
 
 # Decode output of nloptr method and
@@ -229,6 +227,7 @@ cost_function <-
     n.fold = nrow(shp.hf),
     interp.weight = 0.5,
     vgrm.weight = 0.5,
+    segment = NULL,
     verbose = T
   ) {
   # Calculate experimental variogram
@@ -239,6 +238,13 @@ cost_function <-
       n.lags = n.lags,
       lag.start = lag.start
     )
+  if(nrow(experimental.vgrm) < 2) {
+    if(verbose) {
+      cat('\nExperimental variogram has less than two lags!\n')
+      cat('\nReturning arbitrarily high cost\n')
+      return(runif(1, 1, 1.5))
+    }
+  }
   # Fit experimental variogram
   fitted.vgrm <-
     try(
@@ -259,6 +265,7 @@ cost_function <-
   }
   # Compute n-fold cross validation
   if(verbose){
+    cat('\n', rep('+', 30), sep='')
     cat('\nComputing cross-validation')
   }
   k.cv <- 
@@ -273,14 +280,11 @@ cost_function <-
       ),
       silent = T
     )
-  # If cross-validation fails or produces NAs
-  # print message and return arbitrarily high cost or
-  # finish computing cost
   if(any(class(k.cv) == 'try-error')) {
     if(verbose){
       cat('\nCross-validation error!')
       cat('\nReturning arbitrarily high cost\n')
-      return(runif(1, 0.8, 1.5))
+      return(runif(1, 1, 1.5))
     }
   }
   if(sum(is.na(k.cv)) != 0) {
@@ -289,13 +293,14 @@ cost_function <-
       if(sum(is.na(k.cv$residual)) == nrow(k.cv)){
         cat('\nCross-validation produced all NAs!')
         cat('\nReturning arbitrarily high cost\n')
-        return(runif(1, 0.8, 1.5))
+        return(runif(1, 1, 1.5))
       } else {
         cat('\nComputing cost despite', sum(is.na(k.cv$residual)), '/', nrow(k.cv), 'NAs')
       }
     }
   }
   if(verbose) {
+    cat('\nSegment:', segment)
     cat('\nCutoff proportion:', cutoff.prop)
     cat('\nNumber of lags:', n.lags)
     cat('\nLag start:', lag.start)
@@ -318,7 +323,7 @@ cost_function <-
     sqrt(attr(fitted.vgrm, "SSErr") / nrow(experimental.vgrm)) /
     sd(sqrt(experimental.vgrm$gamma))
   if(verbose){
-    cat('\nVariogram error:', vgrm.error)
+    cat('Variogram error:', vgrm.error)
   }
   # Calculate interpolation error similarly to vgrm.error
   #   equation: interp.weight * RMSE / sd(cross-validation estimates)
@@ -331,7 +336,8 @@ cost_function <-
   }
   # Return cost = vgrm.error + interp.error
   if(verbose){
-    cat('\nCost:', vgrm.error + interp.error, '\n')
+    cat('\nCost:', vgrm.error + interp.error)
+    cat('\n', rep('+', 30), '\n', sep='')
   }
   return(vgrm.error + interp.error)
 }

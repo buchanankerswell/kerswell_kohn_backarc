@@ -2,7 +2,6 @@
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
 source('functions.R')
-cat(rep('~', 60), sep='')
 
 # Projections
 # WGS84
@@ -22,7 +21,6 @@ cat(
   '\nRobinson Pacific Centered:\n',
   proj4.RP
 )
-cat('\n', rep('~', 60), '\n', sep='')
 
 # Country Boundaries
 
@@ -58,7 +56,7 @@ suppressWarnings({
 })
 
 # Read Syracuse et al (2006) volcanoes
-cat(rep('~', 60), '\n', sep='')
+cat('\n\n', rep('~', 60), '\n', sep='')
 cat('Reading Syracuse and Abers (2006) data ...\n')
 
 volc <-
@@ -75,6 +73,8 @@ volc.no.spread <-
     na = 'NULL'
   )
 
+volc <- volc %>% bind_rows(volc.no.spread)
+
 # Change to simple features object and project
 shp.volc <-
   volc %>%
@@ -82,14 +82,7 @@ shp.volc <-
   st_set_crs(proj4.wgs) %>%
   st_transform(proj4.RP)
 
-shp.volc.no.spread <-
-  volc.no.spread %>%
-  rename(Vcorr = Vc) %>%
-  st_as_sf(coords = c('Lon', 'Lat')) %>%
-  st_set_crs(proj4.wgs) %>%
-  st_transform(proj4.RP)
-
-cat('\nFound', nrow(volc) + nrow(volc.no.spread) , 'volcanoes\n')
+cat('\nFound', nrow(volc), 'volcanoes\n')
 
 # Read syracuse et al 2006 Segments
 files <-
@@ -102,7 +95,6 @@ seg.names <-
   str_to_title()
 
 cat('\nFound segments:', seg.names, sep = '\n')
-cat(rep('~', 60), sep='')
 
 # Read contours and project to robinson pacific centered
 shp.contours <-
@@ -186,10 +178,9 @@ shp.hf.filtered <-
   rename(hf = `heat-flow (mW/m2)`)
 
 cat('\n\nFinal ThermoGlobe dataset contains', nrow(shp.hf.filtered), 'observations')
-cat('\n', rep('~', 60), sep='')
 
 # Read Lucazeau (2019) interpolation
-cat('\n', rep('~', 60), sep='')
+cat('\n\n', rep('~', 60), sep='')
 cat('\nReading similarity interpolation from Lucazeau (2019) ...')
 
 interp.luca <-
@@ -201,9 +192,9 @@ interp.luca <-
   rename(
     lon = longiyude,
     lat = latitude,
-    est = HF_pred,
-    sigma = sHF_pred,
-    obs = Hf_obs
+    est.sim = HF_pred,
+    sigma.sim = sHF_pred,
+    obs.sim = Hf_obs
   )
 
 # Make simple feature object and project to robinson pacific centered
@@ -218,10 +209,9 @@ cat('\n\nExtracting similarity interpolation grid locations')
 shp.grid <- st_geometry(shp.interp.luca)
 
 cat('\nTotal similarity grid size:', length(shp.grid))
-cat('\n', rep('~', 60), sep='')
 
 # Defining interpolation domain
-cat('\n', rep('~', 60), sep='')
+cat('\n\n', rep('~', 60), sep='')
 cat('\nDefining interpolation domain ...\n')
 
 # Draw 1000 km buffer around segment boundaries
@@ -233,12 +223,12 @@ shp.buffer <-
   shp.segs %>%
   map(~st_buffer(.x, buf.dist, endCapStyle = 'ROUND'))
 
-shp.box <-
-  shp.buffer %>%
-  map(~st_bbox(.x) %>% bbox_widen(crs = proj4.RP))
+# shp.box <-
+#   shp.buffer %>%
+#   map(~st_bbox(.x) %>% bbox_widen(crs = proj4.RP))
 
 # Crop ThermoGlobe data to bounding boxes
-cat('\nCropping ThermoGlobe data to bounding boxes')
+cat('\nCropping ThermoGlobe data to buffers')
 
 shp.hf.crop <-
   suppressWarnings({
@@ -256,7 +246,7 @@ walk2(shp.hf.crop, seg.names, ~{
 cat('\n', rep('+', 40), sep='')
 
 # Cropped grids from Lucazeau (2019) to bounding boxes
-cat('\n\nCropping interpolation grids to bounding boxes')
+cat('\n\nCropping interpolation grids to buffers')
 
 shp.grid.crop <-
 #   shp.box %>%
@@ -272,7 +262,7 @@ walk2(shp.grid.crop, seg.names, ~{
 cat('\n', rep('+', 40), sep='')
 
 # Summarize heat flow data
-cat('\nHeat flow summary:\n')
+cat('\n\nHeat flow summary:\n')
 hf.summary <-
   shp.hf.crop %>%
   map_df(
@@ -293,25 +283,32 @@ hf.summary <-
 print(hf.summary)
 
 # Clean up environment
-cat('\n\n', rep('~', 60), sep='')
+cat('\n', rep('~', 60), sep='')
 cat('\nCleaning up environment ...')
 
 rm(list = lsf.str())
 
 rm(
    files,
+   volc,
+   hf,
+   proj4.RP,
+   proj4.wgs,
    i,
    shp.sliver,
+   shp.hf,
+   shp.grid,
+   shp.countries,
+   volc.no.spread,
    dup,
    rid,
    buf.dist,
-   interp.luca,
-   package.list
+   interp.luca
 )
 
 # Save
-cat('\nSaving data to: data/hf.RData')
+cat('\n\nSaving data to: data/hf.RData')
 save.image('data/hf.RData')
 
-cat('\nDone!')
-cat('\n', rep('~', 60), sep='')
+cat('\n\nDone!')
+cat('\n\n', rep('~', 60), sep='')

@@ -1,12 +1,12 @@
 #!/bin/zsh
 echo 'Compiling data ...'
-Rscript compile.R
+Rscript preprocess.R
 echo '\nPlotting global summary ...'
 Rscript global_plots.R
-echo '\nInterpolating differences ...'
-Rscript interp_diff.R
+echo '\nConstructing variograms ...'
+Rscript construct_vgrms.R
 echo '\nSummarizing interpolations ...'
-Rscript summary.R
+Rscript summary_plots.R
 echo '\nVisualizing results ...'
 Rscript visualize_diff.R
 Rscript visualize_diff_comp.R
