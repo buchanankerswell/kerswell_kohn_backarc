@@ -183,6 +183,7 @@ interp_diff <- function(shp.interp.krige, shp.interp.compare) {
   st_intersection(shp.interp.krige) %>%
   mutate(
     est.diff = est.sim - est.krige,
+    sigma.diff = sigma.sim - sigma.krige,
     .before = geometry
   )
 }

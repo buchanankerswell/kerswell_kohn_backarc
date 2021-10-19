@@ -1,7 +1,22 @@
 # Load packages and functions
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
+
 source('functions.R')
+
+# Color scales
+v.scale.white <-
+  scale_color_viridis_c(
+    option = 'magma',
+    limits = c(0, 250),
+    na.value = rgb(0.99, 0.99, 0.90)
+  )
+v.scale.grey <-
+  scale_color_viridis_c(
+    option = 'magma',
+    limits = c(0, 250),
+    na.value = 'grey50'
+  )
 
 # Projections
 # WGS84
@@ -9,7 +24,7 @@ proj4.wgs <-
   '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs'
 
 # Robinson Pacific centered
-proj4.RP <-
+proj4.rp <-
   '+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
 
 # Print Projections
@@ -19,8 +34,30 @@ cat(
   '\nWGS:\n',
   proj4.wgs,
   '\nRobinson Pacific Centered:\n',
-  proj4.RP
+  proj4.rp
 )
+
+# SZ features to include in visualizations
+shp.fts <-
+  tibble(
+    lat =
+      c(2.5, 12.5, 2, 6, 27.5, 15, 5, -60, -57.5,
+        -65, -60, -56.5, 5, 20, -10, -20, -12, -17.5),
+    lon =
+      c(258, 255, 270, 263, 310, 287.5, 300, 329, 340,
+        345, 320, 332.5, 115, 130, 90, 171, 175, 174),
+    segment =
+      c('Central America', 'Central America', 'Central America',
+        'Central America', 'Lesser Antilles', 'Lesser Antilles',
+        'Lesser Antilles', 'Scotia', 'Scotia', 'Scotia', 'Scotia',
+        'Scotia', 'Sumatra Banda Sea', 'Sumatra Banda Sea',
+        'Sumatra Banda Sea', 'Vanuatu', 'Vanuatu', 'Vanuatu'),
+    label =
+      c('GTJ', 'EPR', 'CR', 'CP', 'MAR', 'CBP', 'SA', 'ESR', 'TF',
+        'AP', 'SP', 'SAN', 'SNP', 'PSP', 'AUP', 'NHP', 'BR', 'CWR')
+  ) %>%
+  st_as_sf(coords = c(2, 1), crs = proj4.wgs) %>%
+  st_transform(proj4.rp)
 
 # Country Boundaries
 
@@ -51,7 +88,7 @@ suppressWarnings({
       st_difference(shp.sliver) %>%
       as_tibble() %>%
       st_as_sf() %>%
-      st_transform(proj4.RP)
+      st_transform(proj4.rp)
   })
 })
 
@@ -80,7 +117,7 @@ shp.volc <-
   volc %>%
   st_as_sf(coords = c('Lon', 'Lat')) %>%
   st_set_crs(proj4.wgs) %>%
-  st_transform(proj4.RP)
+  st_transform(proj4.rp)
 
 cat('\nFound', nrow(volc), 'volcanoes\n')
 
@@ -99,7 +136,7 @@ cat('\nFound segments:', seg.names, sep = '\n')
 # Read contours and project to robinson pacific centered
 shp.contours <-
   files %>%
-  map(~read_latlong(.x, proj4.RP)) %>%
+  map(~read_latlong(.x, proj4.rp)) %>%
   set_names(seg.names)
 
 # First contour defines the segment boundaries
@@ -126,7 +163,7 @@ shp.hf <-
   filter(!is.na(longitude)) %>% # remove no lat
   filter(!is.na(latitude)) %>% # remove no long
   st_as_sf(coords = c(9,10), crs = proj4.wgs) %>% # make sf object
-  st_transform(proj4.RP)
+  st_transform(proj4.rp)
 
 # Filter bad quality data and missing heat flow
 shp.hf.filtered <-
@@ -136,7 +173,7 @@ shp.hf.filtered <-
   filter(!is.na(longitude)) %>% # remove no lat
   filter(!is.na(latitude)) %>% # remove no long
   st_as_sf(coords = c(9,10), crs = proj4.wgs) %>% # make sf object
-  st_transform(proj4.RP)
+  st_transform(proj4.rp)
 
 # Check for duplicate measurements and remove
 dup <- sp::zerodist(sf::as_Spatial(shp.hf.filtered))
@@ -201,7 +238,7 @@ interp.luca <-
 shp.interp.luca <-
   interp.luca %>% 
   st_as_sf(coords = c(1,2), crs = proj4.wgs) %>% 
-  st_transform(proj4.RP)
+  st_transform(proj4.rp)
 
 # Extract 0.5˚ x 0.5˚ grid from Lucazeau (2019)
 cat('\n\nExtracting similarity interpolation grid locations')
@@ -225,7 +262,7 @@ shp.buffer <-
 
 # shp.box <-
 #   shp.buffer %>%
-#   map(~st_bbox(.x) %>% bbox_widen(crs = proj4.RP))
+#   map(~st_bbox(.x) %>% bbox_widen(crs = proj4.rp))
 
 # Crop ThermoGlobe data to bounding boxes
 cat('\nCropping ThermoGlobe data to buffers')
@@ -292,7 +329,7 @@ rm(
    files,
    volc,
    hf,
-   proj4.RP,
+   proj4.rp,
    proj4.wgs,
    i,
    shp.sliver,

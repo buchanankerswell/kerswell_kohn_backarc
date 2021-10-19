@@ -9,21 +9,6 @@ dir.create('figs/base', showWarnings = F)
 cat('\n', rep('~', 60), sep='')
 cat('\nVisualizing ...')
 
-# Color scale
-v.scale.white <-
-  scale_color_viridis_c(
-    option = 'magma',
-    limits = c(0, 250),
-    na.value = rgb(0.99, 0.99, 0.90)
-#    na.value = 'white'
-  )
-v.scale.grey <-
-  scale_color_viridis_c(
-    option = 'magma',
-    limits = c(0, 250),
-    na.value = 'grey50'
-  )
-
 # World map
 p1 <-
   ggplot(bind_rows(shp.segs)) +
@@ -218,7 +203,7 @@ suppressWarnings(suppressMessages(
 ))
 system('open figs/base/ThermoGlobeBuffer.png', wait = F)
 
-# Global Lucazeau buffer
+# Crop countries and similarity to buffer
 shp.world.buf <- suppressWarnings(shp.world %>% st_intersection(bind_rows(shp.buffer)))
 shp.sim <- suppressWarnings(shp.interp.luca %>% st_intersection(bind_rows(shp.buffer)))
 p6 <-
