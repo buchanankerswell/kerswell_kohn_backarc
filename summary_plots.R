@@ -6,8 +6,7 @@ source('functions.R')
 load('data/hf.Rdata')
 load('data/opt.RData')
 dir.create('figs/summary', showWarnings = F)
-
-cat(rep('~', 60), sep='')
+dir.create('figs/vgrms', showWarnings = F)
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
@@ -46,7 +45,7 @@ p1 <-
       plot.margin = margin()
     )
 # Save
-cat('\nSaving plot to: figs/summary/hf_summary.png')
+cat('\n\nSaving plot to: figs/summary/hf_summary.png')
 suppressWarnings(suppressMessages(
   ggsave(
     file = 'figs/summary/hf_summary.png',
@@ -60,8 +59,7 @@ suppressWarnings(suppressMessages(
 system('open figs/summary/hf_summary.png', wait = F)
 
 # Plot optimum variogram models
-cat('\nSaving variogram plots to: figs/vgrms/\n')
-dir.create('figs/vgrms', showWarnings = F)
+cat('\nSaving plot to: figs/vgrms/')
 
 plts <-
   pmap(solns,
@@ -69,7 +67,7 @@ plts <-
       experimental.vgrm = ..4,
       fitted.vgrm = ..5,
       cost = ..6,
-      v.mod = ..1,
+      v.mod = ..2,
       lineCol = 'firebrick'
     )
   )
@@ -91,25 +89,37 @@ pwalk(~{
     width = 6,
     height = 6
   )
+  system(paste0('open figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms.png'), wait = F)
 })
 
 # Summarise variogram models
 p2 <-
   vgrm.summary %>%
+  filter(sill < 10000 & range < 2000000) %>%
   mutate('range' = range/1000) %>%
   rename(
-    'lag~cutoff' = cutoff.prop,
-    'number~of~lags' = n.lags,
-    'lag~shift' = lag.start,
-    'max~local~pairs' = n.max,
-    'range~(km)' = range,
-    'sill~(mWm^-2)' = sill,
+    'lag cutoff' = cutoff.prop,
+    'number of lags' = n.lags,
+    'lag shift' = lag.start,
+    'max local pairs' = n.max,
+    'range' = range,
+    'sill' = sill,
   ) %>%
-  pivot_longer(-c(model.vgrm, cost)) %>%
-  ggplot(aes(x = cost, y = value)) +
+  pivot_longer(-c(v.mod, cost, segment, itr)) %>%
+  ggplot(aes(x = cost, y = value, shape = v.mod, color = segment)) +
     geom_point() +
-    facet_wrap(~name, scales = 'free', labeller = label_parsed) +
-    labs(y = NULL, x = bquote('Cost'~(mWm^-2))) +
+    facet_wrap(
+      ~name,
+      ncol = 2,
+      scales = 'free'
+    ) +
+    labs(
+      y = NULL,
+      x = bquote('Cost'~(mWm^-2)),
+      color = 'Segment',
+      shape = 'Variogram model'
+    ) +
+    scale_color_discrete_qualitative('Dark 3') +
     theme_classic() +
     theme(
       strip.background = element_rect(fill = 'grey90', color=NA)
@@ -123,14 +133,19 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6,
-    height = 3.5
+    height = 6
   )
 ))
 system('open figs/summary/vgrm_summary.png', wait = F)
 
 # Interpolation differences
+opt.solns <-
+  solns %>%
+  mutate(shp.interp.diff = shp.interp.diff, .before = cost) %>%
+  group_by(segment) %>%
+  slice_min(cost)
 p3 <-
-  shp.interp.diff %>%
+  opt.solns$shp.interp.diff %>%
   map_df(
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
@@ -139,7 +154,7 @@ p3 <-
     stat_density_ridges(
       aes(x=est.diff, y=segment, group=segment, fill=factor(stat(quantile))),
       size = 0.3,
-      scale = 1.5,
+      scale = 2.5,
       geom = 'density_ridges_gradient',
       calc_ecdf = T,
       quantiles = 4,
@@ -149,7 +164,7 @@ p3 <-
       x = bquote('Interpolation difference'~(mWm^-2)),
       y = NULL
     ) +
-    scale_x_continuous(limits = c(-150, 150), breaks = seq(-150, 150, 50)) +
+    scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 25)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic() +
@@ -171,5 +186,5 @@ suppressWarnings(suppressMessages(
 ))
 system('open figs/summary/interp_diff_summary.png', wait = F)
 
-cat('\nDone!')
+cat('\n\nDone!')
 cat('\n', rep('~', 60), sep='')
