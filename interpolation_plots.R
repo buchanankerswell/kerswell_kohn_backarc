@@ -234,9 +234,6 @@ walk(~{
         panel.background = element_rect(fill = 'grey80', color = NA),
         plot.margin = margin()
       )
-  p <-
-    (pp1 + pp2) / (pp3 + pp4) &
-    theme(plot.margin = margin(2, 2, 2, 2))
   # Save
   cat(
     '\nSaving plot to: figs/diff/',
@@ -246,18 +243,170 @@ walk(~{
     '.png',
     sep = ''
   )
+  if(.x == 'Andes') {
+    p <-
+      (pp1 + pp2) + (pp3 + pp4) &
+      theme(plot.margin = margin(2, 2, 2, 2))
+    suppressWarnings(suppressMessages(
+      ggsave(
+        file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'),
+        plot = p,
+        device = 'png',
+        type = 'cairo',
+        width = wdth*4,
+        height = hght,
+        units = 'mm'
+      )
+    ))
+    system(
+      paste0(
+        'open figs/diff/',
+        str_replace_all(.x, ' ', ''),
+        'DiffComp',
+        cntr,
+        '.png'
+      ), wait = F
+    )
+  } else {
+    p <-
+      (pp1 + pp2) / (pp3 + pp4) &
+      theme(plot.margin = margin(2, 2, 2, 2))
+    suppressWarnings(suppressMessages(
+      ggsave(
+        file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'),
+        plot = p,
+        device = 'png',
+        type = 'cairo',
+        width = wdth*2,
+        height = hght*2,
+        units = 'mm'
+      )
+    ))
+    system(
+      paste0(
+        'open figs/diff/',
+        str_replace_all(.x, ' ', ''),
+        'DiffComp',
+        cntr,
+        '.png'
+        ),
+      wait = F
+    )
+  }
+})
+
+walk(seg.names, ~{
+  # Define mapping scale
+  buf <- shp.buffer[[..1]] # Buffer
+  bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
+  wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
+  hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
+  plts <-
+    solns %>%
+    filter(segment == .x) %>%
+    mutate(dif = shp.interp.diff[names(shp.interp.diff) == .x]) %>%
+    pmap(~{
+      # Define map parts
+      cnt <- shp.contours[[..1]] # Contour
+      seg <- shp.segs[[..1]] # Segment
+      buf <- shp.buffer[[..1]] # Buffer
+      bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
+      world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
+      world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
+      volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
+      dif <- ..7 %>% mutate(sigma.diff = sigma.sim - sigma.krige)
+      fts <- shp.fts[shp.fts$segment == ..1,]
+      v.mod <- ..2
+      cost <- ..6
+      # Define map scale 1:50,000
+      wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
+      hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
+      # Define points and text sizes
+      pnt.size <- wdth*hght/2.3e3
+      annt.txt.size <- wdth/2.2e1
+      base.txt.size <- wdth/1.2e1
+      # Krige interpolation
+      ggplot() +
+        geom_sf(data = world, size = 0.1, fill = 'grey95') +
+        geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
+        geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
+        geom_sf(data = buf, size = 0.3, fill = NA) +
+        geom_sf(data = cnt, size = 0.3, color = 'white') +
+        geom_sf(data = seg, size = 1.5, color = 'white') +
+        annotate(
+          'label',
+          x = Inf,
+          y = -Inf,
+          label = ..1,
+          hjust = 1,
+          vjust = 0,
+          size = annt.txt.size,
+          fill = rgb(1, 1, 1, 0.7),
+          label.padding = unit(0.15, 'lines'),
+          label.r = unit(0.05, 'lines')
+        ) +
+        annotate(
+          'label',
+          x = -Inf,
+          y = -Inf,
+          label = paste('Model:', v.mod, '| Cost:', round(cost, 3)),
+          hjust = 0,
+          vjust = 0,
+          size = annt.txt.size,
+          fill = rgb(1, 1, 1, 0.7),
+          label.padding = unit(0.15, 'lines'),
+          label.r = unit(0.05, 'lines')
+        ) +
+        v.scale.white +
+        labs(color = bquote(mWm^-2)) +
+        coord_sf(expand = F) +
+        theme_map(font_size = base.txt.size) +
+        theme(
+          axis.text = element_blank(),
+          legend.position = c(1, 1),
+          legend.justification = c(1, 1),
+          legend.direction = 'horizontal',
+          legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.7), color = NA),
+          legend.box.margin = margin(1, 8, 1, 2),
+          legend.key.height = unit(hght/30, 'mm'),
+          legend.key.width = unit(wdth/10, 'mm'),
+          legend.title = element_text(vjust = 1),
+          panel.grid = element_line(size = 0.1, color = 'white'),
+          panel.background = element_rect(fill = 'grey80', color = NA),
+          plot.margin = margin(2, 2, 2, 2)
+        )
+    })
+  # Save
+  cat(
+    '\nSaving plot to: figs/diff/',
+    str_replace_all(.x, ' ', ''),
+    'modelComparison',
+    cntr,
+    '.png',
+    sep = ''
+  )
+  p <- plts %>% wrap_plots(ncol = 2)
   suppressWarnings(suppressMessages(
     ggsave(
-      file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'),
+      file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'modelComparison', cntr, '.png'),
       plot = p,
       device = 'png',
       type = 'cairo',
-      width = wdth*2,
-      height = hght*2,
+      width = wdth*3,
+      height = hght*3,
       units = 'mm'
     )
   ))
-  system(paste0('open figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'), wait = F)
+  system(
+    paste0(
+      'open figs/diff/',
+      str_replace_all(.x, ' ', ''),
+      'modelComparison',
+      cntr,
+      '.png'
+    ),
+    wait = F
+  )
 })
 
 cat('\n\n', rep('~', 60), sep='')

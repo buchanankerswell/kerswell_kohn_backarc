@@ -100,4 +100,3 @@ else
   done
 fi
 echo 'Finished!'
-#echo '\nRun ./knit.sh to render manuscript'
