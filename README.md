@@ -1,4 +1,5 @@
-# Material for Kerswell & Kohn (2021, G3)
+# Currently under revision
+<!-- # Material for Kerswell & Kohn (2021, G3)
 
 This repository stores all materials for the manuscript *Comparison of heat flow interpolations near subduction zones* and includes:
 
@@ -81,4 +82,4 @@ This repository can also be found at the official [OSF repository](https://osf.i
 
 # Funding
 
-This project was supported by the NSF grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman
+This project was supported by the NSF grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman -->

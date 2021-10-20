@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 # Load packages and functions
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
@@ -16,31 +18,6 @@ v.scale.grey <-
     option = 'magma',
     limits = c(0, 250),
     na.value = 'grey50'
-  )
-
-lisbon.palette <-
-  scale_color_continuous_diverging(
-    palette = 'lisbon',
-    limits = c(-250, 250),
-    na.value = 'grey80'
-  )
-tofino.palette <-
-  scale_color_continuous_diverging(
-    palette = 'tofino',
-    limits = c(-250, 250),
-    na.value = 'grey80'
-  )
-berlin.palette <-
-  scale_color_continuous_diverging(
-    palette = 'berlin',
-    limits = c(-250, 250),
-    na.value = 'grey80'
-  )
-br.palette <-
-  scale_color_continuous_diverging(
-    palette = 'Blue-Red',
-    limits = c(-250, 250),
-    na.value = 'grey80'
   )
 
 # Projections
@@ -373,4 +350,4 @@ cat('\n\nSaving data to: data/hf.RData')
 save.image('data/hf.RData')
 
 cat('\n\nDone!')
-cat('\n\n', rep('~', 60), sep='')
+cat('\n', rep('~', 60), '\n', sep='')
