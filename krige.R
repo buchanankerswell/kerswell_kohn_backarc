@@ -1,18 +1,53 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
+# Test if there is at least one argument: if not, return an error
+if (length(args) == 0) {
+  max.eval <- 100
+  alg <- 'NLOPT_GN_DIRECT_L'            # Global search
+} else if (length(args) != 0) {
+  max.eval <- suppressWarnings(as.numeric(args[1]))
+  if(is.na(max.eval)){
+    cat('\nPassed non-numeric argument for max iterations!')
+    cat('\nDefaulting to 100')
+    max.eval <- 100
+  }
+  if(args[2] == '1') {
+    alg <- 'NLOPT_GN_DIRECT_L'          # Global search
+  } else if(args[2] == '2') {
+    alg <- 'NLOPT_LN_SBPLX'             # Local without gradients
+  } else if(args[2] == '3') {
+    algorithm <- 'NLOPT_LN_NELDERMEAD'  # Local without gradients
+  } else if(args[2] == '4') {
+    algorithm <- 'NLOPT_LN_BOBYQA'      # Local without gradients
+  } else if(args[2] == '5') {
+    algorithm <- 'NLOPT_LN_COBYLA'      # Local without gradients
+  } else {
+    cat('\nAlgorithm passed is not recognized!')
+    cat('\nDefaulting to NLOPT_GN_DIRECT_L')
+    alg <- 'NLOPT_GN_DIRECT_L'
+  }
+}
+
+# Counter
+opt.files <- list.files('data/', pattern = 'opt')
+cat('\n', rep('~', 60), '\n', sep='')
+cat('Found', length(opt.files), 'opt files already in data/\n')
+
+cntr <- length(opt.files) + 1
+cat('Saving results to: data/opt', cntr, '.RData', sep = '')
+
 # Load functions and libraries
-cat(rep('~', 60), '\n', sep='')
-cat('Loading packages and functions ...\n\n')
+cat('\nLoading packages and functions')
 
 source('functions.R')
 load('data/hf.RData')
 
 # Set parallel computing plan
-n.sessions <- 6
-plan(multisession, workers = n.sessions)
-cat('\nParallel computing across', n.sessions, 'R sessions')
-# Counter
-cntr <- 1
-cat('\nSaving results to: data/opt', cntr, '.RData', sep = '')
-cat('\nSaving plots to: figs/vgrms/*', cntr, '.png', sep = '')
+n.cores <- availableCores()-2
+plan(multicore, workers = n.cores)
+cat('\nParallel computing across', n.cores, 'cores')
+
 # Define initial values for cost function
 # and nloptr settings
 cat('\n\n', rep('~', 60), sep='')
@@ -20,19 +55,6 @@ cat('\nSetting up constrained nonlinear minimization problem')
 cat('\n            with "nloptr" to fit variogram models ...')
 cat('\n\nsee https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/')
 cat('\nfor information on nloptr and possible algorithms')
-init.vals <-
-  tibble(
-    cutoff.prop = 3,
-    n.lags = 30,
-    lag.start = 5,
-    n.max = 20,
-#    algorithm = 'NLOPT_GN_DIRECT_L',   # Direct global
-#    algorithm = 'NLOPT_LN_SBPLX',      # Local without gradients
-#    algorithm = 'NLOPT_LN_NELDERMEAD', # Local without gradients
-    algorithm = 'NLOPT_LN_BOBYQA',      # Local without gradients
-#    algorithm = 'NLOPT_LN_COBYLA',     # Local without gradients
-    maxeval = 3
-  )
 # Upper and lower bounds for constrained search
 bounds <-
   tibble(
@@ -40,6 +62,15 @@ bounds <-
     n.lags = c(15, 50),
     lag.start = c(1, 10),
     n.max = c(10, 50)
+  )
+init.vals <-
+  tibble(
+    cutoff.prop = runif(1, bounds$cutoff.prop[1], bounds$cutoff.prop[2]),
+    n.lags = runif(1, bounds$n.lags[1], bounds$n.lags[2]),
+    lag.start = runif(1, bounds$lag.start[1], bounds$lag.start[2]),
+    n.max = runif(1, bounds$n.max[1], bounds$n.max[2]),
+    algorithm = alg,
+    maxeval = max.eval
   )
 # Check init values are within bounds
 pwalk(init.vals, ~{
@@ -278,4 +309,4 @@ save(
 )
 
 cat('\n\nDone!')
-cat('\n\n', rep('~', 60), sep='')
+cat('\n\n', rep('~', 60), '\n', sep='')

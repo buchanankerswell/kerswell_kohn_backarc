@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
 
@@ -460,4 +462,4 @@ walk(~{
 
 cat('\n\n', rep('~', 60), sep='')
 cat('\nDone!')
-cat('\n\n', rep('~', 60), sep='')
+cat('\n', rep('~', 60), '\n', sep='')

@@ -1,18 +1,38 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
+# Test if there is at least one argument: if not, return an error
+if (length(args) == 0) {
+  stop('Provide the optimization data file as the first arugment <opt*>.R', call.=FALSE)
+} else if (length(args) == 1) {
+  if(!file.exists(paste0('data/', args[1]))) {
+    stop('That <opt*.R> file does not exist in data/', call.=FALSE)
+  } else {
+    cntr <- as.numeric(regmatches(args[1], regexec('[0-9]', args[1])))
+    if(is.na(cntr)){
+      cntr <- NULL
+    }
+  }
+}
+
 # Load functions and libraries
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
 
 source('functions.R')
 load('data/hf.Rdata')
-load('data/opt.RData')
+load(paste0('data/opt', cntr, '.RData'))
 dir.create('figs/summary', showWarnings = F)
 dir.create('figs/vgrms', showWarnings = F)
+cat('\nSaving plots to: figs/summary/*', cntr, '.RData', sep = '')
+cat('\nSaving plots to: figs/vgrms/*', cntr, '.png', sep = '')
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
-cat('\nVisualizing ...')
+cat('\nVisualizing ...\n')
 
 # Heat flow summary ridges plot
+if(is.null(cntr)) {
 p1 <-
   shp.hf.crop %>%
   map_df(
@@ -45,7 +65,7 @@ p1 <-
       plot.margin = margin()
     )
 # Save
-cat('\n\nSaving plot to: figs/summary/hf_summary.png')
+cat('\nSaving plot to: figs/summary/hf_summary.png')
 suppressWarnings(suppressMessages(
   ggsave(
     file = 'figs/summary/hf_summary.png',
@@ -57,9 +77,10 @@ suppressWarnings(suppressMessages(
   )
 ))
 system('open figs/summary/hf_summary.png', wait = F)
+}
 
 # Plot optimum variogram models
-cat('\nSaving plot to: figs/vgrms/')
+cat('\nSaving plots to: figs/vgrms/')
 
 plts <-
   pmap(solns,
@@ -82,14 +103,23 @@ pwalk(~{
     wrap_plots(plts[..1:..2], nrow=3, ncol=2) +
     plot_annotation(title = paste(..3, 'variogram models'))
   ggsave(
-    paste0('figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms.png'),
+    paste0('figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms', cntr, '.png'),
     plot = p,
     device = 'png',
     type = 'cairo',
     width = 6,
     height = 6
   )
-  system(paste0('open figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms.png'), wait = F)
+  system(
+    paste0(
+      'open figs/vgrms/',
+      str_replace_all(..3, ' ', ''),
+      'Vgrms',
+      cntr,
+      '.png'
+    ),
+    wait = F
+  )
 })
 
 # Summarise variogram models
@@ -125,10 +155,10 @@ p2 <-
       strip.background = element_rect(fill = 'grey90', color=NA)
     )
 # Save
-cat('\nSaving plot to: figs/summary/vgrm_summary.png')
+cat('\nSaving plot to: figs/summary/vgrm_summary', cntr, '.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = 'figs/summary/vgrm_summary.png',
+    file = paste0('figs/summary/vgrm_summary', cntr, '.png'),
     plot = p2,
     device = 'png',
     type = 'cairo',
@@ -136,7 +166,7 @@ suppressWarnings(suppressMessages(
     height = 6
   )
 ))
-system('open figs/summary/vgrm_summary.png', wait = F)
+system(paste0('open figs/summary/vgrm_summary', cntr, '.png'), wait = F)
 
 # Interpolation differences
 opt.solns <-
@@ -173,10 +203,10 @@ p3 <-
       plot.margin = margin()
     )
 # Save plot
-cat('\nSaving plot to: figs/summary/interp_diff_summary.png')
+cat('\nSaving plot to: figs/summary/interp_diff_summary', cntr, '.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = 'figs/summary/interp_diff_summary.png',
+    file = paste0('figs/summary/interp_diff_summary', cntr, '.png'),
     plot = p3,
     device = 'png',
     type = 'cairo',
@@ -184,7 +214,7 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-system('open figs/summary/interp_diff_summary.png', wait = F)
+system(paste0('open figs/summary/interp_diff_summary', cntr, '.png'), wait = F)
 
 cat('\n\nDone!')
-cat('\n', rep('~', 60), sep='')
+cat('\n', rep('~', 60), '\n', sep='')

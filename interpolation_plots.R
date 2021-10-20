@@ -1,11 +1,29 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
+# Test if there is at least one argument: if not, return an error
+if (length(args) == 0) {
+  stop('Provide the optimization data file as the first arugment <opt*>.R', call.=FALSE)
+} else if (length(args) == 1) {
+  if(!file.exists(paste0('data/', args[1]))) {
+    stop('That <opt*.R> file does not exist in data/', call.=FALSE)
+  } else {
+    cntr <- as.numeric(regmatches(args[1], regexec('[0-9]', args[1])))
+    if(is.na(cntr)){
+      cntr <- NULL
+    }
+  }
+}
+
 # Load functions and libraries
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
 
 source('functions.R')
 load('data/hf.Rdata')
-load('data/opt.RData')
+load(paste0('data/opt', cntr, '.RData'))
 dir.create('figs/diff', showWarnings = F)
+cat('\nSaving plots to: figs/diff/*', cntr, '.png', sep = '')
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
@@ -32,7 +50,7 @@ walk(~{
   # Define points and text sizes
   pnt.size <- wdth*hght/2.3e3
   annt.txt.size <- wdth/2.2e1
-  base.txt.size <- wdth/1.5e1
+  base.txt.size <- wdth/1.2e1
   # Similarity interpolation
   pp1 <- 
     ggplot() +
@@ -47,18 +65,6 @@ walk(~{
         aes(label = label),
         size = annt.txt.size,
         fill = rgb(1, 1, 1, 0.7)
-      ) +
-      annotate(
-        'label',
-        x = -Inf,
-        y = Inf,
-        label = 'a',
-        hjust = 0,
-        vjust = 1,
-        size = annt.txt.size*1.5,
-        fill = rgb(1, 1, 1, 0.7),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
       ) +
       annotate(
         'label',
@@ -113,18 +119,6 @@ walk(~{
       geom_sf(data = seg, size = 1.5, color = 'white') +
       annotate(
         'label',
-        x = -Inf,
-        y = Inf,
-        label = 'b',
-        hjust = 0,
-        vjust = 1,
-        size = annt.txt.size*1.5,
-        fill = rgb(1, 1, 1, 0.7),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      annotate(
-        'label',
         x = Inf,
         y = -Inf,
         label = 'Krige',
@@ -164,18 +158,6 @@ walk(~{
       geom_sf(data = seg, size = 1.5, color = 'white') +
       annotate(
         'label',
-        x = -Inf,
-        y = Inf,
-        label = 'c',
-        hjust = 0,
-        vjust = 1,
-        size = annt.txt.size*1.5,
-        fill = rgb(1, 1, 1, 0.7),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      annotate(
-        'label',
         x = Inf,
         y = -Inf,
         label = 'Estimate Difference',
@@ -186,7 +168,11 @@ walk(~{
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      br.palette +
+      scale_color_continuous_diverging(
+        palette = 'Berlin',
+        limits = c(-100, 125),
+        na.value = 'grey80'
+      ) +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -216,18 +202,6 @@ walk(~{
       geom_sf(data = volc, shape = 2, size = pnt.size, color = 'deeppink') +
       annotate(
         'label',
-        x = -Inf,
-        y = Inf,
-        label = 'd',
-        hjust = 0,
-        vjust = 1,
-        size = annt.txt.size*1.5,
-        fill = rgb(1, 1, 1, 0.7),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      annotate(
-        'label',
         x = Inf,
         y = -Inf,
         label = 'Uncertainty Difference',
@@ -238,7 +212,11 @@ walk(~{
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      berlin.palette +
+      scale_color_continuous_diverging(
+        palette = 'Berlin',
+        limits = c(-125, 100),
+        na.value = 'grey80'
+      ) +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -260,10 +238,17 @@ walk(~{
     (pp1 + pp2) / (pp3 + pp4) &
     theme(plot.margin = margin(2, 2, 2, 2))
   # Save
-  cat('\nSaving plot to: figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp.png', sep = '')
+  cat(
+    '\nSaving plot to: figs/diff/',
+    str_replace_all(.x, ' ', ''),
+    'DiffComp',
+    cntr,
+    '.png',
+    sep = ''
+  )
   suppressWarnings(suppressMessages(
     ggsave(
-      file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp.png'),
+      file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'),
       plot = p,
       device = 'png',
       type = 'cairo',
@@ -272,9 +257,9 @@ walk(~{
       units = 'mm'
     )
   ))
-  system(paste0('open figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp.png'), wait = F)
+  system(paste0('open figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'), wait = F)
 })
 
 cat('\n\n', rep('~', 60), sep='')
 cat('\nDone!')
-cat('\n\n', rep('~', 60), sep='')
+cat('\n', rep('~', 60), '\n', sep='')
