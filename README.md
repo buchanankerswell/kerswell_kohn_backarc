@@ -6,7 +6,7 @@
 ![](figs/CentralAmericaDiffComp.png)
 
 
-![](figs/diff/CentralAmericaModelComparison.png)
+![](figs/CentralAmericaModelComparison.png)
 
 
 <!-- # Material for Kerswell & Kohn (2021, G3)
