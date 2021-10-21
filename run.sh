@@ -14,32 +14,63 @@ if [[ ! $fnum -gt 0 ]]; then
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
-      echo 'Max iterations for optimization search?'
+      unset itr
+      echo '\nMax iterations for optimization search?'
       echo 'Note: computation cost is high!'
       echo 'Recommended < 50 iterations'
       read 'itr?Number: '
-      echo 'Please choose optimization algorithm:'
-      echo 'for more info see: https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/'
-      echo '1: NLOPT_GN_DIRECT_L   (Direct global no gradients)'
+      while [[ -z ${itr} ]]; do
+        read 'itr?Number: '
+      done
+
+      unset alg
+      echo '\nPlease choose optimization algorithm:'
+      echo 'for more info on algorithms see:'
+      echo 'https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/'
+      echo '\n1: NLOPT_GN_DIRECT_L   (Direct global no gradients)'
       echo '2: NLOPT_LN_SBPLX      (Local no gradients)'
       echo '3: NLOPT_LN_NELDERMEAD (Local no gradients)'
       echo '4: NLOPT_LN_BOBYQA     (Local no gradients)'
       echo '5: NLOPT_LN_COBYLA     (Local no gradients)'
       read 'alg?Choice: '
-      echo 'Please enter weights for computing cost function'
-      echo 'Interpolation and variogram weights must add to one'
+      while [[ -z ${alg} ]]; do
+        read 'alg?Choice: '
+      done
+
+      unset iwt
+      unset vwt
+      echo '\nPlease enter weights for computing cost function'
+      echo 'Note: interpolation and variogram weights must add to one'
       read 'iwt?Interpolation weight [0-1]: '
+      while [[ -z ${iwt} ]]; do
+        read 'iwt?Interpolation weight [0-1]: '
+      done
       read 'vwt?Variogram weight [0-1]: '
-      echo 'Please enter number of cores for parallel computing [0 for default]'
+      while [[ -z ${vwt} ]]; do
+        read 'vwt?Variogram weight [0-1]: '
+      done
+
+      unset ncores
+      echo '\nPlease enter number of cores for parallel computing [0 for default]'
       echo 'Available cores on this machine:'
       nproc --all
       read 'ncores?Cores: '
-      echo 'Please enter number of folds for computing k-fold cross-validation'
+      while [[ -z ${ncores} ]]; do
+        read 'ncores?Cores: '
+      done
+
+      unset nfold
+      echo '\nPlease enter number of folds for computing k-fold cross-validation'
       echo 'Note: computation cost is high!'
-      echo 'Leave-one-out [default] is considerably slower than k-fold'
-      echo 'Leave-one-out is more stable, however'
-      echo 'Enter 0 for leave-one-out cross-validation [default]'
+      echo 'Leave-one-out [default] is considerably slower than k-fold, but more stable'
+      echo '\nEnter 0 for leave-one-out cross-validation [default]'
+      echo 'or enter a value between 0 and 1 to set k-folds as a'
+      echo 'proportion of the number of data points in the kriging domain'
       read 'nfold?Number of folds [0=default]: '
+      while [[ -z ${nfold} ]]; do
+        read 'nfold?Number of folds [0=default]: '
+      done
+
       ./krige.R $itr $alg $iwt $vwt $ncores $nfold
       break
     elif [[ $p == 'no' ]]; then
@@ -75,30 +106,63 @@ else
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
-      echo 'Max iterations for optimization search?'
+      unset itr
+      echo '\nMax iterations for optimization search?'
       echo 'Note: computation cost is high!'
       echo 'Recommended < 50 iterations'
       read 'itr?Number: '
-      echo 'Please choose optimization algorithm:'
-      echo 'see https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/'
-      echo 'for more information'
-      echo '1: NLOPT_GN_DIRECT_L'
-      echo '2: NLOPT_LN_SBPLX'
-      echo '3: NLOPT_LN_NELDERMEAD'
-      echo '4: NLOPT_LN_BOBYQA'
-      echo '5: NLOPT_LN_COBYLA'
+      while [[ -z ${itr} ]]; do
+        read 'itr?Number: '
+      done
+
+      unset alg
+      echo '\nPlease choose optimization algorithm:'
+      echo 'for more info on algorithms see:'
+      echo 'https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/'
+      echo '\n1: NLOPT_GN_DIRECT_L   (Direct global no gradients)'
+      echo '2: NLOPT_LN_SBPLX      (Local no gradients)'
+      echo '3: NLOPT_LN_NELDERMEAD (Local no gradients)'
+      echo '4: NLOPT_LN_BOBYQA     (Local no gradients)'
+      echo '5: NLOPT_LN_COBYLA     (Local no gradients)'
       read 'alg?Choice: '
-      echo 'Please enter weights for computing cost function'
-      echo 'Interpolation and variogram weights must add to one'
+      while [[ -z ${alg} ]]; do
+        read 'alg?Choice: '
+      done
+
+      unset iwt
+      unset vwt
+      echo '\nPlease enter weights for computing cost function'
+      echo 'Note: interpolation and variogram weights must add to one'
       read 'iwt?Interpolation weight [0-1]: '
+      while [[ -z ${iwt} ]]; do
+        read 'iwt?Interpolation weight [0-1]: '
+      done
       read 'vwt?Variogram weight [0-1]: '
-      echo 'Please enter number of cores for parallel computing [0 for default]'
+      while [[ -z ${vwt} ]]; do
+        read 'vwt?Variogram weight [0-1]: '
+      done
+
+      unset ncores
+      echo '\nPlease enter number of cores for parallel computing [0 for default]'
       echo 'Available cores on this machine:'
       nproc --all
       read 'ncores?Cores: '
-      echo 'Please enter number of folds for computing k-fold cross-validation'
-      echo 'Enter 0 for leave-one-out cross-validation [default]'
+      while [[ -z ${ncores} ]]; do
+        read 'ncores?Cores: '
+      done
+
+      unset nfold
+      echo '\nPlease enter number of folds for computing k-fold cross-validation'
+      echo 'Note: computation cost is high!'
+      echo 'Leave-one-out [default] is considerably slower than k-fold, but more stable'
+      echo '\nEnter 0 for leave-one-out cross-validation [default]'
+      echo 'or enter a value between 0 and 1 to set k-folds as a'
+      echo 'proportion of the number of data points in the kriging domain'
       read 'nfold?Number of folds [0=default]: '
+      while [[ -z ${nfold} ]]; do
+        read 'nfold?Number of folds [0=default]: '
+      done
+
       ./krige.R $itr $alg $iwt $vwt $ncores $nfold
       break
     elif [[ $p == 'no' ]]; then

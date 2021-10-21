@@ -303,6 +303,7 @@ cost_function <-
   # Check for missing arguments
   if(is.null(shp.hf)) stop('\nMissing heat flow data model!')
   if(is.null(n.fold)) n.fold <- nrow(shp.hf)
+  if(n.fold > 0 & n.fold <= 1) n.fold <- nrow(shp.hf)*n.fold
   # Calculate experimental variogram
   experimental.vgrm <-
     try(
@@ -343,8 +344,8 @@ cost_function <-
   # Check for error during fitting
   if(any(class(fitted.vgrm) == 'try-error')){
     if(verbose) {
-      print(fitted.vgrm)
       cat('\nVariogram fitting error!\n')
+      print(fitted.vgrm)
       cat('\nReturning arbitrarily high cost')
       return(runif(1, 1, 1.5))
     }

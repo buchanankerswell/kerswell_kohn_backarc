@@ -1,85 +1,106 @@
 #!/usr/bin/env Rscript
-args = commandArgs(trailingOnly=TRUE)
+args = commandArgs(trailingOnly = TRUE)
 
 # Testing arguments
 cat('\n', rep('~', 60), sep='')
-if (length(args) == 0) {
+if(length(args) == 0) {
   cat('\nNo arguments passed to krige.R')
   max.eval <- 100
   alg <- 'NLOPT_GN_DIRECT_L'            # Global search
   iwt <- 0.5
   vwt <- 0.5
   n.fold <- NULL
+  n.cores <- future::availableCores() - 2
   cat('\nUsing defaults')
-  cat('\nMax iterations:           ', max.eval)
-  cat('\nAlgorithm:                ', alg)
+  cat('\nMax iterations           :', max.eval)
+  cat('\nAlgorithm                :', alg)
   cat('\nInterpolation cost weight:', iwt)
-  cat('\nVariogram cost weight:    ', vwt)
-} else if (length(args) != 0) {
+  cat('\nVariogram cost weight    :', vwt)
+  cat('\nk-folds for CV           :', vwt)
+  cat('\nVariogram cost weight    :', vwt)
+} else if(length(args) != 0) {
   max.eval <- suppressWarnings(as.numeric(args[1]))
-  if(is.na(max.eval)){
-    max.eval <- 100
+  if(is.na(max.eval)) {
+    max.eval <- 50
     cat('\nPassed non-numeric argument for max iterations!')
     cat('\nDefaulting to', max.eval)
+  } else if(max.eval <= 0) {
+    max.eval <- 50
+    cat('\nMax iterations cannot be negative or zero!')
+    cat('\nDefaulting to', max.eval)
   }
-  if(args[2] == '1') {
-    alg <- 'NLOPT_GN_DIRECT_L'   # Global search
-  } else if(args[2] == '2') {
-    alg <- 'NLOPT_LN_SBPLX'      # Local without gradients
-  } else if(args[2] == '3') {
-    alg <- 'NLOPT_LN_NELDERMEAD' # Local without gradients
-  } else if(args[2] == '4') {
-    alg <- 'NLOPT_LN_BOBYQA'     # Local without gradients
-  } else if(args[2] == '5') {
-    alg <- 'NLOPT_LN_COBYLA'     # Local without gradients
-  } else {
+  alg <- suppressWarnings(as.numeric(args[2]))
+  if(is.na(alg)) {
     cat('\nAlgorithm passed is not recognized!')
     cat('\nDefaulting to NLOPT_GN_DIRECT_L')
     alg <- 'NLOPT_GN_DIRECT_L'
+  } else {
+    if(args[2] == 1) {
+      alg <- 'NLOPT_GN_DIRECT_L'   # Global search
+    } else if(args[2] == 2) {
+      alg <- 'NLOPT_LN_SBPLX'      # Local without gradients
+    } else if(args[2] == 3) {
+      alg <- 'NLOPT_LN_NELDERMEAD' # Local without gradients
+    } else if(args[2] == 4) {
+      alg <- 'NLOPT_LN_BOBYQA'     # Local without gradients
+    } else if(args[2] == 5) {
+      alg <- 'NLOPT_LN_COBYLA'     # Local without gradients
+    } else {
+      cat('\nAlgorithm passed is not recognized!')
+      cat('\nDefaulting to NLOPT_GN_DIRECT_L')
+      alg <- 'NLOPT_GN_DIRECT_L'
+    }
   }
   iwt <- suppressWarnings(as.numeric(args[3]))
-  if(is.na(iwt)){
+  if(is.na(iwt)) {
     iwt <- 0.5
     cat('\nPassed non-numeric argument for interpolation weight!')
     cat('\nDefaulting to', iwt)
   }
   vwt <- suppressWarnings(as.numeric(args[4]))
-  if(is.na(vwt)){
+  if(is.na(vwt)) {
     vwt <- 0.5
     cat('\nPassed non-numeric argument for variogram weight!')
     cat('\nDefaulting to', vwt)
   }
-  if((iwt+vwt) > 1){
+  if((iwt+vwt) != 1) {
     iwt <- 0.5
     vwt <- 0.5
     cat('\nInterpolation and variogram weights must add to one!')
     cat('\nDefaulting to', iwt, 'and', vwt)
   }
   n.cores <- suppressWarnings(as.numeric(args[5]))
-  if(is.na(n.cores)){
+  if(is.na(n.cores)) {
     n.cores <- future::availableCores() - 2
     cat('\nPassed non-numeric argument for number of cores!')
     cat('\nDefaulting to', n.cores)
-  }
-  if(n.cores > future::availableCores()){
+  } else if(n.cores > future::availableCores()) {
     n.cores <- future::availableCores() - 2
     cat('\nToo many cores!')
     cat('\nDefaulting to', n.cores)
+  } else if(n.cores < 0) {
+    n.cores <- future::availableCores() - 2
+    cat('\nCannot run negative cores!')
+    cat('\nDefaulting to', n.cores)
   }
   n.fold <- suppressWarnings(as.numeric(args[6]))
-  if(is.na(n.fold)){
+  if(is.na(n.fold)) {
     n.fold <- NULL
     cat('\nPassed non-numeric argument for k-fold!')
     cat('\nDefaulting to leave-one-out cross-validation')
-  }
-  if(n.fold <= 0){
-    n.fold <- NULL
-    cat('\nk-fold cannot be negative or zero!')
-    cat('\nDefaulting to leave-one-out cross-validation')
+  } else {
+    if(n.fold <= 0) {
+      n.fold <- NULL
+      cat('\nk-fold cannot be negative or zero!')
+      cat('\nDefaulting to leave-one-out cross-validation')
+    } else if(n.fold == 0) {
+      n.fold <- NULL
+    }
   }
 }
+
 # Counter
-opt.files <- list.files('data/', pattern = 'opt')
+opt.files <- list.files('data/', pattern = 'opt*.RData')
 cat('\nFound', length(opt.files), 'opt files already in data/')
 if(length(opt.files) == 0) {
   cntr <- NULL
@@ -217,16 +238,18 @@ f <- function(segment, v.mod) {
       bounds$n.max[2]
     ),
     opts = list(
-      print_level = 1,
+      print_level = 0,
       maxeval = init.vals$maxeval,
       algorithm = init.vals$algorithm
     )
   )
 }
 
+# Capture output
+sink(file = paste0('data/nloptr_trace', cntr), type = 'output')
+
 # Create array of variogram models to optimize
 # for each segment in parallel
-tic()
 opt.grd <-
   tibble(expand.grid(
     segment = seg.names,
@@ -244,7 +267,37 @@ opt.grd <-
         .options = furrr_options(seed = T)
       )
   )
-toc()
+
+# Save output
+sink()
+
+# Parse nloptr history
+raw.trace <- readLines(file(paste0('data/nloptr_trace', cntr)))
+segs.trace <-
+  raw.trace[grepl('^Segment: ', raw.trace)] %>%
+  map_chr(~gsub('Segment: ', '', .x))
+vgrm.model.trace <-
+  raw.trace[grepl('^1', raw.trace)] %>%
+  map_chr(~str_extract(.x, '[A-Z]..'))
+vgrm.error.trace <-
+  raw.trace[grepl('^Variogram error', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Variogram error: ', '', .x)))
+cv.error.trace <-
+  raw.trace[grepl('^Interp', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Interpolation error: ', '', .x)))
+cost.trace <-
+  raw.trace[grepl('^Cost', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Cost: ', '', .x)))
+opt.trace <-
+  tibble(
+    segment = segs.trace,
+    v.mod = vgrm.model.trace,
+    vgrm.error = vgrm.error.trace,
+    cv.error = cv.error.trace,
+    cost = cost.trace
+  ) %>%
+  group_by(segment, v.mod) %>%
+  mutate(itr = row_number(), .before = segment)
 
 # Check for NULL results from errors
 if(any(map_lgl(opt.grd$opt, is.null))) {
@@ -259,12 +312,14 @@ if(any(map_lgl(opt.grd$opt, is.null))) {
   cat('\n', rep('~!', 30), sep='')
 }
 
+# Drop missing values
+opt.grd <- drop_na(opt.grd)
+
 # Decode optimization output and construct variograms
 cat('\n\n', rep('~', 60), sep='')
 cat('\nDecoding optimized solutions ...')
 opt.vgrms <-
   opt.grd %>%
-  drop_na() %>%
   pmap(
     possibly(
       ~decode_opt(
@@ -461,10 +516,12 @@ save(
   list = c(
     'solns',
     'opt.solns',
+    'opt.trace',
     'vgrm.summary',
     'interp.diff.summary'
   ),
   file = paste0('data/opt', cntr, '.RData')
 )
 
+closeAllConnections()
 cat('\nDone!\n')
