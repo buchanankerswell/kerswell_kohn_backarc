@@ -3,5 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
-**.png
-
+figs/diff
+figs/vgrms
+figs/summary
+figs/base

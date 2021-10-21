@@ -345,7 +345,6 @@ cost_function <-
   if(any(class(fitted.vgrm) == 'try-error')){
     if(verbose) {
       cat('\nVariogram fitting error!\n')
-      print(fitted.vgrm)
       cat('\nReturning arbitrarily high cost')
       return(runif(1, 1, 1.5))
     }
@@ -396,7 +395,8 @@ cost_function <-
     cat('\nNumber of lags:', n.lags)
     cat('\nLag start:', lag.start)
     cat('\nMax pairs:', n.max)
-    cat('\nVariogram model:\n')
+    cat('\nVariogram model:', model.vgrm)
+    cat('\n')
     print(fitted.vgrm)
   }
   k.cv <- k.cv %>% filter(!is.na(residual))

@@ -1,4 +1,9 @@
 # Currently under revision
+
+
+## Sample
+
+![](figs/CentralAmericaDiffComp.png)
 <!-- # Material for Kerswell & Kohn (2021, G3)
 
 This repository stores all materials for the manuscript *Comparison of heat flow interpolations near subduction zones* and includes:

@@ -259,26 +259,44 @@ opt.grd <-
   arrange(segment, v.mod) %>%
   mutate(
     opt =
-      future_map2(
+      suppressMessages(future_map2(
         segment,
         v.mod,
         possibly(f, otherwise = NULL),
         .progress = T,
         .options = furrr_options(seed = T)
-      )
+      ))
   )
 
 # Save output
 sink()
 
+# Check for NULL results from errors
+if(any(map_lgl(opt.grd$opt, is.null))) {
+  cat('\n', rep('~!', 30), sep='')
+  cat(
+    '\n\nOptimization failed for',
+    sum(map_lgl(opt.grd$opt, is.null)),
+    'runs:\n'
+  )
+  print(opt.grd[map_lgl(opt.grd$opt, is.null),])
+  cat('\nContinuing computation for good runs ...')
+  cat('\n', rep('~!', 30), sep='')
+}
+
+# Drop missing values
+opt.grd <- drop_na(opt.grd)
+
 # Parse nloptr history
-raw.trace <- readLines(file(paste0('data/nloptr_trace', cntr)))
+con <- file(paste0('data/nloptr_trace', cntr))
+raw.trace <- readLines(con)
+close(con)
 segs.trace <-
   raw.trace[grepl('^Segment: ', raw.trace)] %>%
   map_chr(~gsub('Segment: ', '', .x))
 vgrm.model.trace <-
-  raw.trace[grepl('^1', raw.trace)] %>%
-  map_chr(~str_extract(.x, '[A-Z]..'))
+  raw.trace[grepl('^Variogram model:', raw.trace)] %>%
+  map_chr(~gsub('Variogram model: ', '', .x))
 vgrm.error.trace <-
   raw.trace[grepl('^Variogram error', raw.trace)] %>%
   map_dbl(~as.numeric(gsub('Variogram error: ', '', .x)))
@@ -299,21 +317,40 @@ opt.trace <-
   group_by(segment, v.mod) %>%
   mutate(itr = row_number(), .before = segment)
 
-# Check for NULL results from errors
-if(any(map_lgl(opt.grd$opt, is.null))) {
-  cat('\n', rep('~!', 30), sep='')
-  cat(
-    '\n\nOptimization failed for',
-    sum(map_lgl(opt.grd$opt, is.null)),
-    'runs:\n'
-  )
-  print(opt.grd[map_lgl(opt.grd$opt, is.null),])
-  cat('\nContinuing computation for good runs ...')
-  cat('\n', rep('~!', 30), sep='')
-}
+cat('\nnloptr trace ...')
+cat('\n', rep('+', 40), '\n', sep='')
+print(opt.trace)
+cat(rep('+', 40), '\n', sep='')
 
-# Drop missing values
-opt.grd <- drop_na(opt.grd)
+# Visualize
+plt <-
+  opt.trace %>%
+  ggplot() +
+    geom_path(aes(itr, cost, color = segment)) +
+    labs(x = 'Iteration', y = 'Cost', color = NULL) +
+    guides(color = guide_legend(nrow = 3)) +
+    facet_wrap(~v.mod) +
+    theme_classic() +
+    theme(
+      plot.margin = margin(),
+      legend.position = 'bottom',
+      legend.justification = 'left',
+      legend.box.margin = margin(-10),
+      legend.text = element_text(size = 7),
+      legend.title = element_text(size = 9),
+      legend.key.size = unit(0.8, 'lines'),
+      strip.background = element_rect(fill = 'grey90')
+    )
+ggsave(
+  file =
+  paste0('figs/optTrace', cntr, '.png'),
+  plot = plt,
+  device = 'png',
+  type = 'cairo',
+  width = 6,
+  height = 3.5
+)
+system(paste0('open figs/optTrace', cntr, '.png'), wait = F)
 
 # Decode optimization output and construct variograms
 cat('\n\n', rep('~', 60), sep='')
@@ -523,5 +560,4 @@ save(
   file = paste0('data/opt', cntr, '.RData')
 )
 
-closeAllConnections()
 cat('\nDone!\n')
