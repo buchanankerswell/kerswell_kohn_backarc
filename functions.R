@@ -56,6 +56,8 @@ bbox_widen <-
         'bottom' = 0
       )
   ) {
+  # Check for missing arguments
+  if(is.null(bbox)) stop('\nMissing bounding box!')
   if(is.null(crs)){
     crs <- st_crs(bbox)
   }
@@ -92,7 +94,10 @@ bbox_widen <-
 
 # Read gmt files, wrap the dateline to avoid plotting horizontal lines on map,
 # make into tibble, add segment names, transform projection, and bind into one sf object
-read_latlong <- function(file, crs) {
+read_latlong <- function(file = NULL, crs = NULL) {
+  # Check for missing arguments
+  if(is.null(file)) stop('\nMissing filename!')
+  if(is.null(crs)) stop('\nMissing coordinate reference system!')
   # Parse seg.name from filename
   seg.name <-
     file %>%
@@ -118,11 +123,13 @@ read_latlong <- function(file, crs) {
 # Calculating experimental variograms
 experimental_vgrm <-
   function(
-    shp.hf,
+    shp.hf = NULL,
     cutoff.prop = 3,
     n.lags = 20,
     lag.start = 1
   ) {
+  # Check for missing arguments
+  if(is.null(shp.hf)) stop('\nMissing heat flow data!')
   # Get bounding box
   bbox <- st_bbox(shp.hf)
   # Calculate corner-to-corner distance of bbox
@@ -147,12 +154,17 @@ experimental_vgrm <-
 # Wrapper function around gstat krige method
 Krige <-
   function(
-    shp.hf,
-    fitted.vgrm,
-    shp.interp.grid,
-    n.max=200,
+    shp.hf = NULL,
+    fitted.vgrm = NULL,
+    shp.interp.grid = NULL,
+    n.max = 20,
     seg.name = NULL
   ) {
+  # Check for missing arguments
+  if(is.null(shp.hf)) stop('\nMissing heat flow data!')
+  if(is.null(fitted.vgrm)) stop('\nMissing variogram model!')
+  if(is.null(shp.interp.grid)) stop('\nMissing kriging locations (grid)!')
+  if(is.null(n.max)) stop('\nNumer of max local point-pairs!')
   # Print grid and parameters info
   cat(
     '\nKriging:', seg.name,
@@ -163,57 +175,106 @@ Krige <-
   )
   print(fitted.vgrm)
   # Kriging
-  krige(
-    formula = hf~1,
-    locations = shp.hf,
-    newdata = shp.interp.grid,
-    model = fitted.vgrm,
-    nmax = n.max,
-    debug.level = 0
-  ) %>%
-  as_tibble() %>%
-  st_as_sf() %>%
-  rename(
-    est.krige = var1.pred,
-    var.krige = var1.var
-  ) %>%
-  mutate(
-    sigma.krige = sqrt(var.krige),
-    .before = geometry
-  )
+  k <-
+    try(
+      suppressWarnings(
+        krige(
+          formula = hf~1,
+          locations = shp.hf,
+          newdata = shp.interp.grid,
+          model = fitted.vgrm,
+          nmax = n.max,
+          debug.level = 0
+        ) %>%
+        as_tibble() %>%
+        st_as_sf() %>%
+        rename(
+          est.krige = var1.pred,
+          var.krige = var1.var
+        ) %>%
+        mutate(
+          sigma.krige = sqrt(var.krige),
+          .before = geometry
+        )
+      )
+    )
+  # Check for error during fitting
+  if(any(class(k) == 'try-error')){
+    # Print grid and parameters info
+    cat(
+      '\nKriging:', seg.name,
+      '\nObservations:', nrow(shp.hf),
+      '\nGrid size:', length(shp.interp.grid),
+      '\nMax nearest points:', n.max,
+      '\nVariogram params:\n'
+    )
+    print(fitted.vgrm)
+    stop('\nVariogram fitting error!')
+  }
+  return(k)
 }
 
 # Take difference
-interp_diff <- function(shp.interp.krige, shp.interp.compare) {
+interp_diff <- function(shp.interp.krige, shp.interp.sim) {
+  # Check for missing arguments
+  if(is.null(shp.interp.krige)) stop('\nMissing krige data!')
+  if(is.null(shp.interp.sim)) stop('\nMissing similarity data!')
   # Crop Similarity estimates to Kriging bounding box
-  shp.interp.compare %>%
-  select(-obs.sim) %>%
-  st_intersection(shp.interp.krige) %>%
-  mutate(
-    est.diff = est.sim - est.krige,
-    sigma.diff = sigma.sim - sigma.krige,
-    .before = geometry
-  )
+  dif <-
+    suppressWarnings(
+      shp.interp.sim %>%
+      select(-obs.sim) %>%
+      st_intersection(shp.interp.krige) %>%
+      mutate(
+        est.diff = est.sim - est.krige,
+        sigma.diff = sigma.sim - sigma.krige,
+        .before = geometry
+      )
+    )
+  return(dif)
 }
 
 # Decode output of nloptr method and
 # construct optimized variogram models
-decode_opt <- function(model.vgrm, shp.hf, opt) {
+decode_opt <- function(model.vgrm = NULL, shp.hf = NULL, opt = NULL) {
+  # Check for missing arguments
+  if(is.null(model.vgrm)) stop('\nMissing variogram model!')
+  if(is.null(shp.hf)) stop('\nMissing heat flow data!')
+  if(is.null(opt)) stop('\nMissing nloptr object!')
   # Compute experimental vgrm
   experimental.vgrm <-
-    experimental_vgrm(
-      shp.hf,
-      cutoff.prop = opt$solution[1],
-      n.lags = opt$solution[2],
-      lag.start = opt$solution[3]
+    try(
+      experimental_vgrm(
+        shp.hf,
+        cutoff.prop = opt$solution[1],
+        n.lags = opt$solution[2],
+        lag.start = opt$solution[3]
+      ),
+      silent = T
     )
+  # Need more than one lag to fit variogram
+  if(nrow(experimental.vgrm) < 2) {
+    stop('\nExperimental variogram has less than two lags!')
+  }
+  if(any(class(experimental.vgrm) == 'try-error')) {
+    stop('\nExperimental variogram error!')
+  }
+  # Fit experimental variogram
   fitted.vgrm <-
-    fit.variogram(
-      object = experimental.vgrm,
-      fit.method = 7,
-      debug.level = 0,
-      model = vgm(model = model.vgrm)
+    try(
+      fit.variogram(
+        object = experimental.vgrm,
+        fit.method = 7,
+        debug.level = 0,
+        model = vgm(model = model.vgrm)
+      ),
+      silent = T
     )
+  # Check for error during fitting
+  if(any(class(fitted.vgrm) == 'try-error')){
+    print(fitted.vgrm)
+    stop('\nVariogram fitting error!')
+  }
   return(
     list(
       'experimental.vgrm' = experimental.vgrm,
@@ -233,24 +294,38 @@ cost_function <-
     lag.start = 3,
     model.vgrm = 'Sph',
     n.max = 20,
-    n.fold = nrow(shp.hf),
+    n.fold = NULL,
     interp.weight = 0.5,
     vgrm.weight = 0.5,
     segment = NULL,
     verbose = T
   ) {
+  # Check for missing arguments
+  if(is.null(shp.hf)) stop('\nMissing heat flow data model!')
+  if(is.null(n.fold)) n.fold <- nrow(shp.hf)
   # Calculate experimental variogram
   experimental.vgrm <-
-    experimental_vgrm(
-      shp.hf = shp.hf,
-      cutoff.prop = cutoff.prop,
-      n.lags = n.lags,
-      lag.start = lag.start
+    try(
+      experimental_vgrm(
+        shp.hf = shp.hf,
+        cutoff.prop = cutoff.prop,
+        n.lags = n.lags,
+        lag.start = lag.start
+      ),
+      silent = T
     )
+  # Need more than one lag to fit variogram
   if(nrow(experimental.vgrm) < 2) {
     if(verbose) {
-      cat('\nExperimental variogram has less than two lags!\n')
-      cat('\nReturning arbitrarily high cost\n')
+      cat('\nExperimental variogram has less than two lags!')
+      cat('\nReturning arbitrarily high cost')
+      return(runif(1, 1, 1.5))
+    }
+  }
+  if(any(class(experimental.vgrm) == 'try-error')) {
+    if(verbose) {
+      cat('\nExperimental variogram error!')
+      cat('\nReturning arbitrarily high cost')
       return(runif(1, 1, 1.5))
     }
   }
@@ -268,8 +343,10 @@ cost_function <-
   # Check for error during fitting
   if(any(class(fitted.vgrm) == 'try-error')){
     if(verbose) {
-      cat('\nVariogram fitting error!\n')
       print(fitted.vgrm)
+      cat('\nVariogram fitting error!\n')
+      cat('\nReturning arbitrarily high cost')
+      return(runif(1, 1, 1.5))
     }
   }
   # Compute n-fold cross validation
@@ -289,6 +366,10 @@ cost_function <-
       ),
       silent = T
     )
+  # Handle errors
+  # Return arbitrarily high cost if
+  # k.cv throws an error to keep
+  # minimization algorithm searching
   if(any(class(k.cv) == 'try-error')) {
     if(verbose){
       cat('\nCross-validation error!')
@@ -299,8 +380,8 @@ cost_function <-
   if(sum(is.na(k.cv)) != 0) {
     if(verbose){
       cat('\nCross-validation produced NAs!')
-      if(sum(is.na(k.cv$residual)) == nrow(k.cv)){
-        cat('\nCross-validation produced all NAs!')
+      if(sum(is.na(k.cv$residual)) >= nrow(k.cv)/2){
+        cat('\nCross-validation produced too many NAs!')
         cat('\nReturning arbitrarily high cost\n')
         return(runif(1, 1, 1.5))
       } else {
@@ -360,6 +441,8 @@ plot_vgrm <-
     v.mod = NULL,
     lineCol = 'deeppink'
   ){
+  # Check for missing arguments
+  if(is.null(experimental.vgrm)) stop('\nMissing experimental variogram!')
   p <- 
     ggplot() +
     labs(

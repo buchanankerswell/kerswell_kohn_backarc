@@ -5,7 +5,7 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args) == 0) {
   stop('Provide the optimization data file as the first arugment <opt*>.R', call.=FALSE)
 } else if (length(args) == 1) {
-  if(!file.exists(paste0('data/', args[1]))) {
+  if(!file.exists(args[1])) {
     stop('That <opt*.R> file does not exist in data/', call.=FALSE)
   } else {
     cntr <- as.numeric(regmatches(args[1], regexec('[0-9]', args[1])))
@@ -29,21 +29,25 @@ cat('\nSaving plots to: figs/diff/*', cntr, '.png', sep = '')
 cat('\n', rep('~', 60), sep='')
 cat('\nVisualizing ...')
 # Individual Segments
-seg.names %>%
-walk(~{
-  cat('\nPlotting', .x)
+solns %>%
+group_by(segment) %>%
+filter(v.mod != 'Gau') %>%
+slice_min(cost) %>%
+pwalk(~{
+  cat('\nPlotting', ..1)
   # Define map parts
-  cnt <- shp.contours[[.x]] # Contour
-  seg <- shp.segs[[.x]] # Segment
-  buf <- shp.buffer[[.x]] # Buffer
+  cnt <- shp.contours[[..1]] # Contour
+  seg <- shp.segs[[..1]] # Segment
+  buf <- shp.buffer[[..1]] # Buffer
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
   world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
   volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
-  hf <- suppressWarnings(shp.hf.filtered %>% st_crop(bbx)) # Heat flow
   sim <- suppressWarnings(shp.interp.luca %>% st_intersection(buf)) # Similarity interp
-  dif <- shp.interp.diff[[.x]] %>% mutate(sigma.diff = sigma.sim - sigma.krige)
-  fts <- shp.fts[shp.fts$segment == .x,]
+  dif <- ..6
+  fts <- shp.fts[shp.fts$segment == ..1,]
+  v.mod <- ..2
+  cost <- ..7
   # Define map scale 1:50,000
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
@@ -70,7 +74,7 @@ walk(~{
         'label',
         x = -Inf,
         y = -Inf,
-        label = .x,
+        label = ..1,
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
@@ -90,7 +94,7 @@ walk(~{
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      v.scale.white +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -129,7 +133,19 @@ walk(~{
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      v.scale.white +
+      annotate(
+        'label',
+        x = -Inf,
+        y = -Inf,
+        label = paste('Model:', v.mod, '| Cost:', round(cost, 3)),
+        hjust = 0,
+        vjust = 0,
+        size = annt.txt.size,
+        fill = rgb(1, 1, 1, 0.7),
+        label.padding = unit(0.15, 'lines'),
+        label.r = unit(0.05, 'lines')
+      ) +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -237,19 +253,19 @@ walk(~{
   # Save
   cat(
     '\nSaving plot to: figs/diff/',
-    str_replace_all(.x, ' ', ''),
+    str_replace_all(..1, ' ', ''),
     'DiffComp',
     cntr,
     '.png',
     sep = ''
   )
-  if(.x == 'Andes') {
+  if(..1 == 'Andes') {
     p <-
       (pp1 + pp2) + (pp3 + pp4) &
       theme(plot.margin = margin(2, 2, 2, 2))
     suppressWarnings(suppressMessages(
       ggsave(
-        file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'),
+        file = paste0('figs/diff/', str_replace_all(..1, ' ', ''), 'DiffComp', cntr, '.png'),
         plot = p,
         device = 'png',
         type = 'cairo',
@@ -261,7 +277,7 @@ walk(~{
     system(
       paste0(
         'open figs/diff/',
-        str_replace_all(.x, ' ', ''),
+        str_replace_all(..1, ' ', ''),
         'DiffComp',
         cntr,
         '.png'
@@ -273,7 +289,7 @@ walk(~{
       theme(plot.margin = margin(2, 2, 2, 2))
     suppressWarnings(suppressMessages(
       ggsave(
-        file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'DiffComp', cntr, '.png'),
+        file = paste0('figs/diff/', str_replace_all(..1, ' ', ''), 'DiffComp', cntr, '.png'),
         plot = p,
         device = 'png',
         type = 'cairo',
@@ -285,7 +301,7 @@ walk(~{
     system(
       paste0(
         'open figs/diff/',
-        str_replace_all(.x, ' ', ''),
+        str_replace_all(..1, ' ', ''),
         'DiffComp',
         cntr,
         '.png'
@@ -295,7 +311,7 @@ walk(~{
   }
 })
 
-walk(seg.names, ~{
+walk(unique(solns$segment), ~{
   # Define mapping scale
   buf <- shp.buffer[[..1]] # Buffer
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
@@ -304,7 +320,6 @@ walk(seg.names, ~{
   plts <-
     solns %>%
     filter(segment == .x) %>%
-    mutate(dif = shp.interp.diff[names(shp.interp.diff) == .x]) %>%
     pmap(~{
       # Define map parts
       cnt <- shp.contours[[..1]] # Contour
@@ -314,10 +329,10 @@ walk(seg.names, ~{
       world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
       world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
       volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
-      dif <- ..7 %>% mutate(sigma.diff = sigma.sim - sigma.krige)
+      dif <- ..6
       fts <- shp.fts[shp.fts$segment == ..1,]
       v.mod <- ..2
-      cost <- ..6
+      cost <- ..7
       # Define map scale 1:50,000
       wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
       hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
@@ -357,7 +372,7 @@ walk(seg.names, ~{
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
-        v.scale.white +
+        v.scale.grey +
         labs(color = bquote(mWm^-2)) +
         coord_sf(expand = F) +
         theme_map(font_size = base.txt.size) +
@@ -380,35 +395,60 @@ walk(seg.names, ~{
   cat(
     '\nSaving plot to: figs/diff/',
     str_replace_all(.x, ' ', ''),
-    'modelComparison',
+    'ModelComparison',
     cntr,
     '.png',
     sep = ''
   )
-  p <- plts %>% wrap_plots(ncol = 2)
-  suppressWarnings(suppressMessages(
-    ggsave(
-      file = paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'modelComparison', cntr, '.png'),
-      plot = p,
-      device = 'png',
-      type = 'cairo',
-      width = wdth*3,
-      height = hght*3,
-      units = 'mm'
+  if(.x == 'Andes') {
+    p <- plts %>% wrap_plots(ncol = 6)
+    suppressWarnings(suppressMessages(
+      ggsave(
+        file =
+          paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'ModelComparison', cntr, '.png'),
+        plot = p,
+        device = 'png',
+        type = 'cairo',
+        width = wdth*6,
+        height = hght,
+        units = 'mm'
+      )
+    ))
+    system(
+      paste0(
+        'open figs/diff/',
+        str_replace_all(.x, ' ', ''),
+        'ModelComparison',
+        cntr,
+        '.png'
+      ),
+      wait = F
     )
-  ))
-  system(
-    paste0(
-      'open figs/diff/',
-      str_replace_all(.x, ' ', ''),
-      'modelComparison',
-      cntr,
-      '.png'
-    ),
-    wait = F
-  )
+  } else {
+    p <- plts %>% wrap_plots(ncol = 2)
+    suppressWarnings(suppressMessages(
+      ggsave(
+        file =
+          paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'ModelComparison', cntr, '.png'),
+        plot = p,
+        device = 'png',
+        type = 'cairo',
+        width = wdth*3,
+        height = hght*3,
+        units = 'mm'
+      )
+    ))
+    system(
+      paste0(
+        'open figs/diff/',
+        str_replace_all(.x, ' ', ''),
+        'ModelComparison',
+        cntr,
+        '.png'
+      ),
+      wait = F
+    )
+  }
 })
 
-cat('\n\n', rep('~', 60), sep='')
-cat('\nDone!')
-cat('\n', rep('~', 60), '\n', sep='')
+cat('\n\nDone!\n')

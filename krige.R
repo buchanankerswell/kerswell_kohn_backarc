@@ -1,56 +1,106 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 
-# Test if there is at least one argument: if not, return an error
+# Testing arguments
+cat('\n', rep('~', 60), sep='')
 if (length(args) == 0) {
+  cat('\nNo arguments passed to krige.R')
   max.eval <- 100
   alg <- 'NLOPT_GN_DIRECT_L'            # Global search
+  iwt <- 0.5
+  vwt <- 0.5
+  n.fold <- NULL
+  cat('\nUsing defaults')
+  cat('\nMax iterations:           ', max.eval)
+  cat('\nAlgorithm:                ', alg)
+  cat('\nInterpolation cost weight:', iwt)
+  cat('\nVariogram cost weight:    ', vwt)
 } else if (length(args) != 0) {
   max.eval <- suppressWarnings(as.numeric(args[1]))
   if(is.na(max.eval)){
-    cat('\nPassed non-numeric argument for max iterations!')
-    cat('\nDefaulting to 100')
     max.eval <- 100
+    cat('\nPassed non-numeric argument for max iterations!')
+    cat('\nDefaulting to', max.eval)
   }
   if(args[2] == '1') {
-    alg <- 'NLOPT_GN_DIRECT_L'          # Global search
+    alg <- 'NLOPT_GN_DIRECT_L'   # Global search
   } else if(args[2] == '2') {
-    alg <- 'NLOPT_LN_SBPLX'             # Local without gradients
+    alg <- 'NLOPT_LN_SBPLX'      # Local without gradients
   } else if(args[2] == '3') {
-    algorithm <- 'NLOPT_LN_NELDERMEAD'  # Local without gradients
+    alg <- 'NLOPT_LN_NELDERMEAD' # Local without gradients
   } else if(args[2] == '4') {
-    algorithm <- 'NLOPT_LN_BOBYQA'      # Local without gradients
+    alg <- 'NLOPT_LN_BOBYQA'     # Local without gradients
   } else if(args[2] == '5') {
-    algorithm <- 'NLOPT_LN_COBYLA'      # Local without gradients
+    alg <- 'NLOPT_LN_COBYLA'     # Local without gradients
   } else {
     cat('\nAlgorithm passed is not recognized!')
     cat('\nDefaulting to NLOPT_GN_DIRECT_L')
     alg <- 'NLOPT_GN_DIRECT_L'
   }
+  iwt <- suppressWarnings(as.numeric(args[3]))
+  if(is.na(iwt)){
+    iwt <- 0.5
+    cat('\nPassed non-numeric argument for interpolation weight!')
+    cat('\nDefaulting to', iwt)
+  }
+  vwt <- suppressWarnings(as.numeric(args[4]))
+  if(is.na(vwt)){
+    vwt <- 0.5
+    cat('\nPassed non-numeric argument for variogram weight!')
+    cat('\nDefaulting to', vwt)
+  }
+  if((iwt+vwt) > 1){
+    iwt <- 0.5
+    vwt <- 0.5
+    cat('\nInterpolation and variogram weights must add to one!')
+    cat('\nDefaulting to', iwt, 'and', vwt)
+  }
+  n.cores <- suppressWarnings(as.numeric(args[5]))
+  if(is.na(n.cores)){
+    n.cores <- future::availableCores() - 2
+    cat('\nPassed non-numeric argument for number of cores!')
+    cat('\nDefaulting to', n.cores)
+  }
+  if(n.cores > future::availableCores()){
+    n.cores <- future::availableCores() - 2
+    cat('\nToo many cores!')
+    cat('\nDefaulting to', n.cores)
+  }
+  n.fold <- suppressWarnings(as.numeric(args[6]))
+  if(is.na(n.fold)){
+    n.fold <- NULL
+    cat('\nPassed non-numeric argument for k-fold!')
+    cat('\nDefaulting to leave-one-out cross-validation')
+  }
+  if(n.fold <= 0){
+    n.fold <- NULL
+    cat('\nk-fold cannot be negative or zero!')
+    cat('\nDefaulting to leave-one-out cross-validation')
+  }
 }
-
 # Counter
 opt.files <- list.files('data/', pattern = 'opt')
-cat('\n', rep('~', 60), '\n', sep='')
-cat('Found', length(opt.files), 'opt files already in data/\n')
+cat('\nFound', length(opt.files), 'opt files already in data/')
+if(length(opt.files) == 0) {
+  cntr <- NULL
+} else {
+  cntr <- length(opt.files)
+}
 
-cntr <- length(opt.files) + 1
-cat('Saving results to: data/opt', cntr, '.RData', sep = '')
+cat('\nSaving results to: data/opt', cntr, '.RData', sep = '')
 
 # Load functions and libraries
-cat('\nLoading packages and functions')
-
+cat('\nLoading packages and functions\n')
 source('functions.R')
 load('data/hf.RData')
 
 # Set parallel computing plan
-n.cores <- availableCores()-2
 plan(multicore, workers = n.cores)
 cat('\nParallel computing across', n.cores, 'cores')
 
 # Define initial values for cost function
 # and nloptr settings
-cat('\n\n', rep('~', 60), sep='')
+cat('\n', rep('~', 60), sep='')
 cat('\nSetting up constrained nonlinear minimization problem')
 cat('\n            with "nloptr" to fit variogram models ...')
 cat('\n\nsee https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/')
@@ -89,16 +139,36 @@ pwalk(init.vals, ~{
 })
 # Print settings
 cat(
-  '\n\nnloptr settings:',
-  '\nAlgorithm:       ', init.vals$algorithm,
-  '\nMax evaluations: ', init.vals$maxeval,
+  '\n',
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-  '\n~~~~~~~~~~Initial values~~~~~~~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~     nloptr settings     ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\nAlgorithm       : ', init.vals$algorithm,
+  '\nMax evaluations : ', init.vals$maxeval,
+  '\nk-fold CV       : ', ifelse(is.null(n.fold), 'Leave-one-out', n.fold),
+  '\nInterp weight   : ', iwt,
+  '\nVariogram weight: ', vwt,
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~  Random Initial values  ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '\nLag cutoff:     ', init.vals$cutoff.prop,
   '\nNumber of lags: ', init.vals$n.lags,
   '\nLag shift:      ', init.vals$lag.start,
-  '\nMax local pairs:', init.vals$n.max, '\n'
+  '\nMax local pairs:', init.vals$n.max,
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~    Heavy Computation!   ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~      This may take      ~~~~~~',
+  '\n~~~~~     minutes to hours    ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~    Have a sip of tea    ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
 )
 
 # Setup cost function and nloptr
@@ -112,6 +182,7 @@ f <- function(segment, v.mod) {
       n.lags = x[2],
       lag.start = x[3],
       n.max = x[4],
+      n.fold = n.fold,
       model.vgrm = v.mod,
       interp.weight = 0.1,
       vgrm.weight = 0.9,
@@ -154,7 +225,7 @@ f <- function(segment, v.mod) {
 }
 
 # Create array of variogram models to optimize
-# for each segment and optimize in parallel
+# for each segment in parallel
 tic()
 opt.grd <-
   tibble(expand.grid(
@@ -162,28 +233,46 @@ opt.grd <-
     v.mod = c('Sph', 'Exp', 'Gau', 'Bes', 'Lin', 'Cir'),
     stringsAsFactors = F
   )) %>%
+  arrange(segment, v.mod) %>%
   mutate(
     opt =
       future_map2(
         segment,
         v.mod,
-        f,
+        possibly(f, otherwise = NULL),
         .progress = T,
         .options = furrr_options(seed = T)
       )
   )
 toc()
 
+# Check for NULL results from errors
+if(any(map_lgl(opt.grd$opt, is.null))) {
+  cat('\n', rep('~!', 30), sep='')
+  cat(
+    '\n\nOptimization failed for',
+    sum(map_lgl(opt.grd$opt, is.null)),
+    'runs:\n'
+  )
+  print(opt.grd[map_lgl(opt.grd$opt, is.null),])
+  cat('\nContinuing computation for good runs ...')
+  cat('\n', rep('~!', 30), sep='')
+}
+
 # Decode optimization output and construct variograms
 cat('\n\n', rep('~', 60), sep='')
 cat('\nDecoding optimized solutions ...')
 opt.vgrms <-
   opt.grd %>%
+  drop_na() %>%
   pmap(
-    ~decode_opt(
-      model.vgrm = ..2,
-      shp.hf = shp.hf.crop[[..1]],
-      opt = ..3
+    possibly(
+      ~decode_opt(
+        model.vgrm = ..2,
+        shp.hf = shp.hf.crop[[..1]],
+        opt = ..3
+      ),
+      otherwise = NULL
     )
   )
 # Add variograms and cost to tibble for easy manipulation and query
@@ -194,10 +283,26 @@ solns <-
     opt.fit.vgrm = map(opt.vgrms, ~.x[[2]]),
     cost = map_dbl(opt.grd$opt, ~.x$objective)
   )
+
+# Check for NULL results from errors
+if(any(map_lgl(solns$opt.exp.vgrm, is.null))) {
+  cat('\n', rep('~!', 30), sep='')
+  cat(
+    '\n\nVariogram fitting failed during opt decoding for',
+    sum(map_lgl(solns$opt.exp.vgrm, is.null)),
+    'runs:\n'
+  )
+  print(solns[map_lgl(solns$opt.exp.vgrm, is.null),])
+  cat('\nContinuing computation for good runs ...')
+  cat('\n', rep('~!', 30), sep='')
+}
+
 # Get solutions with minimum cost
 opt.solns <-
   solns %>%
+  drop_na() %>%
   group_by(segment) %>%
+  filter(v.mod != 'Gau') %>%
   slice(which.min(cost))
 
 # Print lowest-cost solutions
@@ -216,6 +321,9 @@ pwalk(opt.solns, ~{
   )
 })
 cat('\n', rep('+', 40), '\n', sep='')
+
+# Drop missing values
+solns <- drop_na(solns)
 
 # Summarise variograms
 cat('\nVariogram summary:\n')
@@ -243,42 +351,91 @@ shp.interp.krige <-
     solns$opt.fit.vgrm,
     map(solns$opt, ~.x$solution[4])
   ) %>%
-  pmap(~
-    suppressWarnings(
-      Krige(
+  pmap(
+    possibly(
+      ~Krige(
        shp.hf = shp.hf.crop[[..1]],
        fitted.vgrm = ..2,
        shp.interp.grid = shp.grid.crop[[..1]],
        n.max = ..3,
        seg.name = ..1
-      )
+      ),
+      otherwise = NULL
     )
   ) %>%
   set_names(solns$segment)
+
+# Check for NULL results from errors
+if(any(map_lgl(shp.interp.krige, is.null))) {
+  cat('\n', rep('~!', 30), sep='')
+  cat(
+    '\n\nVariogram fitting failed during opt decoding for',
+    sum(map_lgl(shp.interp.krige, is.null)),
+    'runs:\n'
+  )
+  indx <- map_lgl(shp.interp.krige, is.null)
+  cat('\nSegments:\n')
+  writeLines(solns$segment[indx])
+  cat('\nVariogram models:\n')
+  print(solns$opt.fit.vgrm[indx])
+  cat('\nContinuing computation for good runs ...')
+  cat('\n', rep('~!', 30), sep='')
+}
+
+# Remove missing values
+solns <-
+  solns %>%
+  mutate(shp.interp.krige, .before = cost) %>%
+  drop_na()
 
 # Calculating interpolation difference
 cat('\n', rep('~', 60), sep='')
 cat('\nComputing differences ...\n')
 shp.interp.diff <-
-  pmap(list(shp.interp.krige, solns$segment, solns$v.mod), ~{
-    suppressWarnings({
-      cat('\nSegment:', ..2)
-      cat('\nModel  :', ..3)
-      interp_diff(..1, shp.interp.luca)
-    })
-  })
+  solns %>%
+  pmap(
+    possibly(
+      ~{
+        cat('\nSegment:', ..1)
+        cat('\nModel  :', ..2)
+        interp_diff(
+          shp.interp.krige = ..6,
+          shp.interp.sim = shp.interp.luca
+        )
+      },
+      otherwise = NULL
+    )
+  ) %>% set_names(solns$segment)
+
+# Check for NULL results from errors
+if(any(map_lgl(shp.interp.diff, is.null))) {
+  cat('\n', rep('~!', 30), sep='')
+  cat(
+    '\n\nVariogram fitting failed during opt decoding for',
+    sum(map_lgl(shp.interp.diff, is.null)),
+    'runs:\n'
+  )
+  indx <- map_lgl(shp.interp.diff, is.null)
+  cat('\nSegments:\n')
+  writeLines(solns$segment[indx])
+  cat('\nVariogram models:\n')
+  print(solns$opt.fit.vgrm[indx])
+  cat('\nContinuing computation for good runs ...')
+  cat('\n', rep('~!', 30), sep='')
+}
+
+# Remove missing values
+solns <-
+  solns %>%
+  mutate(shp.interp.diff, .before = cost) %>%
+  drop_na()
 
 # Summarise interpolation differences
 interp.diff.summary <-
+  solns %>%
   pmap_df(
-    list(
-      shp.interp.diff,
-      solns$v.mod,
-      solns$cost
-    ),
-    ~st_set_geometry(..1, NULL) %>%
-    mutate(v.mod = ..2, cost = ..3, .before = est.sim),
-    .id = 'segment'
+    ~st_set_geometry(..7, NULL) %>%
+    mutate(segment = ..1, v.mod = ..2, cost = ..8, .before = est.sim)
   ) %>%
   group_by(segment, v.mod, cost) %>%
   drop_na() %>%
@@ -295,6 +452,9 @@ interp.diff.summary <-
 cat('\nHeat flow difference summary:\n')
 print(interp.diff.summary)
 
+# Drop krige column since it is a duplicate of diff column
+solns <- select(solns, -shp.interp.krige)
+
 cat('\n', rep('~', 60), sep='')
 cat('\nSaving to: data/opt', cntr, '.RData', sep = '')
 save(
@@ -302,11 +462,9 @@ save(
     'solns',
     'opt.solns',
     'vgrm.summary',
-    'shp.interp.diff',
     'interp.diff.summary'
   ),
   file = paste0('data/opt', cntr, '.RData')
 )
 
-cat('\n\nDone!')
-cat('\n\n', rep('~', 60), '\n', sep='')
+cat('\nDone!\n')

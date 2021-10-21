@@ -1,5 +1,12 @@
 #!/usr/bin/env Rscript
 
+# Check files
+if(dir.exists('figs/base') & length(list.files('figs/base')) == 46) {
+  cat('\nBase plots already exist')
+  cat('\nPassing ...\n')
+  quit()
+}
+
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
 
@@ -345,7 +352,7 @@ walk(~{
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey95') +
       geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.3) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -461,5 +468,4 @@ walk(~{
 })
 
 cat('\n\n', rep('~', 60), sep='')
-cat('\nDone!')
-cat('\n', rep('~', 60), '\n', sep='')
+cat('\nDone!\n')

@@ -5,7 +5,7 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args) == 0) {
   stop('Provide the optimization data file as the first arugment <opt*>.R', call.=FALSE)
 } else if (length(args) == 1) {
-  if(!file.exists(paste0('data/', args[1]))) {
+  if(!file.exists(args[1])) {
     stop('That <opt*.R> file does not exist in data/', call.=FALSE)
   } else {
     cntr <- as.numeric(regmatches(args[1], regexec('[0-9]', args[1])))
@@ -79,31 +79,27 @@ suppressWarnings(suppressMessages(
 system('open figs/summary/hf_summary.png', wait = F)
 }
 
-# Plot optimum variogram models
+# Plot all variogram models
 cat('\nSaving plots to: figs/vgrms/')
 
-plts <-
-  pmap(solns,
-    ~plot_vgrm(
-      experimental.vgrm = ..4,
-      fitted.vgrm = ..5,
-      cost = ..6,
-      v.mod = ..2,
-      lineCol = 'firebrick'
-    )
-  )
 # Draw composite plots
-list(
-  seq(1, nrow(solns)-(length(unique(solns$v.mod))-1), length(unique(solns$v.mod))),
-  seq(length(unique(solns$v.mod)), nrow(solns), length(unique(solns$v.mod))),
-  seg.names
-) %>%
-pwalk(~{
+unique(solns$segment) %>%
+walk(~{
   p <-
-    wrap_plots(plts[..1:..2], nrow=3, ncol=2) +
-    plot_annotation(title = paste(..3, 'variogram models'))
+    filter(solns, segment == .x) %>%
+    pmap(~{
+      plot_vgrm(
+        experimental.vgrm = ..4,
+        fitted.vgrm = ..5,
+        cost = ..7,
+        v.mod = ..2,
+        lineCol = 'firebrick'
+      )
+    }) %>%
+  wrap_plots(nrow=3, ncol=2) +
+  plot_annotation(title = paste(.x, 'variogram models'))
   ggsave(
-    paste0('figs/vgrms/', str_replace_all(..3, ' ', ''), 'Vgrms', cntr, '.png'),
+    paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms', cntr, '.png'),
     plot = p,
     device = 'png',
     type = 'cairo',
@@ -113,7 +109,7 @@ pwalk(~{
   system(
     paste0(
       'open figs/vgrms/',
-      str_replace_all(..3, ' ', ''),
+      str_replace_all(.x, ' ', ''),
       'Vgrms',
       cntr,
       '.png'
@@ -137,7 +133,7 @@ p2 <-
   ) %>%
   pivot_longer(-c(v.mod, cost, segment, itr)) %>%
   ggplot(aes(x = cost, y = value, shape = v.mod, color = segment)) +
-    geom_point() +
+    geom_point(size = 2) +
     facet_wrap(
       ~name,
       ncol = 2,
@@ -152,6 +148,9 @@ p2 <-
     scale_color_discrete_qualitative('Dark 3') +
     theme_classic() +
     theme(
+      legend.box.margin = margin(),
+      legend.text = element_text(size = 8),
+      plot.margin = margin(),
       strip.background = element_rect(fill = 'grey90', color=NA)
     )
 # Save
@@ -169,13 +168,13 @@ suppressWarnings(suppressMessages(
 system(paste0('open figs/summary/vgrm_summary', cntr, '.png'), wait = F)
 
 # Interpolation differences
-opt.solns <-
+dif <-
   solns %>%
-  mutate(shp.interp.diff = shp.interp.diff, .before = cost) %>%
   group_by(segment) %>%
   slice_min(cost)
 p3 <-
-  opt.solns$shp.interp.diff %>%
+  dif$shp.interp.diff %>%
+  set_names(dif$segment) %>%
   map_df(
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
@@ -216,5 +215,4 @@ suppressWarnings(suppressMessages(
 ))
 system(paste0('open figs/summary/interp_diff_summary', cntr, '.png'), wait = F)
 
-cat('\n\nDone!')
-cat('\n', rep('~', 60), '\n', sep='')
+cat('\nDone!\n')

@@ -17,7 +17,7 @@ v.scale.grey <-
   scale_color_viridis_c(
     option = 'magma',
     limits = c(0, 250),
-    na.value = 'grey50'
+    na.value = 'grey80'
   )
 
 # Projections
@@ -346,8 +346,7 @@ rm(
 )
 
 # Save
-cat('\n\nSaving data to: data/hf.RData')
+cat('\nSaving data to: data/hf.RData')
 save.image('data/hf.RData')
 
-cat('\n\nDone!')
-cat('\n', rep('~', 60), '\n', sep='')
+cat('\nDone!\n')
