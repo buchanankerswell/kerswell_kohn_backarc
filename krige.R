@@ -100,7 +100,7 @@ if(length(args) == 0) {
 }
 
 # Counter
-opt.files <- list.files('data/', pattern = 'opt*.RData')
+opt.files <- list.files('data/', pattern = 'opt.*\\.RData')
 cat('\nFound', length(opt.files), 'opt files already in data/')
 if(length(opt.files) == 0) {
   cntr <- NULL
@@ -327,6 +327,7 @@ plt <-
   opt.trace %>%
   ggplot() +
     geom_path(aes(itr, cost, color = segment)) +
+    scale_y_continuous(limits = c(0, 0.3)) +
     labs(x = 'Iteration', y = 'Cost', color = NULL) +
     guides(color = guide_legend(nrow = 3)) +
     facet_wrap(~v.mod) +

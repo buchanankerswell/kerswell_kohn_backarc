@@ -3,10 +3,9 @@
 
 ## Sample
 
-![](figs/CentralAmericaDiffComp.png)
+![](figs/ThermoGlobeBuffer.png)
 
-
-![](figs/CentralAmericaModelComparison.png)
+![](figs/similarityBuffer.png)
 
 
 <!-- # Material for Kerswell & Kohn (2021, G3)

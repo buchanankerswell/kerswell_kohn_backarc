@@ -101,7 +101,7 @@ if [[ ! $fnum -gt 0 ]]; then
   done
 else
   echo 'Found previous kriging results:'
-  ls -1q data/opt*.RData | xargs -n 1 basename
+  ls -1q data/opt*.RData | xargs -n 1
   echo 'Run another round of kriging?'
   read 'p?yes/no: '
   while true; do
@@ -175,13 +175,13 @@ else
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
-      echo 'Please choose an opt file to run:'
-      ls -1q data/opt*.RData | xargs -n 1 basename
-      while [[ ! -f data/$fname ]]; do
+      echo 'Please choose an opt file to run [type full path]:'
+      ls -1q data/opt*.RData | xargs -n 1
+      while [[ ! -f $fname ]]; do
         read 'fname?Filename: '
-        if [[ ! -f data/$fname ]]; then
+        if [[ ! -f $fname ]]; then
           echo 'File does not exist, please try again (or cntrl+c to escape)'
-          ls -1q data/opt*.RData | xargs -n 1 basename
+          ls -1q data/opt*.RData | xargs -n 1
         fi
       done
       ./preprocess.R

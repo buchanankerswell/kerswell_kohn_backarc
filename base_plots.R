@@ -54,7 +54,7 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-system('open figs/base/segments.png', wait = F)
+# system('open figs/base/segments.png', wait = F)
 
 # Global filtered ThermoGlobe
 p2 <-
@@ -100,7 +100,7 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-system('open figs/base/ThermoGlobeFiltered.png', wait = F)
+# system('open figs/base/ThermoGlobeFiltered.png', wait = F)
 
 # Global similarity estimates
 p3 <-
@@ -143,7 +143,7 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-system('open figs/base/similarityInterp.png', wait = F)
+# system('open figs/base/similarityInterp.png', wait = F)
 
 # Global composition
 p4 <-
@@ -161,7 +161,7 @@ suppressWarnings(suppressMessages(
     height = 6
   )
 ))
-system('open figs/base/ThermoGlobeComp.png', wait = F)
+# system('open figs/base/ThermoGlobeComp.png', wait = F)
 
 # Global ThermoGlobe buffer
 p5 <-
@@ -179,6 +179,28 @@ p5 <-
       aes(color = hf),
       size = 0.01,
       shape = 20
+    ) +
+    geom_sf_label_repel(
+      data = bind_rows(shp.segs),
+      aes(label = segment),
+      fill = 'ivory',
+      size = 2.5,
+      alpha = 0.8,
+      force = 5,
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0.05, 'lines')
+    ) +
+    annotate(
+      'label',
+      x = -Inf,
+      y = -Inf,
+      label = 'SZ segments & ThermoGlobe dataset',
+      hjust = 0,
+      vjust = 0,
+      size = 4,
+      fill = 'ivory',
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0.05, 'lines')
     ) +
     v.scale.white +
     labs(color = bquote(mWm^-2)) +
@@ -210,7 +232,7 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-system('open figs/base/ThermoGlobeBuffer.png', wait = F)
+# system('open figs/base/ThermoGlobeBuffer.png', wait = F)
 
 # Crop countries and similarity to buffer
 shp.world.buf <- suppressWarnings(shp.world %>% st_intersection(bind_rows(shp.buffer)))
@@ -224,8 +246,20 @@ p6 <-
     ) +
     geom_sf(data = shp.sim, aes(color = est.sim), size = 0.1, shape = 15) +
     geom_sf(data = shp.world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
-    geom_sf(data = bind_rows(shp.contours), size = 0.05) +
+    geom_sf(data = bind_rows(shp.contours), size = 0.05, color = 'white') +
     geom_sf(data = bind_rows(shp.segs), size = 0.5, color = 'white') +
+    annotate(
+      'label',
+      x = -Inf,
+      y = -Inf,
+      label = 'Similarity interpolation (Lucazeau, 2019)',
+      hjust = 0,
+      vjust = 0,
+      size = 4,
+      fill = 'ivory',
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0.05, 'lines')
+    ) +
     labs(color = bquote(mWm^-2)) +
     v.scale.white +
     coord_sf(expand = F) +
@@ -256,7 +290,7 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-system('open figs/base/similarityBuffer.png', wait = F)
+# system('open figs/base/similarityBuffer.png', wait = F)
 
 # Global buffer composition
 p7 <-
@@ -346,7 +380,7 @@ walk(~{
       units = 'mm'
     )
   ))
-  system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Base.png'), wait = F)
+  # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Base.png'), wait = F)
   # Similarity interpolation
   pp2 <- 
     ggplot() +
@@ -399,7 +433,7 @@ walk(~{
       units = 'mm'
     )
   ))
-  system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Similarity.png'), wait = F)
+  # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Similarity.png'), wait = F)
   # ThermoGlobe data without annotation
   pp3 <- 
     ggplot() +
@@ -444,7 +478,7 @@ walk(~{
         units = 'mm'
       )
     ))
-    system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'), wait = F)
+    # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'), wait = F)
   } else {
     # Composition
     pp4 <-
@@ -463,7 +497,7 @@ walk(~{
         units = 'mm'
       )
     ))
-    system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'), wait = F)
+    # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'), wait = F)
   }
 })
 
