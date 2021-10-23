@@ -52,9 +52,9 @@ pwalk(~{
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
   # Define points and text sizes
-  pnt.size <- wdth*hght/2.3e3
-  annt.txt.size <- wdth/2.2e1
-  base.txt.size <- wdth/1.2e1
+  pnt.size <- log(wdth*hght, base = 20)
+  annt.txt.size <- log(wdth*hght, base = 12)
+  base.txt.size <- log(wdth*hght, base = 5)
   # Similarity interpolation
   pp1 <- 
     ggplot() +
@@ -68,7 +68,7 @@ pwalk(~{
         data = fts,
         aes(label = label),
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7)
+        fill = rgb(1, 1, 0.941, 0.7)
       ) +
       annotate(
         'label',
@@ -78,7 +78,7 @@ pwalk(~{
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7),
+        fill = rgb(1, 1, 0.941, 0.7),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -90,7 +90,7 @@ pwalk(~{
         hjust = 1,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7),
+        fill = rgb(1, 1, 0.941, 0.7),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -99,11 +99,11 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_blank(),
+        axis.text = element_text(),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
         legend.key.width = unit(wdth/10, 'mm'),
@@ -129,7 +129,7 @@ pwalk(~{
         hjust = 1,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7),
+        fill = rgb(1, 1, 0.941, 0.7),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -137,11 +137,11 @@ pwalk(~{
         'label',
         x = -Inf,
         y = -Inf,
-        label = paste('Model:', v.mod, '| Cost:', round(cost, 3)),
+        label = paste('Model:', v.mod),
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7),
+        fill = rgb(1, 1, 0.941, 0.7),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -150,11 +150,11 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_blank(),
+        axis.text = element_text(),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
         legend.key.width = unit(wdth/10, 'mm'),
@@ -180,7 +180,7 @@ pwalk(~{
         hjust = 1,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7),
+        fill = rgb(1, 1, 0.941, 0.7),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -193,11 +193,11 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_blank(),
+        axis.text = element_text(),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
         legend.key.width = unit(wdth/10, 'mm'),
@@ -224,7 +224,7 @@ pwalk(~{
         hjust = 1,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.7),
+        fill = rgb(1, 1, 0.941, 0.7),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -237,11 +237,11 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_blank(),
+        axis.text = element_text(),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
         legend.key.width = unit(wdth/10, 'mm'),
@@ -261,7 +261,8 @@ pwalk(~{
   )
   if(..1 == 'Andes') {
     p <-
-      (pp1 + pp2) + (pp3 + pp4) &
+      (pp1 + (pp2 + theme(axis.text.y = element_blank()))) +
+      ((pp3 + theme(axis.text.y = element_blank())) + (pp4 + theme(axis.text.y = element_blank()))) &
       theme(plot.margin = margin(2, 2, 2, 2))
     suppressWarnings(suppressMessages(
       ggsave(
@@ -274,18 +275,19 @@ pwalk(~{
         units = 'mm'
       )
     ))
-    system(
-      paste0(
-        'open figs/diff/',
-        str_replace_all(..1, ' ', ''),
-        'DiffComp',
-        cntr,
-        '.png'
-      ), wait = F
-    )
+    # system(
+    #   paste0(
+    #     'open figs/diff/',
+    #     str_replace_all(..1, ' ', ''),
+    #     'DiffComp',
+    #     cntr,
+    #     '.png'
+    #   ), wait = F
+    # )
   } else {
     p <-
-      (pp1 + pp2) / (pp3 + pp4) &
+      ((pp1 + theme(axis.text.x = element_blank())) + (pp2 + theme(axis.text = element_blank()))) /
+      (pp3 + (pp4 + theme(axis.text.y = element_blank()))) &
       theme(plot.margin = margin(2, 2, 2, 2))
     suppressWarnings(suppressMessages(
       ggsave(
@@ -298,16 +300,16 @@ pwalk(~{
         units = 'mm'
       )
     ))
-    system(
-      paste0(
-        'open figs/diff/',
-        str_replace_all(..1, ' ', ''),
-        'DiffComp',
-        cntr,
-        '.png'
-        ),
-      wait = F
-    )
+    # system(
+    #   paste0(
+    #     'open figs/diff/',
+    #     str_replace_all(..1, ' ', ''),
+    #     'DiffComp',
+    #     cntr,
+    #     '.png'
+    #     ),
+    #   wait = F
+    # )
   }
 })
 
@@ -337,9 +339,9 @@ walk(unique(solns$segment), ~{
       wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
       hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
       # Define points and text sizes
-      pnt.size <- wdth*hght/2.3e3
-      annt.txt.size <- wdth/2.2e1
-      base.txt.size <- wdth/1.2e1
+      pnt.size <- log(wdth*hght, base = 20)
+      annt.txt.size <- log(wdth*hght, base = 12)
+      base.txt.size <- log(wdth*hght, base = 5)
       # Krige interpolation
       ggplot() +
         geom_sf(data = world, size = 0.1, fill = 'grey95') +
@@ -356,7 +358,7 @@ walk(unique(solns$segment), ~{
           hjust = 1,
           vjust = 0,
           size = annt.txt.size,
-          fill = rgb(1, 1, 1, 0.7),
+          fill = rgb(1, 1, 0.941, 0.7),
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
@@ -364,11 +366,11 @@ walk(unique(solns$segment), ~{
           'label',
           x = -Inf,
           y = -Inf,
-          label = paste('Model:', v.mod, '| Cost:', round(cost, 3)),
+          label = paste('Model:', v.mod),
           hjust = 0,
           vjust = 0,
           size = annt.txt.size,
-          fill = rgb(1, 1, 1, 0.7),
+          fill = rgb(1, 1, 0.941, 0.7),
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
@@ -377,11 +379,11 @@ walk(unique(solns$segment), ~{
         coord_sf(expand = F) +
         theme_map(font_size = base.txt.size) +
         theme(
-          axis.text = element_blank(),
+          axis.text = element_text(),
           legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.direction = 'horizontal',
-          legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.7), color = NA),
+          legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
           legend.box.margin = margin(1, 8, 1, 2),
           legend.key.height = unit(hght/30, 'mm'),
           legend.key.width = unit(wdth/10, 'mm'),
@@ -401,7 +403,14 @@ walk(unique(solns$segment), ~{
     sep = ''
   )
   if(.x == 'Andes') {
-    p <- plts %>% wrap_plots(ncol = 6)
+    p <-
+      plts[[1]] +
+      (plts[[2]] + theme(axis.text.y = element_blank())) +
+      (plts[[3]] + theme(axis.text.y = element_blank())) +
+      (plts[[4]] + theme(axis.text.y = element_blank())) +
+      (plts[[5]] + theme(axis.text.y = element_blank())) +
+      (plts[[6]] + theme(axis.text.y = element_blank())) +
+      plot_layout(ncol = 6)
     suppressWarnings(suppressMessages(
       ggsave(
         file =
@@ -414,18 +423,21 @@ walk(unique(solns$segment), ~{
         units = 'mm'
       )
     ))
-    system(
-      paste0(
-        'open figs/diff/',
-        str_replace_all(.x, ' ', ''),
-        'ModelComparison',
-        cntr,
-        '.png'
-      ),
-      wait = F
-    )
+    # system(
+    #   paste0(
+    #     'open figs/diff/',
+    #     str_replace_all(.x, ' ', ''),
+    #     'ModelComparison',
+    #     cntr,
+    #     '.png'
+    #   ),
+    #   wait = F
+    # )
   } else {
-    p <- plts %>% wrap_plots(ncol = 2)
+    p <-
+      ((plts[[1]] + theme(axis.text.x = element_blank())) + (plts[[2]] + theme(axis.text = element_blank()))) /
+      ((plts[[3]] + theme(axis.text.x = element_blank())) + (plts[[4]] + theme(axis.text = element_blank()))) /
+      (plts[[5]] + (plts[[6]] + theme(axis.text.y = element_blank())))
     suppressWarnings(suppressMessages(
       ggsave(
         file =
@@ -438,16 +450,16 @@ walk(unique(solns$segment), ~{
         units = 'mm'
       )
     ))
-    system(
-      paste0(
-        'open figs/diff/',
-        str_replace_all(.x, ' ', ''),
-        'ModelComparison',
-        cntr,
-        '.png'
-      ),
-      wait = F
-    )
+    # system(
+    #   paste0(
+    #     'open figs/diff/',
+    #     str_replace_all(.x, ' ', ''),
+    #     'ModelComparison',
+    #     cntr,
+    #     '.png'
+    #   ),
+    #   wait = F
+    # )
   }
 })
 

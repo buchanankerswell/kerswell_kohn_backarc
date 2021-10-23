@@ -1,0 +1,25 @@
+# opt models
+opt.RData
+  - 0.5 interpolation weight
+  - 0.5 vgrm weight
+  - BOBYQA
+  - 50 itr
+  - 0.5 k-fold
+opt2.RData
+  - 0.7 interpolation weight
+  - 0.3 vgrm weight
+  - BOBYQA
+  - 50 itr
+  - 0.5 k-fold
+opt4.RData
+  - 1 interpolation weight
+  - 0 vgrm weight
+  - BOBYQA
+  - 50 itr
+  - 0.5 k-fold
+opt5.RData
+  - 0 interpolation weight
+  - 1 vgrm weight
+  - BOBYQA
+  - 50 itr
+  - 0.5 k-fold
