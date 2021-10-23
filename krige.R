@@ -288,9 +288,12 @@ if(any(map_lgl(opt.grd$opt, is.null))) {
 opt.grd <- drop_na(opt.grd)
 
 # Parse nloptr history
-con <- file(paste0('data/nloptr_trace', cntr))
-raw.trace <- readLines(con)
-close(con)
+read_file <- function(fpath, ...) {
+  con <- file(fpath)
+  on.exit(close(con))
+  readLines(con, ...)
+}
+raw.trace <- read_file(paste0('data/nloptr_trace', cntr))
 segs.trace <-
   raw.trace[grepl('^Segment: ', raw.trace)] %>%
   map_chr(~gsub('Segment: ', '', .x))
@@ -327,7 +330,6 @@ plt <-
   opt.trace %>%
   ggplot() +
     geom_path(aes(itr, cost, color = segment)) +
-    scale_y_continuous(limits = c(0, 0.3)) +
     labs(x = 'Iteration', y = 'Cost', color = NULL) +
     guides(color = guide_legend(nrow = 3)) +
     facet_wrap(~v.mod) +

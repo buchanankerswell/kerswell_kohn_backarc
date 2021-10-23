@@ -39,6 +39,7 @@ p1 <-
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
   ) %>%
+  filter(hf > 0 & hf <= 250) %>%
   group_by(segment) %>%
   ggplot() +
     stat_density_ridges(
@@ -54,7 +55,6 @@ p1 <-
       x = bquote('Heat flow'~(mWm^-2)),
       y = NULL
     ) +
-    scale_x_continuous(limits = c(-25, 250)) +
     scale_fill_viridis_d() +
     scale_y_discrete(
       limits = rev(levels(as.factor(seg.names)))
@@ -65,10 +65,10 @@ p1 <-
       plot.margin = margin()
     )
 # Save
-cat('\nSaving plot to: figs/summary/hf_summary.png')
+cat('\nSaving plot to: figs/summary/hfSummary.png')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = 'figs/summary/hf_summary.png',
+    file = 'figs/summary/hfSummary.png',
     plot = p1,
     device = 'png',
     type = 'cairo',
@@ -76,7 +76,7 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-system('open figs/summary/hf_summary.png', wait = F)
+# system('open figs/summary/hfSummary.png', wait = F)
 }
 
 # Plot all variogram models
@@ -106,22 +106,22 @@ walk(~{
     width = 6,
     height = 6
   )
-  system(
-    paste0(
-      'open figs/vgrms/',
-      str_replace_all(.x, ' ', ''),
-      'Vgrms',
-      cntr,
-      '.png'
-    ),
-    wait = F
-  )
+  # system(
+  #   paste0(
+  #     'open figs/vgrms/',
+  #     str_replace_all(.x, ' ', ''),
+  #     'Vgrms',
+  #     cntr,
+  #     '.png'
+  #   ),
+  #   wait = F
+  # )
 })
 
 # Summarise variogram models
 p2 <-
   vgrm.summary %>%
-  filter(sill < 10000 & range < 2000000) %>%
+#  filter(sill < 10000 & range < 2000000) %>%
   mutate('range' = range/1000) %>%
   rename(
     'lag cutoff' = cutoff.prop,
@@ -154,10 +154,10 @@ p2 <-
       strip.background = element_rect(fill = 'grey90', color=NA)
     )
 # Save
-cat('\nSaving plot to: figs/summary/vgrm_summary', cntr, '.png', sep = '')
+cat('\nSaving plot to: figs/summary/vgrmSummary', cntr, '.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = paste0('figs/summary/vgrm_summary', cntr, '.png'),
+    file = paste0('figs/summary/vgrmSummary', cntr, '.png'),
     plot = p2,
     device = 'png',
     type = 'cairo',
@@ -165,7 +165,7 @@ suppressWarnings(suppressMessages(
     height = 6
   )
 ))
-system(paste0('open figs/summary/vgrm_summary', cntr, '.png'), wait = F)
+# system(paste0('open figs/summary/vgrmSummary', cntr, '.png'), wait = F)
 
 # Interpolation differences
 dif <-
@@ -213,6 +213,6 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-system(paste0('open figs/summary/interp_diff_summary', cntr, '.png'), wait = F)
+# system(paste0('open figs/summary/interp_diff_summary', cntr, '.png'), wait = F)
 
 cat('\nDone!\n')

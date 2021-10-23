@@ -11,7 +11,7 @@ v.scale.white <-
   scale_color_viridis_c(
     option = 'magma',
     limits = c(0, 250),
-    na.value = rgb(0.99, 0.99, 0.90)
+    na.value = 'white'
   )
 v.scale.grey <-
   scale_color_viridis_c(
@@ -308,6 +308,7 @@ hf.summary <-
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
   ) %>%
+  filter(hf > 0 & hf <= 250) %>%
   group_by(segment) %>%
   summarise(
     n = n(),
