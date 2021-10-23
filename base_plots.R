@@ -65,7 +65,12 @@ p2 <-
       fill = 'grey95'
     ) +
     geom_sf(
-      data = shp.hf.filtered,
+      data = 
+        shp.hf.crop %>%
+        map_df(
+          ~st_set_geometry(.x, NULL),
+          .id = 'segment'
+        ),
       aes(color = hf),
       size = 0.01,
       shape = 20
@@ -321,7 +326,15 @@ walk(~{
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
   world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
-  hf <- suppressWarnings(shp.hf.filtered %>% st_crop(bbx)) # Heat flow
+  hf <-
+    suppressWarnings(
+      shp.hf.crop %>%
+      map_df(
+        ~st_set_geometry(.x, NULL),
+        .id = 'segment'
+      ) %>%
+      st_crop(bbx)
+    )
   sim <- suppressWarnings(shp.interp.luca %>% st_intersection(buf)) # Similarity interp
   # Define map scale 1:50,000
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4

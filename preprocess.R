@@ -151,10 +151,13 @@ cat('\n', rep('~', 60), sep='')
 cat('\nReading ThermoGlobe data from Lucazeau (2019) ...\n')
 
 # Read ThermoGlobe data from Lucazeau (2019)
-hf <- read_csv('data/tglobe/tglobe.csv', col_type = cols())
+hf <- 
+  read_csv('data/tglobe/tglobe.csv', col_type = cols()) %>%
+  select(longitude, latitude, `heat-flow (mW/m2)`, code6) %>%
+  rename(hf = `heat-flow (mW/m2)`)
 
 cat(
-  '\nRemoving', nrow(hf[is.na(hf$`heat-flow (mW/m2)`),]), 'NA heat flow values',
+  '\nRemoving', nrow(hf[is.na(hf$hf),]), 'NA heat flow values',
   '\nRemoving', nrow(hf[hf$code6 == 'D',]), 'poor quality data (code6 = D)',
   '\nRemoving', nrow(hf[is.na(hf$latitude) | is.na(hf$longitude),]), 'obs without coords\n'
 )
@@ -164,23 +167,25 @@ shp.hf <-
   hf %>%
   filter(!is.na(longitude)) %>% # remove no lat
   filter(!is.na(latitude)) %>% # remove no long
-  st_as_sf(coords = c(9,10), crs = proj4.wgs) %>% # make sf object
+  st_as_sf(coords = c(1,2), crs = proj4.wgs) %>% # make sf object
   st_transform(proj4.rp)
 
 # Filter bad quality data and missing heat flow
 shp.hf.filtered <-
   hf %>% 
-  filter(!is.na(`heat-flow (mW/m2)`)) %>% # remove NA
+  filter(!is.na(hf)) %>% # remove NA
   filter(code6 != 'D') %>% # remove poor quality data
   filter(!is.na(longitude)) %>% # remove no lat
   filter(!is.na(latitude)) %>% # remove no long
-  st_as_sf(coords = c(9,10), crs = proj4.wgs) %>% # make sf object
+  filter(hf > 0 & hf <= 250) %>%
+  st_as_sf(coords = c(1,2), crs = proj4.wgs) %>% # make sf object
   st_transform(proj4.rp)
 
 # Check for duplicate measurements and remove
 dup <- sp::zerodist(sf::as_Spatial(shp.hf.filtered))
+n.dup <- nrow(dup)
 
-cat('\nParsing', length(dup), 'duplicate measurements:\n')
+cat('\nParsing', nrow(dup), 'duplicate measurements:\n')
 cat('\n', rep('+', 40), sep='')
 cat(
   '\nIf x is better quality than y, keep x',
@@ -213,8 +218,8 @@ cat('\n\nParsed', length(rid), 'duplicates')
 shp.hf.filtered <-
   shp.hf.filtered %>%
   slice(-rid) %>%
-  select(`heat-flow (mW/m2)`, geometry) %>%
-  rename(hf = `heat-flow (mW/m2)`)
+  select(hf, geometry) %>%
+  rename(hf = hf)
 
 cat('\n\nFinal ThermoGlobe dataset contains', nrow(shp.hf.filtered), 'observations')
 
@@ -284,6 +289,14 @@ walk2(shp.hf.crop, seg.names, ~{
 })
 cat('\n', rep('+', 40), sep='')
 
+# Filtered and cropped hf tibble by segment
+hf.crop <-
+  shp.hf.crop %>%
+  map_df(
+    ~st_set_geometry(.x, NULL),
+    .id = 'segment'
+  )
+
 # Cropped grids from Lucazeau (2019) to bounding boxes
 cat('\n\nCropping interpolation grids to buffers')
 
@@ -308,7 +321,6 @@ hf.summary <-
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
   ) %>%
-  filter(hf > 0 & hf <= 250) %>%
   group_by(segment) %>%
   summarise(
     n = n(),
@@ -331,12 +343,12 @@ rm(list = lsf.str())
 rm(
    files,
    volc,
-   hf,
    proj4.rp,
    proj4.wgs,
    i,
    shp.sliver,
    shp.hf,
+   shp.hf.filtered,
    shp.grid,
    shp.countries,
    volc.no.spread,

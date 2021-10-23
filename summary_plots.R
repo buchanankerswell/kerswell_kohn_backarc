@@ -39,7 +39,6 @@ p1 <-
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
   ) %>%
-  filter(hf > 0 & hf <= 250) %>%
   group_by(segment) %>%
   ggplot() +
     stat_density_ridges(
