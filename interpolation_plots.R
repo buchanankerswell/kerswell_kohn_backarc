@@ -45,7 +45,7 @@ pwalk(~{
   volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
   sim <- suppressWarnings(shp.interp.luca %>% st_intersection(buf)) # Similarity interp
   dif <- ..6
-  fts <- shp.fts[shp.fts$segment == ..1,]
+#  fts <- shp.fts[shp.fts$segment == ..1,]
   v.mod <- ..2
   cost <- ..7
   # Define map scale 1:50,000
@@ -64,12 +64,12 @@ pwalk(~{
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf_label(
-        data = fts,
-        aes(label = label),
-        size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7)
-      ) +
+      # geom_sf_label(
+      #   data = fts,
+      #   aes(label = label),
+      #   size = annt.txt.size,
+      #   fill = rgb(1, 1, 0.941, 0.7)
+      # ) +
       annotate(
         'label',
         x = -Inf,
@@ -270,7 +270,7 @@ pwalk(~{
         plot = p,
         device = 'png',
         type = 'cairo',
-        width = wdth*4,
+        width = wdth*4+(wdth*0.06),
         height = hght,
         units = 'mm'
       )
@@ -332,7 +332,7 @@ walk(unique(solns$segment), ~{
       world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
       volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
       dif <- ..6
-      fts <- shp.fts[shp.fts$segment == ..1,]
+#      fts <- shp.fts[shp.fts$segment == ..1,]
       v.mod <- ..2
       cost <- ..7
       # Define map scale 1:50,000

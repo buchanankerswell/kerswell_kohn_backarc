@@ -86,7 +86,9 @@ if [[ ! $fnum -gt 0 ]]; then
   fname=$(ls -1q data/opt*.RData | tail -n 1)
   while true; do
     if [[ $p == 'yes' ]]; then
-      ./preprocess.R
+      if [[ ! -f data/hf.RData ]]; then
+        ./preprocess.R
+      fi
       ./base_plots.R
       ./interpolation_plots.R $fname
       ./summary_plots.R $fname
@@ -184,7 +186,9 @@ else
           ls -1q data/opt*.RData | xargs -n 1
         fi
       done
-      ./preprocess.R
+      if [[ ! -f data/hf.RData ]]; then
+        ./preprocess.R
+      fi
       ./base_plots.R
       ./interpolation_plots.R $fname
       ./summary_plots.R $fname

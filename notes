@@ -5,19 +5,19 @@ opt.RData
   - BOBYQA
   - 50 itr
   - 0.5 k-fold
-opt2.RData
-  - 0.7 interpolation weight
-  - 0.3 vgrm weight
+opt1.RData
+  - 0.3 interpolation weight
+  - 0.7 vgrm weight
   - BOBYQA
   - 50 itr
   - 0.5 k-fold
-opt4.RData
+opt2.RData
   - 1 interpolation weight
   - 0 vgrm weight
   - BOBYQA
   - 50 itr
   - 0.5 k-fold
-opt5.RData
+opt3.RData
   - 0 interpolation weight
   - 1 vgrm weight
   - BOBYQA

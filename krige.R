@@ -346,7 +346,7 @@ plt <-
     )
 ggsave(
   file =
-  paste0('figs/optTrace', cntr, '.png'),
+  paste0('figs/summary/optTrace', cntr, '.png'),
   plot = plt,
   device = 'png',
   type = 'cairo',

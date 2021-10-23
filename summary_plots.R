@@ -32,7 +32,7 @@ cat('\n', rep('~', 60), sep='')
 cat('\nVisualizing ...\n')
 
 # Heat flow summary ridges plot
-if(is.null(cntr)) {
+if(!file.exists('figs/summary/hfSummary.png')) {
 p1 <-
   shp.hf.crop %>%
   map_df(
@@ -55,6 +55,7 @@ p1 <-
       y = NULL
     ) +
     scale_fill_viridis_d() +
+    scale_x_continuous(breaks = seq(0, 250, 50)) +
     scale_y_discrete(
       limits = rev(levels(as.factor(seg.names)))
     ) +
@@ -120,7 +121,7 @@ walk(~{
 # Summarise variogram models
 p2 <-
   vgrm.summary %>%
-#  filter(sill < 10000 & range < 2000000) %>%
+  filter(cost < 0.5) %>%
   mutate('range' = range/1000) %>%
   rename(
     'lag cutoff' = cutoff.prop,
@@ -169,6 +170,7 @@ suppressWarnings(suppressMessages(
 # Interpolation differences
 dif <-
   solns %>%
+  filter(v.mod != 'Gau') %>%
   group_by(segment) %>%
   slice_min(cost)
 p3 <-
@@ -192,7 +194,7 @@ p3 <-
       x = bquote('Interpolation difference'~(mWm^-2)),
       y = NULL
     ) +
-    scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 25)) +
+    scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic() +
@@ -201,10 +203,10 @@ p3 <-
       plot.margin = margin()
     )
 # Save plot
-cat('\nSaving plot to: figs/summary/interp_diff_summary', cntr, '.png', sep = '')
+cat('\nSaving plot to: figs/summary/interpDiffSummary', cntr, '.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = paste0('figs/summary/interp_diff_summary', cntr, '.png'),
+    file = paste0('figs/summary/interpDiffSummary', cntr, '.png'),
     plot = p3,
     device = 'png',
     type = 'cairo',

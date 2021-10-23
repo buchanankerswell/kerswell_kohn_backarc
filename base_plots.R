@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 # Check files
-if(dir.exists('figs/base') & length(list.files('figs/base')) == 14) {
+if(dir.exists('figs/base') & length(list.files('figs/base')) == 16) {
   cat('\nBase plots already exist')
   cat('\nPassing ...\n')
   quit()
@@ -66,17 +66,17 @@ p1 <-
       plot.margin = margin()
     )
 # Save
-# cat('\nSaving plot to: figs/base/ThermoGlobeBuffer.png')
-# suppressWarnings(suppressMessages(
-#   ggsave(
-#     file = 'figs/base/ThermoGlobeBuffer.png',
-#     plot = p1,
-#     device = 'png',
-#     type = 'cairo',
-#     width = 6,
-#     height = 3
-#   )
-# ))
+cat('\nSaving plot to: figs/base/ThermoGlobeBuffer.png')
+suppressWarnings(suppressMessages(
+  ggsave(
+    file = 'figs/base/ThermoGlobeBuffer.png',
+    plot = p1,
+    device = 'png',
+    type = 'cairo',
+    width = 6,
+    height = 3
+  )
+))
 # system('open figs/base/ThermoGlobeBuffer.png', wait = F)
 
 # Crop countries and similarity to buffer
@@ -137,17 +137,17 @@ p2 <-
       plot.margin = margin()
     )
 # Save
-# cat('\nSaving plot to: figs/base/similarityBuffer.png')
-# suppressWarnings(suppressMessages(
-#   ggsave(
-#     file = 'figs/base/similarityBuffer.png',
-#     plot = p2,
-#     device = 'png',
-#     type = 'cairo',
-#     width = 6,
-#     height = 3
-#   )
-# ))
+cat('\nSaving plot to: figs/base/similarityBuffer.png')
+suppressWarnings(suppressMessages(
+  ggsave(
+    file = 'figs/base/similarityBuffer.png',
+    plot = p2,
+    device = 'png',
+    type = 'cairo',
+    width = 6,
+    height = 3
+  )
+))
 # system('open figs/base/similarityBuffer.png', wait = F)
 
 # Global buffer composition
@@ -171,7 +171,6 @@ suppressWarnings(suppressMessages(
 # Individual Segments
 seg.names %>%
 walk(~{
-  cat('\nPlotting', .x)
   # Define map parts
   cnt <- shp.contours[[.x]] # Contour
   seg <- shp.segs[[.x]] # Segment
@@ -323,7 +322,7 @@ walk(~{
     # Composition
     pp4 <-
       (pp3 + theme(plot.margin = margin(0, 2, 0, 0))) +
-      (pp2 + theme(axis.text.x = element_blank(), plot.margin = margin(0, 0, 0, 2)))
+      (pp2 + theme(axis.text.y = element_blank(), plot.margin = margin(0, 0, 0, 2)))
     # Save
     cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png', sep = '')
     suppressWarnings(suppressMessages(
@@ -341,8 +340,8 @@ walk(~{
   } else {
     # Composition
     pp4 <-
-      (pp3 + theme(plot.margin = margin(0, 0, 2, 0))) /
-      (pp2 + theme(axis.text.y = element_blank(), plot.margin = margin(2, 0, 0, 0)))
+      (pp3 + theme(axis.text.x = element_blank(), plot.margin = margin(0, 0, 2, 0))) /
+      (pp2 + theme(plot.margin = margin(2, 0, 0, 0)))
     # Save
     cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png', sep = '')
     suppressWarnings(suppressMessages(
