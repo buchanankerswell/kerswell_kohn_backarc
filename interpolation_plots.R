@@ -34,7 +34,6 @@ group_by(segment) %>%
 filter(v.mod != 'Gau') %>%
 slice_min(cost) %>%
 pwalk(~{
-  cat('\nPlotting', ..1)
   # Define map parts
   cnt <- shp.contours[[..1]] # Contour
   seg <- shp.segs[[..1]] # Segment
@@ -54,7 +53,7 @@ pwalk(~{
   # Define points and text sizes
   pnt.size <- log(wdth*hght, base = 20)
   annt.txt.size <- log(wdth*hght, base = 12)
-  base.txt.size <- log(wdth*hght, base = 5)
+  base.txt.size <- log(wdth*hght, base = 3)
   # Similarity interpolation
   pp1 <- 
     ggplot() +
@@ -99,14 +98,14 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_text(),
+        axis.text = element_text(color = 'grey20'),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/10, 'mm'),
+        legend.key.width = unit(wdth/12, 'mm'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
         panel.background = element_rect(fill = 'grey80', color = NA),
@@ -150,14 +149,14 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_text(),
+        axis.text = element_text(color = 'grey20'),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/10, 'mm'),
+        legend.key.width = unit(wdth/12, 'mm'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
         panel.background = element_rect(fill = 'grey80', color = NA),
@@ -193,14 +192,14 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_text(),
+        axis.text = element_text(color = 'grey20'),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/10, 'mm'),
+        legend.key.width = unit(wdth/12, 'mm'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
         panel.background = element_rect(fill = 'grey80', color = NA),
@@ -237,14 +236,14 @@ pwalk(~{
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
       theme(
-        axis.text = element_text(),
+        axis.text = element_text(color = 'grey20'),
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/10, 'mm'),
+        legend.key.width = unit(wdth/12, 'mm'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
         panel.background = element_rect(fill = 'grey80', color = NA),
@@ -261,8 +260,27 @@ pwalk(~{
   )
   if(..1 == 'Andes') {
     p <-
-      (pp1 + (pp2 + theme(axis.text.y = element_blank()))) +
-      ((pp3 + theme(axis.text.y = element_blank())) + (pp4 + theme(axis.text.y = element_blank()))) &
+      (pp1 +
+        (pp2 +
+          theme(
+            legend.position = 'none',
+            axis.text.y = element_blank()
+          )
+        )
+      ) +
+      (
+        (pp3 +
+          theme(
+            legend.position = 'none',
+            axis.text.y = element_blank()
+          )
+        ) +
+        (pp4 +
+          theme(
+            axis.text.y = element_blank()
+          )
+        )
+      ) &
       theme(plot.margin = margin(2, 2, 2, 2))
     suppressWarnings(suppressMessages(
       ggsave(
@@ -286,8 +304,31 @@ pwalk(~{
     # )
   } else {
     p <-
-      ((pp1 + theme(axis.text.x = element_blank())) + (pp2 + theme(axis.text = element_blank()))) /
-      (pp3 + (pp4 + theme(axis.text.y = element_blank()))) &
+      (
+        (pp1 +
+          theme(
+            axis.text.x = element_blank()
+          )
+        ) +
+        (pp2 +
+          theme(
+            legend.position = 'none',
+            axis.text = element_blank()
+          )
+        )
+      ) /
+      (
+        (pp3 +
+          theme(
+            legend.position = 'none'
+          )
+        ) +
+        (pp4 +
+          theme(
+            axis.text.y = element_blank()
+          )
+        )
+      ) &
       theme(plot.margin = margin(2, 2, 2, 2))
     suppressWarnings(suppressMessages(
       ggsave(
@@ -341,7 +382,7 @@ walk(unique(solns$segment), ~{
       # Define points and text sizes
       pnt.size <- log(wdth*hght, base = 20)
       annt.txt.size <- log(wdth*hght, base = 12)
-      base.txt.size <- log(wdth*hght, base = 5)
+      base.txt.size <- log(wdth*hght, base = 3)
       # Krige interpolation
       ggplot() +
         geom_sf(data = world, size = 0.1, fill = 'grey95') +
@@ -379,14 +420,14 @@ walk(unique(solns$segment), ~{
         coord_sf(expand = F) +
         theme_map(font_size = base.txt.size) +
         theme(
-          axis.text = element_text(),
+          axis.text = element_text(color = 'grey20'),
           legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.direction = 'horizontal',
           legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
           legend.box.margin = margin(1, 8, 1, 2),
           legend.key.height = unit(hght/30, 'mm'),
-          legend.key.width = unit(wdth/10, 'mm'),
+          legend.key.width = unit(wdth/12, 'mm'),
           legend.title = element_text(vjust = 1),
           panel.grid = element_line(size = 0.1, color = 'white'),
           panel.background = element_rect(fill = 'grey80', color = NA),
@@ -405,11 +446,11 @@ walk(unique(solns$segment), ~{
   if(.x == 'Andes') {
     p <-
       plts[[1]] +
-      (plts[[2]] + theme(axis.text.y = element_blank())) +
-      (plts[[3]] + theme(axis.text.y = element_blank())) +
-      (plts[[4]] + theme(axis.text.y = element_blank())) +
-      (plts[[5]] + theme(axis.text.y = element_blank())) +
-      (plts[[6]] + theme(axis.text.y = element_blank())) +
+      (plts[[2]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
+      (plts[[3]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
+      (plts[[4]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
+      (plts[[5]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
+      (plts[[6]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
       plot_layout(ncol = 6)
     suppressWarnings(suppressMessages(
       ggsave(
@@ -435,9 +476,46 @@ walk(unique(solns$segment), ~{
     # )
   } else {
     p <-
-      ((plts[[1]] + theme(axis.text.x = element_blank())) + (plts[[2]] + theme(axis.text = element_blank()))) /
-      ((plts[[3]] + theme(axis.text.x = element_blank())) + (plts[[4]] + theme(axis.text = element_blank()))) /
-      (plts[[5]] + (plts[[6]] + theme(axis.text.y = element_blank())))
+      (
+        (plts[[1]] +
+          theme(
+            axis.text.x = element_blank()
+          )
+        ) +
+        (plts[[2]] +
+          theme(
+            legend.position = 'none',
+            axis.text = element_blank()
+          )
+        )
+      ) /
+      (
+        (plts[[3]] +
+          theme(
+            legend.position = 'none',
+            axis.text.x = element_blank()
+          )
+        ) +
+        (plts[[4]] +
+          theme(
+            legend.position = 'none',
+            axis.text = element_blank()
+          )
+        )
+      ) /
+      (
+        (plts[[5]] +
+          theme(
+            legend.position = 'none'
+          )
+        ) +
+        (plts[[6]] +
+          theme(
+            legend.position = 'none',
+            axis.text.y = element_blank()
+          )
+        )
+      )
     suppressWarnings(suppressMessages(
       ggsave(
         file =
