@@ -1,0 +1,19 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~     nloptr settings     ~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Algorithm       :  NLOPT_LN_BOBYQA 
+Max evaluations :  3 
+k-fold CV       :  3 
+Interp weight   :  0.5 
+Variogram weight:  0.5 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~  Random Initial values  ~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Lag cutoff      : 10.13487 
+Number of lags  : 22.06671 
+Lag shift       : 5.310529 
+Max local pairs : 41.27957

@@ -1,0 +1,5735 @@
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 826.7955 36395.48
+Variogram error: 0.002932819
+Interpolation error: 0.1759551
+Cost: 0.178888
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 826.7955 36395.48
+Variogram error: 0.002932819
+Interpolation error: 0.1552494
+Cost: 0.1581822
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 826.7955 36395.48
+Variogram error: 0.002932819
+Interpolation error: 0.1471692
+Cost: 0.150102
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 817.5352 32389.53
+Variogram error: 0.002650677
+Interpolation error: 0.1722684
+Cost: 0.1749191
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 832.5198 40641.69
+Variogram error: 0.002747005
+Interpolation error: 0.1465827
+Cost: 0.1493297
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 844.9491 195841.9
+Variogram error: 0.00296954
+Interpolation error: 0.156881
+Cost: 0.1598505
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 844.9491 195841.9
+Variogram error: 0.00296954
+Interpolation error: 0.1509629
+Cost: 0.1539325
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 844.9491 195841.9
+Variogram error: 0.00296954
+Interpolation error: 0.1741682
+Cost: 0.1771378
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 816.2928 129300.2
+Variogram error: 0.002728334
+Interpolation error: 0.1915774
+Cost: 0.1943058
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 831.4322 157827.2
+Variogram error: 0.002524413
+Interpolation error: 0.1375669
+Cost: 0.1400914
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 824.768 46887.92
+Variogram error: 0.002957081
+Interpolation error: 0.1961524
+Cost: 0.1991095
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 824.768 46887.92
+Variogram error: 0.002957081
+Interpolation error: 0.1742822
+Cost: 0.1772393
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 824.768 46887.92
+Variogram error: 0.002957081
+Interpolation error: 0.1912953
+Cost: 0.1942524
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 818.2153 45297.23
+Variogram error: 0.002666164
+Interpolation error: 0.1910702
+Cost: 0.1937364
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 832.0039 56833.93
+Variogram error: 0.002798096
+Interpolation error: 0.1840748
+Cost: 0.1868729
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 836.454 109984.7
+Variogram error: 0.003206365
+Interpolation error: 0.1003715
+Cost: 0.1035779
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 836.454 109984.7
+Variogram error: 0.003206365
+Interpolation error: 0.1002041
+Cost: 0.1034105
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 836.454 109984.7
+Variogram error: 0.003206365
+Interpolation error: 0.1002983
+Cost: 0.1035047
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 811.9994 55630.98
+Variogram error: 0.002791766
+Interpolation error: 0.09990722
+Cost: 0.102699
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 833.7819 83139.42
+Variogram error: 0.002612221
+Interpolation error: 0.1002136
+Cost: 0.1028259
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 844.9491 161116.5
+Variogram error: 0.00267331
+Interpolation error: 0.1444569
+Cost: 0.1471303
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 844.9491 161116.5
+Variogram error: 0.00267331
+Interpolation error: 0.1494128
+Cost: 0.1520861
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 844.9491 161116.5
+Variogram error: 0.00267331
+Interpolation error: 0.1475963
+Cost: 0.1502696
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 813.9024 112453.9
+Variogram error: 0.002835594
+Interpolation error: 0.165571
+Cost: 0.1684066
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 843.4132 146960.4
+Variogram error: 0.002477098
+Interpolation error: 0.1585487
+Cost: 0.1610258
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 830.3011 180710.3
+Variogram error: 0.002764572
+Interpolation error: 0.1483508
+Cost: 0.1511153
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 830.3011 180710.3
+Variogram error: 0.002764572
+Interpolation error: 0.1564791
+Cost: 0.1592436
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 830.3011 180710.3
+Variogram error: 0.002764572
+Interpolation error: 0.1611788
+Cost: 0.1639434
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 818.6471 144929.2
+Variogram error: 0.002674495
+Interpolation error: 0.1748775
+Cost: 0.177552
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Alaska Aleutians
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 830.1778 174413.7
+Variogram error: 0.0025631
+Interpolation error: 0.1650042
+Cost: 0.1675673
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 654 / 1400 NAs
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 5455.648 173907.1
+Variogram error: 0.01412816
+Interpolation error: 0.08385291
+Cost: 0.09798107
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 650 / 1400 NAs
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 5455.648 173907.1
+Variogram error: 0.01412816
+Interpolation error: 0.0866239
+Cost: 0.1007521
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 602 / 1400 NAs
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 5455.648 173907.1
+Variogram error: 0.01412816
+Interpolation error: 0.0881302
+Cost: 0.1022584
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 90 / 1400 NAs
+Segment: Andes
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 3379.077 76508.38
+Variogram error: 0.01242931
+Interpolation error: 0.07181482
+Cost: 0.08424413
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 421 / 1400 NAs
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 5251.174 159929.8
+Variogram error: 0.01368504
+Interpolation error: 0.07759873
+Cost: 0.09128377
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill  range
+1   Cir 5199.77 525303
+Variogram error: 0.01590554
+Interpolation error: 0.06185936
+Cost: 0.0777649
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill  range
+1   Cir 5199.77 525303
+Variogram error: 0.01590554
+Interpolation error: 0.06020858
+Cost: 0.07611411
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill  range
+1   Cir 5199.77 525303
+Variogram error: 0.01590554
+Interpolation error: 0.05865968
+Cost: 0.07456522
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 3079.565 227699.4
+Variogram error: 0.01319547
+Interpolation error: 0.06333526
+Cost: 0.07653074
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 5042.309 489348.5
+Variogram error: 0.01505887
+Interpolation error: 0.06078441
+Cost: 0.07584327
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 6252.712 381380.9
+Variogram error: 0.01248398
+Interpolation error: 0.06178991
+Cost: 0.07427389
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 6252.712 381380.9
+Variogram error: 0.01248398
+Interpolation error: 0.05841643
+Cost: 0.07090041
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 6252.712 381380.9
+Variogram error: 0.01248398
+Interpolation error: 0.05937946
+Cost: 0.07186343
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 3576.235 133738.3
+Variogram error: 0.01225367
+Interpolation error: 0.05981598
+Cost: 0.07206965
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 6045.48 354561.8
+Variogram error: 0.01207584
+Interpolation error: 0.05944987
+Cost: 0.0715257
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 4968.195 403375.1
+Variogram error: 0.01676553
+Interpolation error: 0.05934777
+Cost: 0.0761133
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 4968.195 403375.1
+Variogram error: 0.01676553
+Interpolation error: 0.06041682
+Cost: 0.07718235
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 4968.195 403375.1
+Variogram error: 0.01676553
+Interpolation error: 0.06010774
+Cost: 0.07687327
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model   psill    range
+1   Lin 3073.73 196343.2
+Variogram error: 0.01369813
+Interpolation error: 0.06208554
+Cost: 0.07578367
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 4919.894 390048.8
+Variogram error: 0.0157723
+Interpolation error: 0.05918269
+Cost: 0.07495499
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 5340.016 633303.3
+Variogram error: 0.01541621
+Interpolation error: 0.06115631
+Cost: 0.07657252
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 5340.016 633303.3
+Variogram error: 0.01541621
+Interpolation error: 0.06129109
+Cost: 0.07670731
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 5340.016 633303.3
+Variogram error: 0.01541621
+Interpolation error: 0.06100847
+Cost: 0.07642468
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 3118.545 262063.2
+Variogram error: 0.01306428
+Interpolation error: 0.06209162
+Cost: 0.0751559
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Andes
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill  range
+1   Sph 5158.085 584665
+Variogram error: 0.01467336
+Interpolation error: 0.05989484
+Cost: 0.0745682
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 40 / 1445 NAs
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill   range
+1   Bes 3058.162 75407.9
+Variogram error: 0.01771611
+Interpolation error: 0.06133983
+Cost: 0.07905594
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 100 / 1445 NAs
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill   range
+1   Bes 3058.162 75407.9
+Variogram error: 0.01771611
+Interpolation error: 0.06174996
+Cost: 0.07946607
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 127 / 1445 NAs
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill   range
+1   Bes 3058.162 75407.9
+Variogram error: 0.01771611
+Interpolation error: 0.06463993
+Cost: 0.08235604
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 2150.212 6001.344
+Variogram error: 0.06297795
+Interpolation error: 0.05498886
+Cost: 0.1179668
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 22 / 1445 NAs
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 2841.163 58877.98
+Variogram error: 0.02203746
+Interpolation error: 0.05674869
+Cost: 0.07878614
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2888.879 238032.7
+Variogram error: 0.01595803
+Interpolation error: 0.05052981
+Cost: 0.06648785
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2888.879 238032.7
+Variogram error: 0.01595803
+Interpolation error: 0.04872644
+Cost: 0.06468447
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2888.879 238032.7
+Variogram error: 0.01595803
+Interpolation error: 0.05132958
+Cost: 0.06728761
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2029.927 50045.08
+Variogram error: 0.0643461
+Interpolation error: 0.05024121
+Cost: 0.1145873
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2797.038 196294.2
+Variogram error: 0.02426568
+Interpolation error: 0.04959347
+Cost: 0.07385915
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 3325.122 145463.9
+Variogram error: 0.01914455
+Interpolation error: 0.05068162
+Cost: 0.06982617
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 3325.122 145463.9
+Variogram error: 0.01914455
+Interpolation error: 0.04955655
+Cost: 0.0687011
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 3325.122 145463.9
+Variogram error: 0.01914455
+Interpolation error: 0.05023003
+Cost: 0.06937458
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2165.573 7215.725
+Variogram error: 0.06290608
+Interpolation error: 0.05342207
+Cost: 0.1163282
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 3080.689 114167.4
+Variogram error: 0.02046671
+Interpolation error: 0.05171216
+Cost: 0.07217887
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 579 / 1445 NAs
+Segment: Central America
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 2467.565 21289.64
+Variogram error: 0.06613916
+Interpolation error: 0.09996888
+Cost: 0.166108
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model   psill    range
+1   Lin 2891.68 202199.9
+Variogram error: 0.01766066
+Interpolation error: 0.05194656
+Cost: 0.06960723
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model   psill    range
+1   Lin 2891.68 202199.9
+Variogram error: 0.01766066
+Interpolation error: 0.05077493
+Cost: 0.0684356
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model   psill    range
+1   Lin 2891.68 202199.9
+Variogram error: 0.01766066
+Interpolation error: 0.05207836
+Cost: 0.06973902
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 2 / 1445 NAs
+Segment: Central America
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 2051.939 47439.96
+Variogram error: 0.06399031
+Interpolation error: 0.05030635
+Cost: 0.1142967
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 2751.752 160039.5
+Variogram error: 0.02727389
+Interpolation error: 0.05073643
+Cost: 0.07801032
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2888.303 267742.5
+Variogram error: 0.01587137
+Interpolation error: 0.05020581
+Cost: 0.06607717
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2888.303 267742.5
+Variogram error: 0.01587137
+Interpolation error: 0.05083936
+Cost: 0.06671073
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2888.303 267742.5
+Variogram error: 0.01587137
+Interpolation error: 0.05063238
+Cost: 0.06650374
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2043.914 56898.12
+Variogram error: 0.06411477
+Interpolation error: 0.05183225
+Cost: 0.115947
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Central America
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2811.033 226078.6
+Variogram error: 0.02304542
+Interpolation error: 0.05031748
+Cost: 0.07336291
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 287 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1851.443 57238.06
+Variogram error: 0.02630124
+Interpolation error: 0.09595906
+Cost: 0.1222603
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 333 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1851.443 57238.06
+Variogram error: 0.02630124
+Interpolation error: 0.09539304
+Cost: 0.1216943
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 298 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1851.443 57238.06
+Variogram error: 0.02630124
+Interpolation error: 0.09317675
+Cost: 0.119478
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 255 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1845.666 46035.09
+Variogram error: 0.02866786
+Interpolation error: 0.09552137
+Cost: 0.1241892
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 306 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1843.186 52490.47
+Variogram error: 0.02458504
+Interpolation error: 0.09374153
+Cost: 0.1183266
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill  range
+1   Cir 1818.559 211651
+Variogram error: 0.0261434
+Interpolation error: 0.08820208
+Cost: 0.1143455
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill  range
+1   Cir 1818.559 211651
+Variogram error: 0.0261434
+Interpolation error: 0.08702216
+Cost: 0.1131656
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill  range
+1   Cir 1818.559 211651
+Variogram error: 0.0261434
+Interpolation error: 0.08679995
+Cost: 0.1129433
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1777.999 149158.5
+Variogram error: 0.03567899
+Interpolation error: 0.0860141
+Cost: 0.1216931
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill    range
+1   Cir 1813.35 191863.8
+Variogram error: 0.02845198
+Interpolation error: 0.0880909
+Cost: 0.1165429
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1856.551 80558.39
+Variogram error: 0.02667282
+Interpolation error: 0.08804202
+Cost: 0.1147148
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1856.551 80558.39
+Variogram error: 0.02667282
+Interpolation error: 0.08821326
+Cost: 0.1148861
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1856.551 80558.39
+Variogram error: 0.02667282
+Interpolation error: 0.09206835
+Cost: 0.1187412
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1874.93 71471.72
+Variogram error: 0.02672926
+Interpolation error: 0.09095999
+Cost: 0.1176893
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1855.157 76989.11
+Variogram error: 0.02427344
+Interpolation error: 0.08926188
+Cost: 0.1135353
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 584 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1835.566 82658.14
+Variogram error: 0.03401079
+Interpolation error: 0.09998008
+Cost: 0.1339909
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 597 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1835.566 82658.14
+Variogram error: 0.03401079
+Interpolation error: 0.09997016
+Cost: 0.133981
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 554 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1835.566 82658.14
+Variogram error: 0.03401079
+Interpolation error: 0.09998111
+Cost: 0.1339919
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 504 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1793.645 69421.85
+Variogram error: 0.03552487
+Interpolation error: 0.09997258
+Cost: 0.1354975
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 718 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1799.034 117708.1
+Variogram error: 0.03436926
+Interpolation error: 0.09999879
+Cost: 0.1343681
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 0 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1815.045 188027.1
+Variogram error: 0.02589645
+Interpolation error: 0.08942451
+Cost: 0.115321
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1815.045 188027.1
+Variogram error: 0.02589645
+Interpolation error: 0.08766131
+Cost: 0.1135578
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 2 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1815.045 188027.1
+Variogram error: 0.02589645
+Interpolation error: 0.08874695
+Cost: 0.1146434
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 0 / 2269 NAs
+Segment: Kamchatka Marianas
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1786.396 137289.1
+Variogram error: 0.03856058
+Interpolation error: 0.09040989
+Cost: 0.1289705
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1808.122 167330.8
+Variogram error: 0.0310044
+Interpolation error: 0.09024182
+Cost: 0.1212462
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1823.031 236572.2
+Variogram error: 0.02643872
+Interpolation error: 0.09112799
+Cost: 0.1175667
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1823.031 236572.2
+Variogram error: 0.02643872
+Interpolation error: 0.08737543
+Cost: 0.1138142
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1823.031 236572.2
+Variogram error: 0.02643872
+Interpolation error: 0.08948813
+Cost: 0.1159269
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1797.872 176311.2
+Variogram error: 0.03441256
+Interpolation error: 0.09000235
+Cost: 0.1244149
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kamchatka Marianas
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1816.405 213973.7
+Variogram error: 0.02719563
+Interpolation error: 0.08707649
+Cost: 0.1142721
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1850.182 5398.695
+Variogram error: 0.0345164
+Interpolation error: 0.1072697
+Cost: 0.1417861
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1850.182 5398.695
+Variogram error: 0.0345164
+Interpolation error: 0.1061234
+Cost: 0.1406398
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1850.182 5398.695
+Variogram error: 0.0345164
+Interpolation error: 0.1036558
+Cost: 0.1381722
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1818.338 4319.931
+Variogram error: 0.03845307
+Interpolation error: 0.1158066
+Cost: 0.1542597
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 30 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1862.632 18709.78
+Variogram error: 0.03167407
+Interpolation error: 0.09801229
+Cost: 0.1296864
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1850.008 84830.83
+Variogram error: 0.03451691
+Interpolation error: 0.09746582
+Cost: 0.1319827
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1850.008 84830.83
+Variogram error: 0.03451691
+Interpolation error: 0.1013057
+Cost: 0.1358226
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1850.008 84830.83
+Variogram error: 0.03451691
+Interpolation error: 0.1023682
+Cost: 0.1368852
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1816.928 56276.38
+Variogram error: 0.03849948
+Interpolation error: 0.1028865
+Cost: 0.141386
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1852.638 82568.71
+Variogram error: 0.03156174
+Interpolation error: 0.1006357
+Cost: 0.1321975
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1850.742 6128.12
+Variogram error: 0.0345152
+Interpolation error: 0.1102666
+Cost: 0.1447818
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1850.742 6128.12
+Variogram error: 0.0345152
+Interpolation error: 0.1146482
+Cost: 0.1491634
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1850.742 6128.12
+Variogram error: 0.0345152
+Interpolation error: 0.1097373
+Cost: 0.1442525
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1818.242 4958.123
+Variogram error: 0.03845614
+Interpolation error: 0.1206011
+Cost: 0.1590572
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1866.066 25430.6
+Variogram error: 0.03166456
+Interpolation error: 0.1007393
+Cost: 0.1324038
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 177 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1860.855 23679.25
+Variogram error: 0.03460993
+Interpolation error: 0.09997108
+Cost: 0.134581
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 166 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1860.855 23679.25
+Variogram error: 0.03460993
+Interpolation error: 0.09999006
+Cost: 0.1346
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 196 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1860.855 23679.25
+Variogram error: 0.03460993
+Interpolation error: 0.099989
+Cost: 0.1345989
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 97 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1811.391 17759.82
+Variogram error: 0.03874181
+Interpolation error: 0.1000154
+Cost: 0.1387572
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 355 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill   range
+1   Gau 1857.641 42673.1
+Variogram error: 0.03154545
+Interpolation error: 0.09997134
+Cost: 0.1315168
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1850.008 87018.04
+Variogram error: 0.03451691
+Interpolation error: 0.1034787
+Cost: 0.1379957
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 0 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1850.008 87018.04
+Variogram error: 0.03451691
+Interpolation error: 0.1000838
+Cost: 0.1346007
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 0 / 1897 NAs
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1850.008 87018.04
+Variogram error: 0.03451691
+Interpolation error: 0.1002966
+Cost: 0.1348135
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1816.928 54873.41
+Variogram error: 0.03849948
+Interpolation error: 0.1007703
+Cost: 0.1392698
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1852.638 75597.61
+Variogram error: 0.03156174
+Interpolation error: 0.1004445
+Cost: 0.1320063
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1850.008 82555.47
+Variogram error: 0.03451691
+Interpolation error: 0.1043173
+Cost: 0.1388342
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1850.008 82555.47
+Variogram error: 0.03451691
+Interpolation error: 0.1011211
+Cost: 0.135638
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1850.008 82555.47
+Variogram error: 0.03451691
+Interpolation error: 0.09903068
+Cost: 0.1335476
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1816.928 57098.12
+Variogram error: 0.03849948
+Interpolation error: 0.09996806
+Cost: 0.1384675
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Kyushu Ryukyu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1854.323 90536.54
+Variogram error: 0.03153606
+Interpolation error: 0.1043883
+Cost: 0.1359244
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 844.4319 64785.03
+Variogram error: 0.03652194
+Interpolation error: 0.0687451
+Cost: 0.105267
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 844.4319 64785.03
+Variogram error: 0.03652194
+Interpolation error: 0.0703768
+Cost: 0.1068987
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 844.4319 64785.03
+Variogram error: 0.03652194
+Interpolation error: 0.06622272
+Cost: 0.1027447
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1019.042 85691.02
+Variogram error: 0.02715232
+Interpolation error: 0.06718616
+Cost: 0.09433848
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 730.6709 81474.72
+Variogram error: 0.03175778
+Interpolation error: 0.06648612
+Cost: 0.0982439
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 886.3824 17345.35
+Variogram error: 0.03629535
+Interpolation error: 0.07277032
+Cost: 0.1090657
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 886.3824 17345.35
+Variogram error: 0.03629535
+Interpolation error: 0.06923408
+Cost: 0.1055294
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 886.3824 17345.35
+Variogram error: 0.03629535
+Interpolation error: 0.07067164
+Cost: 0.106967
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 958.908 37617.15
+Variogram error: 0.02822147
+Interpolation error: 0.07587288
+Cost: 0.1040944
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 897.2352 58328.85
+Variogram error: 0.03288252
+Interpolation error: 0.06480134
+Cost: 0.09768385
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 633.4023 59893.69
+Variogram error: 0.03949941
+Interpolation error: 0.07019976
+Cost: 0.1096992
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 633.4023 59893.69
+Variogram error: 0.03949941
+Interpolation error: 0.07292724
+Cost: 0.1124266
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 633.4023 59893.69
+Variogram error: 0.03949941
+Interpolation error: 0.06557973
+Cost: 0.1050791
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 938.7514 64858.21
+Variogram error: 0.02860261
+Interpolation error: 0.07654149
+Cost: 0.1051441
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 821.5871 82440.42
+Variogram error: 0.02931089
+Interpolation error: 0.06880356
+Cost: 0.09811445
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 840.7471 65764.72
+Variogram error: 0.03653935
+Interpolation error: 0.07208807
+Cost: 0.1086274
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 840.7471 65764.72
+Variogram error: 0.03653935
+Interpolation error: 0.06624624
+Cost: 0.1027856
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 840.7471 65764.72
+Variogram error: 0.03653935
+Interpolation error: 0.06981869
+Cost: 0.106358
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 987.2621 94026.65
+Variogram error: 0.02712929
+Interpolation error: 0.06460015
+Cost: 0.09172944
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Lesser Antilles
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 833.7688 119162.2
+Variogram error: 0.03073029
+Interpolation error: 0.06507932
+Cost: 0.09580961
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1248.008 5712.271
+Variogram error: 0.01370107
+Interpolation error: 0.1586328
+Cost: 0.1723339
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1248.008 5712.271
+Variogram error: 0.01370107
+Interpolation error: 0.1444045
+Cost: 0.1581056
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1248.008 5712.271
+Variogram error: 0.01370107
+Interpolation error: 0.1484016
+Cost: 0.1621027
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1434.222 22835.76
+Variogram error: 0.01457019
+Interpolation error: 0.1101381
+Cost: 0.1247083
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill   range
+1   Bes 1354.786 15884.2
+Variogram error: 0.01169874
+Interpolation error: 0.1140839
+Cost: 0.1257827
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1309.815 50455.03
+Variogram error: 0.01185823
+Interpolation error: 0.1235342
+Cost: 0.1353924
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1309.815 50455.03
+Variogram error: 0.01185823
+Interpolation error: 0.1274597
+Cost: 0.1393179
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1309.815 50455.03
+Variogram error: 0.01185823
+Interpolation error: 0.1231316
+Cost: 0.1349899
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1360.484 71281.69
+Variogram error: 0.01319736
+Interpolation error: 0.1131312
+Cost: 0.1263286
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1328.699 63012.67
+Variogram error: 0.01126203
+Interpolation error: 0.1112611
+Cost: 0.1225232
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1260.812 6671.78
+Variogram error: 0.01321924
+Interpolation error: 0.1817036
+Cost: 0.1949228
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1260.812 6671.78
+Variogram error: 0.01321924
+Interpolation error: 0.1769319
+Cost: 0.1901511
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 1260.812 6671.78
+Variogram error: 0.01321924
+Interpolation error: 0.1733059
+Cost: 0.1865252
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1451.674 35243.16
+Variogram error: 0.01502862
+Interpolation error: 0.123993
+Cost: 0.1390216
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1355.506 21470.74
+Variogram error: 0.01176089
+Interpolation error: 0.1268347
+Cost: 0.1385956
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 1249.05 21816.51
+Variogram error: 0.01366128
+Interpolation error: 0.100015
+Cost: 0.1136763
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 1249.05 21816.51
+Variogram error: 0.01366128
+Interpolation error: 0.1000243
+Cost: 0.1136856
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 1249.05 21816.51
+Variogram error: 0.01366128
+Interpolation error: 0.1000352
+Cost: 0.1136965
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 12 / 569 NAs
+Segment: N Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 1411.84 39522.66
+Variogram error: 0.01368343
+Interpolation error: 0.0999103
+Cost: 0.1135937
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 29 / 569 NAs
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1357.784 45865.12
+Variogram error: 0.0142022
+Interpolation error: 0.09990726
+Cost: 0.1141095
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1309.815 56945.44
+Variogram error: 0.01185823
+Interpolation error: 0.1205203
+Cost: 0.1323786
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1309.815 56945.44
+Variogram error: 0.01185823
+Interpolation error: 0.1343517
+Cost: 0.1462099
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1309.815 56945.44
+Variogram error: 0.01185823
+Interpolation error: 0.1181916
+Cost: 0.1300498
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 0 / 569 NAs
+Segment: N Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model   psill   range
+1   Lin 1323.79 59097.1
+Variogram error: 0.0129138
+Interpolation error: 0.1160268
+Cost: 0.1289406
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill   range
+1   Lin 1361.379 63122.7
+Variogram error: 0.01073901
+Interpolation error: 0.111983
+Cost: 0.122722
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1306.713 47804.91
+Variogram error: 0.01191827
+Interpolation error: 0.1242287
+Cost: 0.136147
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1306.713 47804.91
+Variogram error: 0.01191827
+Interpolation error: 0.1458289
+Cost: 0.1577472
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1306.713 47804.91
+Variogram error: 0.01191827
+Interpolation error: 0.1236671
+Cost: 0.1355854
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1371.447 81788.73
+Variogram error: 0.01375878
+Interpolation error: 0.1261836
+Cost: 0.1399424
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: N Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1345.573 72566.97
+Variogram error: 0.01119935
+Interpolation error: 0.1267
+Cost: 0.1378994
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 637.6297 5205.851
+Variogram error: 0.001256488
+Interpolation error: 0.3171932
+Cost: 0.3184497
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 637.6297 5205.851
+Variogram error: 0.001256488
+Interpolation error: 0.2916706
+Cost: 0.2929271
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 637.6297 5205.851
+Variogram error: 0.001256488
+Interpolation error: 0.524499
+Cost: 0.5257555
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 721.3759 35167.61
+Variogram error: 0.001943406
+Interpolation error: 0.2614098
+Cost: 0.2633532
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 713.6105 33015.45
+Variogram error: 0.001741101
+Interpolation error: 0.2002981
+Cost: 0.2020392
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 645.4507 45555.7
+Variogram error: 0.001250497
+Interpolation error: 0.2880904
+Cost: 0.2893409
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 645.4507 45555.7
+Variogram error: 0.001250497
+Interpolation error: 0.2907502
+Cost: 0.2920007
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 645.4507 45555.7
+Variogram error: 0.001250497
+Interpolation error: 0.4115331
+Cost: 0.4127836
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model  psill    range
+1   Cir 628.81 83778.86
+Variogram error: 0.001939412
+Interpolation error: 0.2449801
+Cost: 0.2469195
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 640.3066 81004.9
+Variogram error: 0.001736411
+Interpolation error: 0.2694964
+Cost: 0.2712329
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 653.3378 6104.219
+Variogram error: 0.001245736
+Interpolation error: 0.3741772
+Cost: 0.375423
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 653.3378 6104.219
+Variogram error: 0.001245736
+Interpolation error: 0.4765927
+Cost: 0.4778384
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 653.3378 6104.219
+Variogram error: 0.001245736
+Interpolation error: 0.509269
+Cost: 0.5105148
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 745.9026 60762.23
+Variogram error: 0.001949037
+Interpolation error: 0.238244
+Cost: 0.2401931
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 728.2301 54456.7
+Variogram error: 0.001746773
+Interpolation error: 0.2275116
+Cost: 0.2292584
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 698.1759 19559.22
+Variogram error: 0.001242722
+Interpolation error: 0.3092254
+Cost: 0.3104681
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 698.1759 19559.22
+Variogram error: 0.001242722
+Interpolation error: 0.2305737
+Cost: 0.2318164
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 698.1759 19559.22
+Variogram error: 0.001242722
+Interpolation error: 0.3624441
+Cost: 0.3636868
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 707.0865 59570.79
+Variogram error: 0.001934034
+Interpolation error: 0.1178787
+Cost: 0.1198127
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model   psill    range
+1   Gau 697.573 47352.49
+Variogram error: 0.001739031
+Interpolation error: 0.1028508
+Cost: 0.1045899
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 632.8601 46166.29
+Variogram error: 0.001260706
+Interpolation error: 0.2580184
+Cost: 0.2592791
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 632.8601 46166.29
+Variogram error: 0.001260706
+Interpolation error: 0.2963749
+Cost: 0.2976356
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 632.8601 46166.29
+Variogram error: 0.001260706
+Interpolation error: 0.2632323
+Cost: 0.264493
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model   psill    range
+1   Lin 615.621 67044.92
+Variogram error: 0.001924906
+Interpolation error: 0.2227478
+Cost: 0.2246727
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 618.4043 72526.42
+Variogram error: 0.00171679
+Interpolation error: 0.2158757
+Cost: 0.2175925
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 647.6393 42712.91
+Variogram error: 0.001249045
+Interpolation error: 0.2779627
+Cost: 0.2792118
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 647.6393 42712.91
+Variogram error: 0.001249045
+Interpolation error: 0.4026647
+Cost: 0.4039137
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 647.6393 42712.91
+Variogram error: 0.001249045
+Interpolation error: 0.3904625
+Cost: 0.3917116
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 650.3444 105479.8
+Variogram error: 0.001942534
+Interpolation error: 0.2579558
+Cost: 0.2598983
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: New Britain Solomon
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 663.0495 103983.4
+Variogram error: 0.001741066
+Interpolation error: 0.229996
+Cost: 0.2317371
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1074.712 7300.422
+Variogram error: 0.006220614
+Interpolation error: 0.1236932
+Cost: 0.1299138
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1074.712 7300.422
+Variogram error: 0.006220614
+Interpolation error: 0.1213647
+Cost: 0.1275853
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1074.712 7300.422
+Variogram error: 0.006220614
+Interpolation error: 0.1257156
+Cost: 0.1319362
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1081.837 19180.54
+Variogram error: 0.005813443
+Interpolation error: 0.1072573
+Cost: 0.1130707
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1068.851 19700.87
+Variogram error: 0.006385806
+Interpolation error: 0.1092407
+Cost: 0.1156265
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 993.1662 93405.53
+Variogram error: 0.006654086
+Interpolation error: 0.1048815
+Cost: 0.1115356
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 993.1662 93405.53
+Variogram error: 0.006654086
+Interpolation error: 0.09078627
+Cost: 0.09744035
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 993.1662 93405.53
+Variogram error: 0.006654086
+Interpolation error: 0.1057552
+Cost: 0.1124093
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1059.744 75837.43
+Variogram error: 0.005884859
+Interpolation error: 0.1023666
+Cost: 0.1082515
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1069.846 92909.72
+Variogram error: 0.006349099
+Interpolation error: 0.09978125
+Cost: 0.1061303
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1075.37 9950.799
+Variogram error: 0.006220498
+Interpolation error: 0.1264514
+Cost: 0.1326719
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1075.37 9950.799
+Variogram error: 0.006220498
+Interpolation error: 0.1254013
+Cost: 0.1316218
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1075.37 9950.799
+Variogram error: 0.006220498
+Interpolation error: 0.1541137
+Cost: 0.1603342
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1079.431 25146.45
+Variogram error: 0.005827036
+Interpolation error: 0.120727
+Cost: 0.126554
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1065.414 24663.14
+Variogram error: 0.00640365
+Interpolation error: 0.1062868
+Cost: 0.1126905
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 0 / 459 NAs
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1078.934 34080.75
+Variogram error: 0.006220684
+Interpolation error: 0.1000524
+Cost: 0.1062731
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 6 / 459 NAs
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1078.934 34080.75
+Variogram error: 0.006220684
+Interpolation error: 0.09995892
+Cost: 0.1061796
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 9 / 459 NAs
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1078.934 34080.75
+Variogram error: 0.006220684
+Interpolation error: 0.1000893
+Cost: 0.10631
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 3 / 459 NAs
+Segment: S Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1078.125 34705.41
+Variogram error: 0.005950995
+Interpolation error: 0.09995397
+Cost: 0.105905
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 13 / 459 NAs
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1072.616 34290.46
+Variogram error: 0.006485136
+Interpolation error: 0.09996084
+Cost: 0.106446
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 968.9961 89900.85
+Variogram error: 0.006928801
+Interpolation error: 0.1103423
+Cost: 0.1172711
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 968.9961 89900.85
+Variogram error: 0.006928801
+Interpolation error: 0.1009696
+Cost: 0.1078984
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 968.9961 89900.85
+Variogram error: 0.006928801
+Interpolation error: 0.09595721
+Cost: 0.102886
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1059.744 70045.75
+Variogram error: 0.005884859
+Interpolation error: 0.09354667
+Cost: 0.09943153
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1069.846 84464.91
+Variogram error: 0.006349099
+Interpolation error: 0.09553806
+Cost: 0.1018872
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1038.074 89906.79
+Variogram error: 0.006313943
+Interpolation error: 0.09840669
+Cost: 0.1047206
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1038.074 89906.79
+Variogram error: 0.006313943
+Interpolation error: 0.1109597
+Cost: 0.1172736
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1038.074 89906.79
+Variogram error: 0.006313943
+Interpolation error: 0.102968
+Cost: 0.1092819
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1070.861 87795.81
+Variogram error: 0.005877078
+Interpolation error: 0.1083634
+Cost: 0.1142405
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: S Philippines
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1078.613 105865.9
+Variogram error: 0.006335735
+Interpolation error: 0.1063147
+Cost: 0.1126504
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 562.2164 54555.54
+Variogram error: 0.0003752857
+Interpolation error: 0.08049775
+Cost: 0.08087303
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 562.2164 54555.54
+Variogram error: 0.0003752857
+Interpolation error: 0.08447536
+Cost: 0.08485064
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 562.2164 54555.54
+Variogram error: 0.0003752857
+Interpolation error: 0.09688089
+Cost: 0.09725618
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 537.5517 49980.04
+Variogram error: 0.0004119116
+Interpolation error: 0.1309897
+Cost: 0.1314016
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill  range
+1   Cir 545.3477 166263
+Variogram error: 0.0003722996
+Interpolation error: 0.08028649
+Cost: 0.08065879
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill  range
+1   Cir 545.3477 166263
+Variogram error: 0.0003722996
+Interpolation error: 0.09249653
+Cost: 0.09286883
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill  range
+1   Cir 545.3477 166263
+Variogram error: 0.0003722996
+Interpolation error: 0.08650292
+Cost: 0.08687522
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 570.5667 52927.14
+Variogram error: 0.0004432688
+Interpolation error: 0.0791201
+Cost: 0.07956337
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 520.0416 152747.9
+Variogram error: 0.0004096046
+Interpolation error: 0.05812642
+Cost: 0.05853603
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 565.6634 93448.01
+Variogram error: 0.0003757845
+Interpolation error: 0.09620082
+Cost: 0.09657661
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 565.6634 93448.01
+Variogram error: 0.0003757845
+Interpolation error: 0.05833862
+Cost: 0.0587144
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 565.6634 93448.01
+Variogram error: 0.0003757845
+Interpolation error: 0.09440272
+Cost: 0.0947785
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 12415.18 2626252
+Variogram error: 0.0003383386
+Interpolation error: 0.04984459
+Cost: 0.05018293
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 539.6909 83056.01
+Variogram error: 0.0004117431
+Interpolation error: 0.05322743
+Cost: 0.05363917
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 569.2469 89075.74
+Variogram error: 0.0003741609
+Interpolation error: 0.1108664
+Cost: 0.1112406
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 569.2469 89075.74
+Variogram error: 0.0003741609
+Interpolation error: 0.06718673
+Cost: 0.06756089
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 569.2469 89075.74
+Variogram error: 0.0003741609
+Interpolation error: 0.09795901
+Cost: 0.09833317
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1990.231 199153.4
+Variogram error: 0.0003252379
+Interpolation error: 0.1082837
+Cost: 0.1086089
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 362.6529 28182.32
+Variogram error: 0.0004140749
+Interpolation error: 0.09238849
+Cost: 0.09280257
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 422.3997 96948.01
+Variogram error: 0.0003806388
+Interpolation error: 0.09638699
+Cost: 0.09676763
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 422.3997 96948.01
+Variogram error: 0.0003806388
+Interpolation error: 0.110279
+Cost: 0.1106596
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 422.3997 96948.01
+Variogram error: 0.0003806388
+Interpolation error: 0.079161
+Cost: 0.07954164
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 570.5667 52927.14
+Variogram error: 0.0004432688
+Interpolation error: 0.09768527
+Cost: 0.09812854
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 432.7379 97942.45
+Variogram error: 0.0004165073
+Interpolation error: 0.07265982
+Cost: 0.07307633
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 472.8087 156179.7
+Variogram error: 0.0003740896
+Interpolation error: 0.0747667
+Cost: 0.07514079
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 472.8087 156179.7
+Variogram error: 0.0003740896
+Interpolation error: 0.1099129
+Cost: 0.110287
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 472.8087 156179.7
+Variogram error: 0.0003740896
+Interpolation error: 0.09550702
+Cost: 0.09588111
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 570.5667 52927.14
+Variogram error: 0.0004432688
+Interpolation error: 0.1624299
+Cost: 0.1628731
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Scotia
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 487.3396 159809.5
+Variogram error: 0.0004106924
+Interpolation error: 0.07062646
+Cost: 0.07103715
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1833.473 173971.6
+Variogram error: 0.005532577
+Interpolation error: 0.068423
+Cost: 0.07395557
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1833.473 173971.6
+Variogram error: 0.005532577
+Interpolation error: 0.07328558
+Cost: 0.07881816
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1833.473 173971.6
+Variogram error: 0.005532577
+Interpolation error: 0.06917582
+Cost: 0.0747084
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1050.128 10383.18
+Variogram error: 0.01932436
+Interpolation error: 0.05688091
+Cost: 0.07620527
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1510.421 95843.53
+Variogram error: 0.01027352
+Interpolation error: 0.06272005
+Cost: 0.07299357
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill    range
+1   Cir 1624.29 470517.8
+Variogram error: 0.005769207
+Interpolation error: 0.05436602
+Cost: 0.06013523
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill    range
+1   Cir 1624.29 470517.8
+Variogram error: 0.005769207
+Interpolation error: 0.05206508
+Cost: 0.05783429
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model   psill    range
+1   Cir 1624.29 470517.8
+Variogram error: 0.005769207
+Interpolation error: 0.05446104
+Cost: 0.06023025
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 1135.568 95574.5
+Variogram error: 0.01819741
+Interpolation error: 0.05425898
+Cost: 0.07245638
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1551.659 359730.3
+Variogram error: 0.01073643
+Interpolation error: 0.0576528
+Cost: 0.06838924
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2178.293 403847.8
+Variogram error: 0.005488994
+Interpolation error: 0.05172514
+Cost: 0.05721413
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2178.293 403847.8
+Variogram error: 0.005488994
+Interpolation error: 0.05573576
+Cost: 0.06122475
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2178.293 403847.8
+Variogram error: 0.005488994
+Interpolation error: 0.0518761
+Cost: 0.05736509
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1098.816 12486.99
+Variogram error: 0.01860218
+Interpolation error: 0.05343014
+Cost: 0.07203232
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1649.221 191693.1
+Variogram error: 0.009522776
+Interpolation error: 0.05326431
+Cost: 0.06278709
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Cross-validation produced too many NAs!
+Returning arbitrarily high cost
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 86 / 1414 NAs
+Segment: Sumatra Banda Sea
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1165.598 35974.69
+Variogram error: 0.01798195
+Interpolation error: 0.1000219
+Cost: 0.1180038
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 350 / 1414 NAs
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1208.403 91684.55
+Variogram error: 0.01194548
+Interpolation error: 0.1003188
+Cost: 0.1122643
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1610.783 390768.4
+Variogram error: 0.00562546
+Interpolation error: 0.05375401
+Cost: 0.05937947
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1610.783 390768.4
+Variogram error: 0.00562546
+Interpolation error: 0.05338159
+Cost: 0.05900705
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1610.783 390768.4
+Variogram error: 0.00562546
+Interpolation error: 0.05456031
+Cost: 0.06018577
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1118.431 87630.58
+Variogram error: 0.01836655
+Interpolation error: 0.05834576
+Cost: 0.07671231
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1537.303 298722.9
+Variogram error: 0.01118706
+Interpolation error: 0.0523828
+Cost: 0.06356986
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1654.254 557648.6
+Variogram error: 0.005837375
+Interpolation error: 0.05567028
+Cost: 0.06150766
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1654.254 557648.6
+Variogram error: 0.005837375
+Interpolation error: 0.05316814
+Cost: 0.05900552
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1654.254 557648.6
+Variogram error: 0.005837375
+Interpolation error: 0.05444307
+Cost: 0.06028044
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1149.237 99875.72
+Variogram error: 0.01808382
+Interpolation error: 0.05529361
+Cost: 0.07337743
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Sumatra Banda Sea
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1545.333 403381.3
+Variogram error: 0.01054753
+Interpolation error: 0.05300917
+Cost: 0.0635567
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1156.827 87215.87
+Variogram error: 0.003684012
+Interpolation error: 0.1106548
+Cost: 0.1143388
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1156.827 87215.87
+Variogram error: 0.003684012
+Interpolation error: 0.1207252
+Cost: 0.1244092
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 1156.827 87215.87
+Variogram error: 0.003684012
+Interpolation error: 0.1170838
+Cost: 0.1207678
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 949.3865 43322.02
+Variogram error: 0.006853442
+Interpolation error: 0.1187397
+Cost: 0.1255932
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 941.1077 36574.35
+Variogram error: 0.005630167
+Interpolation error: 0.1152195
+Cost: 0.1208497
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1052.539 251858.1
+Variogram error: 0.003767895
+Interpolation error: 0.1319464
+Cost: 0.1357143
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1052.539 251858.1
+Variogram error: 0.003767895
+Interpolation error: 0.1406695
+Cost: 0.1444374
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 1052.539 251858.1
+Variogram error: 0.003767895
+Interpolation error: 0.1125098
+Cost: 0.1162777
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 866.6091 113331.9
+Variogram error: 0.007134061
+Interpolation error: 0.1224222
+Cost: 0.1295562
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 854.3262 68365.92
+Variogram error: 0.005711444
+Interpolation error: 0.1620166
+Cost: 0.167728
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1270.93 169828.2
+Variogram error: 0.003604005
+Interpolation error: 0.1234028
+Cost: 0.1270068
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1270.93 169828.2
+Variogram error: 0.003604005
+Interpolation error: 0.1137625
+Cost: 0.1173665
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model   psill    range
+1   Exp 1270.93 169828.2
+Variogram error: 0.003604005
+Interpolation error: 0.110847
+Cost: 0.114451
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill   range
+1   Exp 997.5472 77380.8
+Variogram error: 0.00675788
+Interpolation error: 0.1171663
+Cost: 0.1239242
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 1007.501 72711.15
+Variogram error: 0.005418728
+Interpolation error: 0.1466156
+Cost: 0.1520343
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 89 / 356 NAs
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1025.835 122225.3
+Variogram error: 0.004102038
+Interpolation error: 0.1005559
+Cost: 0.104658
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 83 / 356 NAs
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1025.835 122225.3
+Variogram error: 0.004102038
+Interpolation error: 0.1000126
+Cost: 0.1041146
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 102 / 356 NAs
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 1025.835 122225.3
+Variogram error: 0.004102038
+Interpolation error: 0.100048
+Cost: 0.10415
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Cross-validation produced NAs!
+Computing cost despite 15 / 356 NAs
+Segment: Tonga New Zealand
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 890.5203 67227.75
+Variogram error: 0.007006985
+Interpolation error: 0.1001822
+Cost: 0.1071891
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 907.0564 26317.55
+Variogram error: 0.005770212
+Interpolation error: 0.100291
+Cost: 0.1060613
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1044.692 214324.8
+Variogram error: 0.003749528
+Interpolation error: 0.1251291
+Cost: 0.1288786
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1044.692 214324.8
+Variogram error: 0.003749528
+Interpolation error: 0.1196997
+Cost: 0.1234493
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1044.692 214324.8
+Variogram error: 0.003749528
+Interpolation error: 0.125871
+Cost: 0.1296206
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 877.2085 112744.9
+Variogram error: 0.007313073
+Interpolation error: 0.123116
+Cost: 0.1304291
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill  range
+1   Lin 1033.045 177334
+Variogram error: 0.007041269
+Interpolation error: 0.11205
+Cost: 0.1190913
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1074.189 297345.4
+Variogram error: 0.003780782
+Interpolation error: 0.1192938
+Cost: 0.1230746
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1074.189 297345.4
+Variogram error: 0.003780782
+Interpolation error: 0.1242619
+Cost: 0.1280427
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 1074.189 297345.4
+Variogram error: 0.003780782
+Interpolation error: 0.1122525
+Cost: 0.1160333
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 885.3998 138325.2
+Variogram error: 0.007112643
+Interpolation error: 0.1226935
+Cost: 0.1298061
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Tonga New Zealand
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 861.7588 67333.24
+Variogram error: 0.005698293
+Interpolation error: 0.1370851
+Cost: 0.1427834
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 2152.756 6854.773
+Variogram error: 0.002429009
+Interpolation error: 0.361846
+Cost: 0.364275
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 2152.756 6854.773
+Variogram error: 0.002429009
+Interpolation error: 0.283819
+Cost: 0.286248
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 2152.756 6854.773
+Variogram error: 0.002429009
+Interpolation error: 0.2777248
+Cost: 0.2801538
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model   psill    range
+1   Bes 2248.34 45571.45
+Variogram error: 0.002615702
+Interpolation error: 0.1525488
+Cost: 0.1551645
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Bes
+  model    psill    range
+1   Bes 2351.898 44470.59
+Variogram error: 0.002454602
+Interpolation error: 0.1473686
+Cost: 0.1498232
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 2096.556 63805.1
+Variogram error: 0.002452122
+Interpolation error: 0.2299985
+Cost: 0.2324506
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 2096.556 63805.1
+Variogram error: 0.002452122
+Interpolation error: 0.293291
+Cost: 0.2957431
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill   range
+1   Cir 2096.556 63805.1
+Variogram error: 0.002452122
+Interpolation error: 0.2827875
+Cost: 0.2852396
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2022.137 121174.3
+Variogram error: 0.002630777
+Interpolation error: 0.1729472
+Cost: 0.1755779
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Cir
+  model    psill    range
+1   Cir 2143.672 116440.7
+Variogram error: 0.002500984
+Interpolation error: 0.1812833
+Cost: 0.1837843
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2167.983 8151.723
+Variogram error: 0.002425934
+Interpolation error: 0.3385261
+Cost: 0.340952
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2167.983 8151.723
+Variogram error: 0.002425934
+Interpolation error: 0.3209762
+Cost: 0.3234022
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2167.983 8151.723
+Variogram error: 0.002425934
+Interpolation error: 0.33767
+Cost: 0.3400959
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2474.267 92666.35
+Variogram error: 0.002637348
+Interpolation error: 0.1833198
+Cost: 0.1859572
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Exp
+  model    psill    range
+1   Exp 2552.668 89068.03
+Variogram error: 0.002430844
+Interpolation error: 0.1424448
+Cost: 0.1448756
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 2413.886 25175.27
+Variogram error: 0.002562244
+Interpolation error: 0.2778545
+Cost: 0.2804167
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 2413.886 25175.27
+Variogram error: 0.002562244
+Interpolation error: 0.2225677
+Cost: 0.2251299
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 2413.886 25175.27
+Variogram error: 0.002562244
+Interpolation error: 0.2052017
+Cost: 0.2077639
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 2116.949 80788.28
+Variogram error: 0.002675438
+Interpolation error: 0.1015258
+Cost: 0.1042012
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Gau
+  model    psill    range
+1   Gau 2208.497 55498.42
+Variogram error: 0.002518919
+Interpolation error: 0.1491955
+Cost: 0.1517144
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 2082.491 56330.76
+Variogram error: 0.002460779
+Interpolation error: 0.1986517
+Cost: 0.2011125
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 2082.491 56330.76
+Variogram error: 0.002460779
+Interpolation error: 0.2488801
+Cost: 0.2513408
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 2082.491 56330.76
+Variogram error: 0.002460779
+Interpolation error: 0.2407512
+Cost: 0.243212
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill    range
+1   Lin 1993.111 96833.39
+Variogram error: 0.002601063
+Interpolation error: 0.1786382
+Cost: 0.1812393
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Lin
+  model    psill   range
+1   Lin 2109.298 93178.2
+Variogram error: 0.002493461
+Interpolation error: 0.1820506
+Cost: 0.184544
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2111.464 73662.49
+Variogram error: 0.002444182
+Interpolation error: 0.2372415
+Cost: 0.2396857
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2111.464 73662.49
+Variogram error: 0.002444182
+Interpolation error: 0.2372224
+Cost: 0.2396666
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2111.464 73662.49
+Variogram error: 0.002444182
+Interpolation error: 0.2120091
+Cost: 0.2144533
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 14.88487
+Number of lags: 22.06671
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2028.512 138941.1
+Variogram error: 0.002637549
+Interpolation error: 0.1999031
+Cost: 0.2025406
+++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++
+Computing cross-validation
+Segment: Vanuatu
+Cutoff proportion: 10.13487
+Number of lags: 27.36674
+Lag start: 5.310529
+Max pairs: 41.27957
+Variogram model: Sph
+  model    psill    range
+1   Sph 2163.112 135974.4
+Variogram error: 0.002503926
+Interpolation error: 0.1857215
+Cost: 0.1882255
+++++++++++++++++++++++++++++++

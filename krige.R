@@ -176,10 +176,10 @@ cat(
   '\n~~~~~  Random Initial values  ~~~~~~',
   '\n~~~~~                         ~~~~~~',
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-  '\nLag cutoff:     ', init.vals$cutoff.prop,
-  '\nNumber of lags: ', init.vals$n.lags,
-  '\nLag shift:      ', init.vals$lag.start,
-  '\nMax local pairs:', init.vals$n.max,
+  '\nLag cutoff      :', init.vals$cutoff.prop,
+  '\nNumber of lags  :', init.vals$n.lags,
+  '\nLag shift       :', init.vals$lag.start,
+  '\nMax local pairs :', init.vals$n.max,
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '\n~~~~~                         ~~~~~~',
   '\n~~~~~    Heavy Computation!   ~~~~~~',
@@ -190,6 +190,29 @@ cat(
   '\n~~~~~    Have a sip of tea    ~~~~~~',
   '\n~~~~~                         ~~~~~~',
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
+)
+# Print to data/run*
+cat(
+  '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~     nloptr settings     ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\nAlgorithm       : ', init.vals$algorithm,
+  '\nMax evaluations : ', init.vals$maxeval,
+  '\nk-fold CV       : ', ifelse(is.null(n.fold), 'Leave-one-out', n.fold),
+  '\nInterp weight   : ', iwt,
+  '\nVariogram weight: ', vwt,
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~  Random Initial values  ~~~~~~',
+  '\n~~~~~                         ~~~~~~',
+  '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+  '\nLag cutoff      :', init.vals$cutoff.prop,
+  '\nNumber of lags  :', init.vals$n.lags,
+  '\nLag shift       :', init.vals$lag.start,
+  '\nMax local pairs :', init.vals$n.max,
+  file = paste0('data/nloptr_init', cntr)
 )
 
 # Setup cost function and nloptr
@@ -246,7 +269,7 @@ f <- function(segment, v.mod) {
 }
 
 # Capture output
-sink(file = paste0('data/nloptr_trace', cntr), type = 'output')
+sink(file = paste0('data/nloptr_trace', cntr), type = 'output', split = T)
 
 # Create array of variogram models to optimize
 # for each segment in parallel
@@ -270,6 +293,9 @@ opt.grd <-
 
 # Save output
 sink()
+
+# Capture output
+sink(file = paste0('data/nloptr_log', cntr), type = 'output', split = T)
 
 # Check for NULL results from errors
 if(any(map_lgl(opt.grd$opt, is.null))) {
@@ -353,7 +379,7 @@ ggsave(
   width = 6,
   height = 3.5
 )
-system(paste0('open figs/optTrace', cntr, '.png'), wait = F)
+# system(paste0('open figs/summary/optTrace', cntr, '.png'), wait = F)
 
 # Decode optimization output and construct variograms
 cat('\n\n', rep('~', 60), sep='')
@@ -422,6 +448,10 @@ solns <- drop_na(solns)
 
 # Summarise variograms
 cat('\nVariogram summary:\n')
+opt.trace.end <-
+  opt.trace %>%
+  group_by(segment, v.mod) %>%
+  slice_tail()
 vgrm.summary <-
   tibble(
     segment = solns$segment,
@@ -432,9 +462,8 @@ vgrm.summary <-
     n.max = map_dbl(solns$opt, ~.x$solution[4]),
     sill = map_dbl(solns$opt.fit.vgrm, ~.x$psill),
     range = map_dbl(solns$opt.fit.vgrm, ~.x$range),
-    itr = map_dbl(solns$opt, ~.x$iterations),
-    cost = solns$cost,
-  )
+  ) %>%
+  left_join(opt.trace.end, by = c('segment', 'v.mod'))
 print(vgrm.summary)
 
 # Kriging segments
@@ -564,3 +593,4 @@ save(
 )
 
 cat('\nDone!\n')
+sink()
