@@ -1,0 +1,139 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+R version 4.1.0 (2021-05-18)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Big Sur 11.6
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+[1] compiler_4.1.0
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Loading packages and functions ...
+
+Spherical geometry (s2) switched off
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Defining coordinate reference system ...
+ 
+WGS:
+ +proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs 
+Robinson Pacific Centered:
+ +proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Reading Syracuse and Abers (2006) data ...
+
+Found 917 volcanoes
+
+Found segments:
+Alaska Aleutians
+Andes
+Central America
+Kamchatka Marianas
+Kyushu Ryukyu
+Lesser Antilles
+N Philippines
+New Britain Solomon
+S Philippines
+Scotia
+Sumatra Banda Sea
+Tonga New Zealand
+Vanuatu
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Reading ThermoGlobe data from Lucazeau (2019) ...
+
+Removing 350 NA heat flow values 
+Removing 4790 poor quality data (code6 = D) 
+Removing 2 obs without coords
+
+Parsing 14119 duplicate measurements:
+
+++++++++++++++++++++++++++++++++++++++++
+If x is better quality than y, keep x 
+otherwise randomly keep either x or y
+++++++++++++++++++++++++++++++++++++++++
+
+Parsed 14119 duplicates
+
+Final ThermoGlobe dataset contains 52378 observations
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Reading similarity interpolation from Lucazeau (2019) ...
+
+Extracting similarity interpolation grid locations
+Total similarity grid size: 259200
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Defining interpolation domain ...
+
+Drawing 1000 km buffers around segments
+Cropping ThermoGlobe data to buffers
+Number of observations by segment:
+
+++++++++++++++++++++++++++++++++++++++++
+ Alaska Aleutians : 289
+ Andes : 1399
+ Central America : 1442
+ Kamchatka Marianas : 2269
+ Kyushu Ryukyu : 1895
+ Lesser Antilles : 3010
+ N Philippines : 567
+ New Britain Solomon : 101
+ S Philippines : 458
+ Scotia : 25
+ Sumatra Banda Sea : 1417
+ Tonga New Zealand : 355
+ Vanuatu : 137
+++++++++++++++++++++++++++++++++++++++++
+
+Cropping interpolation grids to buffers
+Number of Kriging estimates by segment:
+
+++++++++++++++++++++++++++++++++++++++++
+ Alaska Aleutians : 5779
+ Andes : 7624
+ Central America : 2792
+ Kamchatka Marianas : 7059
+ Kyushu Ryukyu : 2768
+ Lesser Antilles : 2226
+ N Philippines : 1835
+ New Britain Solomon : 2011
+ S Philippines : 3174
+ Scotia : 2719
+ Sumatra Banda Sea : 5932
+ Tonga New Zealand : 4091
+ Vanuatu : 2508
+++++++++++++++++++++++++++++++++++++++++
+
+Heat flow summary:
+[38;5;246m# A tibble: 13 × 8[39m
+   segment                 n   min   max median   IQR  mean    sd
+   [3m[38;5;246m<chr>[39m[23m               [3m[38;5;246m<int>[39m[23m [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m  [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m
+[38;5;250m 1[39m Alaska Aleutians      289     6   196     66    27    70    28
+[38;5;250m 2[39m Andes                [4m1[24m399     7   250    107   120   119    66
+[38;5;250m 3[39m Central America      [4m1[24m442     8   250     89   123   110    67
+[38;5;250m 4[39m Kamchatka Marianas   [4m2[24m269     1   248     78    51    83    42
+[38;5;250m 5[39m Kyushu Ryukyu        [4m1[24m895     3   250     76    42    84    42
+[38;5;250m 6[39m Lesser Antilles      [4m3[24m010    13   242     41     8    46    18
+[38;5;250m 7[39m N Philippines         567     3   231     71    26    75    33
+[38;5;250m 8[39m New Britain Solomon   101     3   143     59    34    61    26
+[38;5;250m 9[39m S Philippines         458     1   224     71    32    74    33
+[38;5;250m10[39m Scotia                 25    13   145     81    62    79    43
+[38;5;250m11[39m Sumatra Banda Sea    [4m1[24m417     1   247     59    63    67    42
+[38;5;250m12[39m Tonga New Zealand     355     5   218     49    40    59    37
+[38;5;250m13[39m Vanuatu               137     1   223     61    62    80    52
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Cleaning up environment ...
+Saving data to: data/hf.RData
+Done!
