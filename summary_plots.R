@@ -121,8 +121,9 @@ walk(~{
 # Summarise variogram models
 p2 <-
   vgrm.summary %>%
-  filter(cost < 0.5) %>%
+  drop_na() %>%
   mutate('range' = range/1000) %>%
+  filter(cost < (median(cost)+(5*IQR(cost))) & range < (median(range)+(5*IQR(range)))) %>%
   rename(
     'lag cutoff' = cutoff.prop,
     'number of lags' = n.lags,
@@ -131,7 +132,18 @@ p2 <-
     'range' = range,
     'sill' = sill,
   ) %>%
-  pivot_longer(-c(v.mod, cost, segment, itr)) %>%
+  pivot_longer(-c(
+    v.mod,
+    cost,
+    segment,
+    itr,
+    vgrm.wt,
+    vgrm.rmse,
+    vgrm.cost,
+    cv.wt,
+    cv.rmse,
+    cv.cost
+  )) %>%
   ggplot(aes(x = cost, y = value, shape = v.mod, color = segment)) +
     geom_point(size = 2) +
     facet_wrap(
@@ -191,7 +203,7 @@ p3 <-
       quantile_lines = T
     ) +
     labs(
-      x = bquote('Interpolation difference'~(mWm^-2)),
+      x = bquote('Interpolation estimate difference'~(mWm^-2)),
       y = NULL
     ) +
     scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
@@ -214,6 +226,79 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-# system(paste0('open figs/summary/interp_diff_summary', cntr, '.png'), wait = F)
+# system(paste0('open figs/summary/interpDiffSummary', cntr, '.png'), wait = F)
+
+p3b <-
+  dif$shp.interp.diff %>%
+  set_names(dif$segment) %>%
+  map_df(
+    ~st_set_geometry(.x, NULL),
+    .id = 'segment'
+  ) %>%
+  ggplot() +
+    stat_density_ridges(
+      aes(x=sigma.diff, y=segment, group=segment, fill=factor(stat(quantile))),
+      size = 0.3,
+      scale = 2.5,
+      geom = 'density_ridges_gradient',
+      calc_ecdf = T,
+      quantiles = 4,
+      quantile_lines = T
+    ) +
+    labs(
+      x = bquote('Interpolation'~sigma~'difference'~(mWm^-2)),
+      y = NULL
+    ) +
+    scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
+    scale_fill_viridis_d() +
+    scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
+    theme_classic() +
+    theme(
+      legend.position = 'none',
+      plot.margin = margin()
+    )
+# Save plot
+cat('\nSaving plot to: figs/summary/interpSigmaDiffSummary', cntr, '.png', sep = '')
+suppressWarnings(suppressMessages(
+  ggsave(
+    file = paste0('figs/summary/interpSigmaDiffSummary', cntr, '.png'),
+    plot = p3b,
+    device = 'png',
+    type = 'cairo',
+    width = 6,
+    height = 3.5
+  )
+))
+# system(paste0('open figs/summary/interpSigmaDiffSummary', cntr, '.png'), wait = F)
+# nloptr trace
+p4 <-
+  opt.trace %>%
+  group_by(segment, v.mod) %>%
+  ggplot() +
+    geom_path(aes(itr, cost, color = segment, group = segment)) +
+    facet_wrap(~v.mod, scales = 'free') +
+    labs(x = 'Iteration', y = 'Cost', color = NULL) +
+    guides(color = guide_legend(nrow = 3)) +
+    theme_classic() +
+    theme(
+      plot.margin = margin(),
+      legend.position = 'bottom',
+      legend.justification = 'left',
+      legend.box.margin = margin(-10),
+      legend.text = element_text(size = 7),
+      legend.title = element_text(size = 9),
+      legend.key.size = unit(0.8, 'lines'),
+      strip.background = element_rect(fill = 'grey90')
+    )
+ggsave(
+  file =
+  paste0('figs/summary/optTrace', cntr, '.png'),
+  plot = p4,
+  device = 'png',
+  type = 'cairo',
+  width = 6,
+  height = 3.5
+)
+# system(paste0('open figs/summary/optTrace', cntr, '.png'), wait = F)
 
 cat('\nDone!\n')

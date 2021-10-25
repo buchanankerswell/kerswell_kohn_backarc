@@ -114,6 +114,7 @@ cat('\nSaving results to: data/opt', cntr, '.RData', sep = '')
 cat('\nLoading packages and functions\n')
 source('functions.R')
 load('data/hf.RData')
+dir.create('data/nloptr/', showWarnings = F)
 
 # Set parallel computing plan
 plan(multicore, workers = n.cores)
@@ -212,7 +213,7 @@ cat(
   '\nNumber of lags  :', init.vals$n.lags,
   '\nLag shift       :', init.vals$lag.start,
   '\nMax local pairs :', init.vals$n.max,
-  file = paste0('data/nloptr_init', cntr)
+  file = paste0('data/nloptr/nloptr_init', cntr)
 )
 
 # Setup cost function and nloptr
@@ -228,8 +229,8 @@ f <- function(segment, v.mod) {
       n.max = x[4],
       n.fold = n.fold,
       model.vgrm = v.mod,
-      interp.weight = 0.1,
-      vgrm.weight = 0.9,
+      interp.weight = iwt,
+      vgrm.weight = vwt,
       segment = segment,
       verbose = T
     )
@@ -269,7 +270,11 @@ f <- function(segment, v.mod) {
 }
 
 # Capture output
-sink(file = paste0('data/nloptr_trace', cntr), type = 'output', split = T)
+sink(file = paste0('data/nloptr/nloptr_trace', cntr), type = 'output', split = T)
+
+cat(rep('~', 60), '\n', sep='')
+sessionInfo()
+cat('\n', rep('~', 60), '\n', sep='')
 
 # Create array of variogram models to optimize
 # for each segment in parallel
@@ -295,7 +300,11 @@ opt.grd <-
 sink()
 
 # Capture output
-sink(file = paste0('data/nloptr_log', cntr), type = 'output', split = T)
+sink(file = paste0('data/nloptr/nloptr_log', cntr), type = 'output', split = T)
+
+cat(rep('~', 60), '\n', sep='')
+sessionInfo()
+cat('\n', rep('~', 60), '\n', sep='')
 
 # Check for NULL results from errors
 if(any(map_lgl(opt.grd$opt, is.null))) {
@@ -319,19 +328,31 @@ read_file <- function(fpath, ...) {
   on.exit(close(con))
   readLines(con, ...)
 }
-raw.trace <- read_file(paste0('data/nloptr_trace', cntr))
+raw.trace <- read_file(paste0('data/nloptr/nloptr_trace', cntr))
 segs.trace <-
   raw.trace[grepl('^Segment: ', raw.trace)] %>%
   map_chr(~gsub('Segment: ', '', .x))
 vgrm.model.trace <-
   raw.trace[grepl('^Variogram model:', raw.trace)] %>%
   map_chr(~gsub('Variogram model: ', '', .x))
-vgrm.error.trace <-
-  raw.trace[grepl('^Variogram error', raw.trace)] %>%
-  map_dbl(~as.numeric(gsub('Variogram error: ', '', .x)))
-cv.error.trace <-
-  raw.trace[grepl('^Interp', raw.trace)] %>%
-  map_dbl(~as.numeric(gsub('Interpolation error: ', '', .x)))
+vgrm.weight.trace <-
+  raw.trace[grepl('^Variogram weight', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Variogram weight: ', '', .x)))
+vgrm.rmse.trace <-
+  raw.trace[grepl('^Variogram rmse', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Variogram rmse: ', '', .x)))
+vgrm.cost.trace <-
+  raw.trace[grepl('^Variogram cost', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Variogram cost: ', '', .x)))
+cv.weight.trace <-
+  raw.trace[grepl('^Interpolation weight', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Interpolation weight: ', '', .x)))
+cv.rmse.trace <-
+  raw.trace[grepl('^Interpolation rmse', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Interpolation rmse: ', '', .x)))
+cv.cost.trace <-
+  raw.trace[grepl('^Interpolation cost', raw.trace)] %>%
+  map_dbl(~as.numeric(gsub('Interpolation cost: ', '', .x)))
 cost.trace <-
   raw.trace[grepl('^Cost', raw.trace)] %>%
   map_dbl(~as.numeric(gsub('Cost: ', '', .x)))
@@ -339,47 +360,22 @@ opt.trace <-
   tibble(
     segment = segs.trace,
     v.mod = vgrm.model.trace,
-    vgrm.error = vgrm.error.trace,
-    cv.error = cv.error.trace,
+    vgrm.wt = vgrm.weight.trace,
+    vgrm.rmse = vgrm.rmse.trace,
+    vgrm.cost = vgrm.cost.trace,
+    cv.wt = cv.weight.trace,
+    cv.rmse = cv.rmse.trace,
+    cv.cost = cv.cost.trace,
     cost = cost.trace
   ) %>%
   group_by(segment, v.mod) %>%
-  mutate(itr = row_number(), .before = segment)
+  mutate(itr = row_number(), .before = segment) %>%
+  ungroup()
 
 cat('\nnloptr trace ...')
 cat('\n', rep('+', 40), '\n', sep='')
 print(opt.trace)
 cat(rep('+', 40), '\n', sep='')
-
-# Visualize
-plt <-
-  opt.trace %>%
-  ggplot() +
-    geom_path(aes(itr, cost, color = segment)) +
-    labs(x = 'Iteration', y = 'Cost', color = NULL) +
-    guides(color = guide_legend(nrow = 3)) +
-    facet_wrap(~v.mod) +
-    theme_classic() +
-    theme(
-      plot.margin = margin(),
-      legend.position = 'bottom',
-      legend.justification = 'left',
-      legend.box.margin = margin(-10),
-      legend.text = element_text(size = 7),
-      legend.title = element_text(size = 9),
-      legend.key.size = unit(0.8, 'lines'),
-      strip.background = element_rect(fill = 'grey90')
-    )
-ggsave(
-  file =
-  paste0('figs/summary/optTrace', cntr, '.png'),
-  plot = plt,
-  device = 'png',
-  type = 'cairo',
-  width = 6,
-  height = 3.5
-)
-# system(paste0('open figs/summary/optTrace', cntr, '.png'), wait = F)
 
 # Decode optimization output and construct variograms
 cat('\n\n', rep('~', 60), sep='')
@@ -451,7 +447,8 @@ cat('\nVariogram summary:\n')
 opt.trace.end <-
   opt.trace %>%
   group_by(segment, v.mod) %>%
-  slice_tail()
+  slice_tail() %>%
+  ungroup()
 vgrm.summary <-
   tibble(
     segment = solns$segment,

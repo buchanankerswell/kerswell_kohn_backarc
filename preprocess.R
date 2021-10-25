@@ -1,7 +1,13 @@
 #!/usr/bin/env Rscript
 
-# Load packages and functions
+# Capture output
+sink(file = 'data/preprocess_log', type = 'output', split = T)
+
 cat(rep('~', 60), '\n', sep='')
+sessionInfo()
+cat('\n', rep('~', 60), '\n', sep='')
+
+# Load packages and functions
 cat('Loading packages and functions ...\n\n')
 
 source('functions.R')
@@ -363,3 +369,4 @@ cat('\nSaving data to: data/hf.RData')
 save.image('data/hf.RData')
 
 cat('\nDone!\n')
+sink()

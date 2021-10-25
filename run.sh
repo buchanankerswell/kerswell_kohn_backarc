@@ -71,7 +71,12 @@ if [[ ! $fnum -gt 0 ]]; then
         read 'nfold?Number of folds [0=default]: '
       done
 
+      if [[ ! -f data/hf.RData ]]; then
+        ./preprocess.R
+      fi
+
       ./krige.R $itr $alg $iwt $vwt $ncores $nfold
+
       break
     elif [[ $p == 'no' ]]; then
       echo okay bye
@@ -165,7 +170,12 @@ else
         read 'nfold?Number of folds [0=default]: '
       done
 
+      if [[ ! -f data/hf.RData ]]; then
+        ./preprocess.R
+      fi
+
       ./krige.R $itr $alg $iwt $vwt $ncores $nfold
+
       break
     elif [[ $p == 'no' ]]; then
       break

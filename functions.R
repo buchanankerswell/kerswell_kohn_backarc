@@ -389,48 +389,47 @@ cost_function <-
       }
     }
   }
-  if(verbose) {
-    cat('\nSegment:', segment)
-    cat('\nCutoff proportion:', cutoff.prop)
-    cat('\nNumber of lags:', n.lags)
-    cat('\nLag start:', lag.start)
-    cat('\nMax pairs:', n.max)
-    cat('\nVariogram model:', model.vgrm)
-    cat('\n')
-    print(fitted.vgrm)
-  }
   k.cv <- k.cv %>% filter(!is.na(residual))
   # Calculating cost function after Li et al 2018
   # https://doi.org/10.1016/j.cageo.2018.07.011
   # Weights
   iwt <- interp.weight # interpolation error
   vwt <- vgrm.weight # variogram fit error
-  # Calculate variogram fit error
-  #   equation: vgrm.weight * RMSE / sd(experimental.vgrm) [mWm^-2]
+  # Calculate variogram fit cost
+  #   equation: sqrt( vgrm.weight * RMSE / sd(experimental.vgrm) ) [mWm^-2]
   #   note: The weighted RMSE is minimized during the fitting process with weights
   #   defined in fit.variogram method, see table 4.2 in http://www.gstat.org/gstat.pdf
-  vgrm.error <-
-    vwt *
-    sqrt(attr(fitted.vgrm, "SSErr") / nrow(experimental.vgrm)) /
-    sd(sqrt(experimental.vgrm$gamma))
-  if(verbose){
-    cat('Variogram error:', vgrm.error)
-  }
-  # Calculate interpolation error similarly to vgrm.error
-  #   equation: interp.weight * RMSE / sd(cross-validation estimates)
-  interp.error <-
-    iwt *
-    sqrt(sum(k.cv$residual^2, na.rm = T) / nrow(k.cv)) /
-    sd(k.cv$var1.pred, na.rm = T)
-  if(verbose){
-    cat('\nInterpolation error:', interp.error)
-  }
+  vgrm.rmse <-
+    sqrt(attr(fitted.vgrm, "SSErr") / nrow(experimental.vgrm))
+  # Important! Take square root of variogram RMSE to get in units of mWm^-2
+  vgrm.cost <-
+    sqrt(vwt * vgrm.rmse / sd(experimental.vgrm$gamma, na.rm = T))
+  # Calculate interpolation cost similarly to vgrm.cost
+  #   equation: interp.weight * RMSE / sd(cross-validation estimates) [mWm^-2]
+  interp.rmse <-
+    sqrt(sum(k.cv$residual^2, na.rm = T) / nrow(k.cv))
+  interp.cost <-
+    iwt * interp.rmse / sd(k.cv$var1.pred, na.rm = T)
   # Return cost = vgrm.error + interp.error
-  if(verbose){
-    cat('\nCost:', vgrm.error + interp.error)
+  if(verbose) {
+    cat('\nSegment:', segment)
+    cat('\nCutoff proportion:', cutoff.prop)
+    cat('\nNumber of lags:', n.lags)
+    cat('\nLag start:', lag.start)
+    cat('\nMax pairs:', n.max)
+    cat('\nVariogram weight:', vwt)
+    cat('\nVariogram rmse:', vgrm.rmse)
+    cat('\nVariogram cost:', vgrm.cost)
+    cat('\nInterpolation weight:', iwt)
+    cat('\nInterpolation rmse:', interp.rmse)
+    cat('\nInterpolation cost:', interp.cost)
+    cat('\nCost:', vgrm.cost + interp.cost)
+    cat('\nVariogram model:', model.vgrm)
+    cat('\n')
+    print(fitted.vgrm)
     cat('\n', rep('+', 30), '\n', sep='')
   }
-  return(vgrm.error + interp.error)
+  return(vgrm.cost + interp.cost)
 }
 
 # Plot variogram
