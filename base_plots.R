@@ -98,7 +98,7 @@ p2 <-
       aes(label = c('AA', 'An', 'CA', 'KM', 'KR', 'LA', 'NP', 'NBS', 'SP', 'SC', 'SBS', 'TNZ', 'VN')),
       fill = 'ivory',
       size = 2.5,
-      alpha = 0.8,
+      alpha = 0.7,
       segment.size = 0.3,
       segment.color = 'white',
       segment.curvature = -1e-20,
