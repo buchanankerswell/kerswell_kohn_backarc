@@ -4,9 +4,9 @@
 
 This repository stores all materials for the manuscript
 
-*Comparison of heat flow interpolations near subduction zones*
+***Comparison of heat flow interpolations near subduction zones***(2021, G3)
 
-~~Included:~~
+Included:
 
 - Datasets
 - R scripts to reproduce all results and figures
@@ -22,7 +22,7 @@ This study is written in R. Follow the instructions at [R's homepage](https://ww
 
 ### GDAL, GEOS, and PROJ
 
-Geographic operations require the geographic libraries [gdal](https://gdal.org), [geos](https://trac.osgeo.org/geos), and [proj](https://proj.org). On Mac, the easiest way to get gdal, geos, and proj is to use Homebrew. If your machine does not have Homebrew, you can install it by running in the terminal
+Geographic operations require the geographic libraries [gdal](https://gdal.org), [geos](https://trac.osgeo.org/geos), and [proj](https://proj.org). On Mac, the easiest way to get gdal, geos, and proj is to use Homebrew. If your machine does not have Homebrew, you can install it by running
 
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -30,14 +30,14 @@ Geographic operations require the geographic libraries [gdal](https://gdal.org),
 
 Or follow instructions from [Hombrew's webpage](https://brew.sh).
 
-Once Homebrew is installed, use (in terminal)
+Once Homebrew is installed
 
 ```
 brew install pkg-config
 brew install gdal
 ```
 
-which will install the latest gdal, geos, and proj libraries together.
+will install the latest gdal, geos, and proj libraries together.
 
 ### sf
 
@@ -50,13 +50,15 @@ The trickiest R package to install is [sf](https://r-spatial.github.io/sf/), sin
 git clone https://github.com/buchanankerswell/kerswell_kohn_backarc.git
 
 # Change into the directory
-cd kerswell_kon_backarc
+cd kerswell_kohn_backarc
 
 # Use Makefile to compile
 make
 ```
 
-This will run scripts that check for required R packages and tries to install missing packages automatically. If all packages are found and available it will proceed to run the study with some prompts from the user.
+This will check for required R packages and try to install missing packages automatically.
+
+If all packages are found and available it will proceed to run the study with some initial prompts from the user.
 
 # Open Science Framework
 
