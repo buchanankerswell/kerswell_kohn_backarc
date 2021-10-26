@@ -3,8 +3,3 @@
 .RData
 .Ruserdata
 .DS_Store
-figs/diff
-figs/vgrms
-figs/summary
-figs/base
-figs/opt*
