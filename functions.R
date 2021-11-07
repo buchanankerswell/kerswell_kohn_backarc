@@ -432,6 +432,92 @@ cost_function <-
   return(vgrm.cost + interp.cost)
 }
 
+# Splits lines longer than a given threshold into the minimum number
+# of pieces to all be under the given threshold
+# From: https://gist.github.com/dblodgett-usgs/cf87392c02d73f1b7d16153d2b66a8f3
+split_lines <- function(input_lines, max_length, id = NULL) {
+  geom_column <- attr(input_lines, "sf_column")
+
+  input_crs <- sf::st_crs(input_lines)
+
+  input_lines[["geom_len"]] <- sf::st_length(input_lines[[geom_column]])
+
+  attr(input_lines[["geom_len"]], "units") <- NULL
+  input_lines[["geom_len"]] <- as.numeric(input_lines[["geom_len"]])
+
+  too_long <- 
+    input_lines %>%
+    select(all_of(id), all_of(geom_column), geom_len) %>%
+    filter(geom_len >= max_length)
+
+  rm(input_lines) # just to control memory usage in case this is big.
+
+  too_long <-
+    too_long %>%
+    mutate(
+      pieces = ceiling(geom_len / max_length),
+      piece_len = (geom_len / pieces),
+      fID = 1:nrow(too_long)
+    )
+
+  split_points <-
+    sf::st_set_geometry(too_long, NULL)[rep(seq_len(nrow(too_long)), too_long[["pieces"]]),]
+
+  split_points <-
+    split_points %>%
+    mutate(split_fID = row.names(split_points)) %>%
+    select(-geom_len, -pieces) %>%
+    group_by(fID) %>%
+    mutate(ideal_len = cumsum(piece_len)) %>%
+    ungroup()
+
+  coords <- data.frame(sf::st_coordinates(too_long[[geom_column]]))
+  rm(too_long)
+
+  coords <- rename(coords, fID = L1) %>% mutate(nID = 1:nrow(coords))
+
+  split_nodes <-
+    coords %>%
+    group_by(fID) %>%
+    # First calculate cumulative length by feature.
+    mutate(len  = sqrt(((X - (lag(X)))^2) + (((Y - (lag(Y)))^2)))) %>%
+    mutate(len = ifelse(is.na(len), 0, len)) %>%
+    mutate(len = cumsum(len)) %>%
+    # Now join nodes to split points -- this generates all combinations.
+    left_join(select(split_points, fID, ideal_len, split_fID), by = "fID") %>%
+    # Calculate the difference between node-wise distance and split-point distance.
+    mutate(diff_len = abs(len - ideal_len)) %>%
+    # regroup by the new split features.
+    group_by(split_fID) %>%
+    # filter out na then grab the min distance
+    filter(!is.na(diff_len) & diff_len == min(diff_len)) %>%
+    ungroup() %>%
+    # Grab the start node for each geometry -- the end node of the geometry before it.
+    mutate(start_nID = lag(nID),
+           # need to move the start node one for new features.
+           new_feature = fID - lag(fID, default = -1),
+           start_nID = ifelse(new_feature == 1, start_nID + 1, start_nID)) %>%
+    # Clean up the mess
+    select(fID, split_fID, start_nID, stop_nID = nID, -diff_len, -ideal_len, -len, -X, -Y)
+
+  split_nodes$start_nID[1] <- 1
+
+  split_points <- 
+    split_points %>%
+    left_join(select(split_nodes, split_fID, start_nID, stop_nID), by = "split_fID")
+
+  new_line <- function(start_stop, coords) {
+    sf::st_linestring(as.matrix(coords[start_stop[1]:start_stop[2], c("X", "Y")]))
+  }
+
+  split_lines <- apply(as.matrix(split_points[c("start_nID", "stop_nID")]),
+                        MARGIN = 1, FUN = new_line, coords = coords)
+
+  split_lines <- st_sf(split_points[c(id, "split_fID")], geometry = st_sfc(split_lines, crs = input_crs))
+
+  return(split_lines)
+}
+
 # Plot variogram
 plot_vgrm <-
   function(
@@ -499,4 +585,244 @@ plot_vgrm <-
     }
   )
   return(plt)
+}
+
+# Splits SZ segment buffers into equal parts and crops data points and
+# interpolations by intersection for each buffer segment
+split_segment <- function(seg.name, buf.dir = 'l', seg.num = 6, buf.len = 1e6) {
+  pnts <- shp.hf.crop[[seg.name]]
+  seg <- shp.segs[[seg.name]]
+  split.seg <- split_lines(seg, as.numeric(st_length(seg)/seg.num))
+  buf <- st_buffer(seg, dist = buf.len, endCapStyle = 'FLAT')
+  split.buf <-
+    st_buffer(
+      split.seg,
+      dist = ifelse(buf.dir == 'l', -5*buf.len, 5*buf.len),
+      singleSide = T,
+      endCapStyle = 'FLAT'
+    ) %>%
+    st_intersection(buf)
+  pnts.buf <-
+    st_intersection(pnts, split.buf) %>%
+    mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+  best.mod <-
+    solns %>%
+    filter(segment == seg.name & v.mod != 'Gau') %>%
+    slice_min(cost)
+  interp <- best.mod[['shp.interp.diff']][[1]]
+  interp.buf <-
+    st_intersection(interp, split.buf) %>%
+    mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+  return(
+    list(
+      'seg' = split.seg,
+      'buf' = split.buf,
+      'pnts' = pnts.buf,
+      'interp' = interp.buf
+    )
+  )
+}
+
+# Plot split segment
+plot_split_segment <-
+  function(
+    split.seg,
+    running.avg = 5,
+    scale.bar.width = 5,
+    scale.bar.height = 0.05,
+    scale.bar.text = 2.5,
+    scale.bar.just = 0.05,
+    scale.bar.position = 'bottomright',
+    north.scale = 0.2,
+    north.position = 'topleft',
+    label.size = 3
+  ) {
+  seg.num <- as.numeric(unique(split.seg$pnts$split_fID))
+  wdth <- range(st_bbox(split.seg$buf)[c('xmin', 'xmax')])/1e3
+  sbar <- round((wdth[2]-wdth[1])/scale.bar.width, -1)
+  y.lim <- 
+    c(
+      median(split.seg$interp$est.sim) - 2*IQR(split.seg$interp$est.sim),
+      median(split.seg$interp$est.sim) + 2*IQR(split.seg$interp$est.sim),
+      median(split.seg$interp$est.krige) - 2*IQR(split.seg$interp$est.krige),
+      median(split.seg$interp$est.krige) + 2*IQR(split.seg$interp$est.krige)
+    )
+  p0 <-
+    ggplot() +
+      geom_sf(
+        data = split.seg$buf,
+        aes(fill = split_fID),
+        size = 0.5,
+        color = 'grey90',
+        show.legend = F
+      ) +
+      geom_sf(data = split.seg$seg, size = 2) +
+      geom_sf_text(
+        data = st_centroid(split.seg$buf),
+        aes(label = split_fID, fill = split_fID),
+        size = label.size,
+        color = 'white',
+        alpha = 0.8,
+        show.legend = F
+      ) +
+      ggsn::north(split.seg$buf, scale = north.scale, location = north.position) +
+      ggsn::scalebar(
+        split.seg$buf,
+        dist = sbar,
+        location = scale.bar.position,
+        st.size = scale.bar.text,
+        height = scale.bar.height,
+        st.dist = scale.bar.just,
+        border.size = 0.1,
+        dist_unit = 'km',
+        transform = F,
+        model = 'WGS84'
+      ) +
+      theme_map() +
+      theme(plot.margin = margin())
+  p1 <-
+    split.seg$interp %>%
+    st_set_geometry(NULL) %>%
+    select(est.sim, est.krige, split_fID) %>%
+    rename(Similarity = est.sim, Krige = est.krige) %>%
+    pivot_longer(-split_fID) %>%
+    group_by(name) %>%
+    ggplot() +
+    geom_density_ridges(
+      aes(x = value, y = split_fID, fill = split_fID, linetype = name),
+      calc_ecdf = T,
+      quantiles = 4,
+      quantile_lines = T,
+      alpha = 0.9
+    ) +
+    coord_cartesian(xlim = range(y.lim)) +
+    scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
+    labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = 'Sector') +
+    guides(fill = 'none') +
+    theme_classic() +
+    theme(
+      legend.box.margin = margin(),
+      legend.background = element_rect(fill = NA, color = NA),
+      legend.key.size = unit(0.8, 'lines'),
+      panel.background = element_rect(fill = 'grey90')
+    )
+  if(!(split.seg$interp$segment[1] %in% c('Andes', 'Kamchatka Marianas', 'Tonga New Zealand'))) {
+    p2 <-
+      split.seg$interp %>%
+      st_set_geometry(NULL) %>%
+      filter(distance.from.seg <= 1000000) %>%
+      select(est.sim, est.krige, split_fID, distance.from.seg) %>%
+      mutate(
+        Similarity = zoo::rollmean(est.sim, running.avg, fill = NA),
+        Krige = zoo::rollmean(est.krige, running.avg, fill = NA)
+      ) %>%
+      select(-c(est.sim, est.krige)) %>%
+      pivot_longer(-c(split_fID, distance.from.seg)) %>%
+      group_by(name) %>%
+      ggplot() +
+        geom_point(
+          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+          size = 0.1,
+          shape = 19,
+          alpha = 0.2,
+          show.legend = F
+        ) +
+        geom_smooth(
+          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+          size = 1,
+          se = F
+        ) +
+        labs(
+          x = 'Distance from Trench (km)',
+          y = bquote('Heat Flow'~(mWm^-2)),
+          color = 'Sector'
+        ) +
+        scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
+        coord_cartesian(ylim = range(y.lim)) +
+        facet_wrap(~name) +
+        theme_classic() +
+        theme(
+          panel.background = element_rect(fill = 'grey90'),
+          legend.key.size = unit(0.8, 'lines'),
+          legend.position = c(1, 0),
+          legend.justification = c(1, 0),
+          legend.dir = 'horizontal',
+          legend.background = element_rect(fill = NA)
+        )
+    pp1 <- p0 + p1 + plot_layout(widths = 1)
+    p <-
+      pp1 / p2 +
+      plot_layout(widths = c(1, 2), guides = 'collect') +
+      plot_annotation(
+        tag_level = 'a',
+        caption = split.seg$interp$segment[1]
+      ) &
+      theme(
+        plot.margin = margin(2, 2, 2, 2),
+        plot.tag = element_text(face = 'bold'),
+        legend.position = 'bottom'
+      )
+  } else {
+    p2 <-
+      split.seg$interp %>%
+      st_set_geometry(NULL) %>%
+      filter(distance.from.seg <= 1000000) %>%
+      select(est.sim, est.krige, split_fID, distance.from.seg) %>%
+      mutate(
+        Similarity = zoo::rollmean(est.sim, running.avg, fill = NA),
+        Krige = zoo::rollmean(est.krige, running.avg, fill = NA)
+      ) %>%
+      select(-c(est.sim, est.krige)) %>%
+      pivot_longer(-c(split_fID, distance.from.seg)) %>%
+      group_by(name) %>%
+      ggplot() +
+        geom_point(
+          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+          size = 0.1,
+          shape = 19,
+          alpha = 0.2,
+          show.legend = F
+        ) +
+        geom_smooth(
+          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+          size = 0.6,
+          se = F
+        ) +
+        labs(
+          x = 'Distance from Trench (km)',
+          y = bquote('Heat Flow'~(mWm^-2)),
+          color = 'Sector'
+        ) +
+        scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
+        coord_cartesian(ylim = range(y.lim)) +
+        facet_wrap(~name, nrow = 2, ncol = 1) +
+        theme_classic() +
+        theme(
+          panel.background = element_rect(fill = 'grey90'),
+          legend.key.size = unit(0.8, 'lines'),
+          legend.position = c(1, 0),
+          legend.justification = c(1, 0),
+          legend.dir = 'horizontal',
+          legend.background = element_rect(fill = NA)
+        )
+    layout <- '
+    AABB
+    AABB
+    AACC
+    AACC
+    '
+    p <-
+      p0 + p1 + p2 +
+      plot_layout(design = layout, guides = 'collect') +
+      plot_annotation(
+        tag_level = 'a',
+        caption = split.seg$interp$segment[1]
+      ) &
+      theme(
+        plot.margin = margin(2, 2, 2, 2),
+        plot.tag = element_text(face = 'bold'),
+        legend.position = 'bottom'
+      )
+    }
+  p
 }

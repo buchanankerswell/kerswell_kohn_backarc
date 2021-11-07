@@ -301,4 +301,52 @@ ggsave(
 )
 # system(paste0('open figs/summary/optTrace', cntr, '.png'), wait = F)
 
+# Cut up segments and visualize heat flow
+# within sectors
+tibble(
+  seg.names = seg.names,
+  buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
+  seg.num = c(4, 8, 4, 8, 8, 5, 3, 3, 6, 2, 6, 8, 6),
+  scale.bar.width = c(5, 3, 4, 4, 3.5, 3, 4, 4, 2.5, 4, 5.5, 3, 2.5),
+  scale.bar.height = c(0.05, 0.02, 0.05, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02),
+  scale.bar.text = c(3.5, 4, 4, 4, 3.5, 4, 4, 4, 3.5, 3.5, 3.5, 4, 3.5),
+  scale.bar.just = c(0.06, 0.02, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.06, 0.05, 0.05),
+  scale.bar.position = c('topleft', 'bottomleft', 'bottomleft', 'topleft', 'topleft', 'bottomleft', 'bottomleft', 'bottomleft', 'bottomleft', 'topleft', 'bottomleft', 'bottomleft', 'bottomleft'),
+  north.scale = c(0.4, 0.25, 0.25, 0.2, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.3, 0.2, 0.25),
+  north.position = c('bottomright', 'topleft', 'topright', 'bottomright', 'bottomright', 'topleft', 'topright', 'topright', 'topright', 'bottomleft', 'topright', 'topleft', 'topright'),
+  label.size = c(6, 6, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
+) %>%
+pwalk(~{
+  split_segment(
+    seg.name = ..1,
+    buf.dir = ..2,
+    seg.num = ..3
+  ) %>%
+  plot_split_segment(
+    running.avg = 5,
+    scale.bar.width = ..4,
+    scale.bar.height = ..5,
+    scale.bar.text = ..6,
+    scale.bar.just = ..7,
+    scale.bar.position = ..8,
+    north.scale = ..9,
+    north.position = ..10,
+    label.size = ..11
+  ) -> p
+  ggsave(
+    file = paste0('figs/upperPlate/', str_replace_all(..1, ' ', ''), 'UpperPlate.png'),
+    plot = p,
+    device = 'png',
+    type = 'cairo',
+    width = 6,
+    height = 6
+  )
+  # system(
+  #   paste0(
+  #     'open ',
+  #     paste0('figs/upperPlate/', str_replace_all(..1, ' ', ''), 'UpperPlate.png')
+  #   )
+  # )
+})
+
 cat('\nDone!\n')
