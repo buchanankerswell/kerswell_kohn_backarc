@@ -75,11 +75,11 @@ shp.fts <-
 shp.sliver <-
   st_polygon(
     x = list(rbind(
-      c(25.000001, 90),
+      c(25.001, 90),
       c(25, 90),
       c(25, -90),
-      c(25.000001, -90),
-      c(25.000001, 90))
+      c(25.001, -90),
+      c(25.001, 90))
     )
   ) %>%
   st_sfc() %>%
@@ -93,6 +93,46 @@ suppressWarnings({
   suppressMessages({
     shp.world <-
       shp.countries %>%
+      st_difference(shp.sliver) %>%
+      as_tibble() %>%
+      st_as_sf() %>%
+      st_transform(proj4.rp)
+  })
+})
+
+cat('\n\n', rep('~', 60), '\n', sep='')
+cat('Reading UTIG plate boundary data ...\n')
+# Plate boundaries from UTIG
+# http://www-udc.ig.utexas.edu/external/plates/data.htm
+shp.ridge <- st_read('data/utig/ridge.gmt', crs = proj4.wgs, quiet = T)
+shp.trench <- st_read('data/utig/trench.gmt', crs = proj4.wgs, quiet = T)
+shp.transform <- st_read('data/utig/transform.gmt', crs = proj4.wgs, quiet = T)
+
+# Filter out linestrings with single points
+single.pnt.idx <-
+  shp.ridge$geometry %>%
+  map_lgl(~nrow(st_coordinates(.x)) <= 1)
+
+# Fix dateline wrapping and transform
+suppressWarnings({
+  suppressMessages({
+    shp.ridge <-
+      shp.ridge[!single.pnt.idx,] %>%
+      st_wrap_dateline() %>%
+      st_difference(shp.sliver) %>%
+      as_tibble() %>%
+      st_as_sf() %>%
+      st_transform(proj4.rp)
+    shp.trench <-
+      shp.trench %>%
+      st_wrap_dateline() %>%
+      st_difference(shp.sliver) %>%
+      as_tibble() %>%
+      st_as_sf() %>%
+      st_transform(proj4.rp)
+    shp.transform <-
+      shp.transform %>%
+      st_wrap_dateline() %>%
       st_difference(shp.sliver) %>%
       as_tibble() %>%
       st_as_sf() %>%
@@ -273,9 +313,28 @@ shp.buffer <-
   shp.segs %>%
   map(~st_buffer(.x, buf.dist, endCapStyle = 'ROUND'))
 
-# shp.box <-
-#   shp.buffer %>%
-#   map(~st_bbox(.x) %>% bbox_widen(crs = proj4.rp))
+shp.box <-
+  shp.buffer %>%
+  map(~st_bbox(.x) %>% bbox_widen(crs = proj4.rp))
+
+# Crop UTIG plate boundaries to bounding boxes
+cat('\nCropping UTIG plate boundaries to segment bounding boxes')
+
+shp.ridge.crop <-
+  suppressWarnings({
+    shp.box %>%
+    map(~shp.ridge %>% st_crop(.x))
+  })
+shp.trench.crop <-
+  suppressWarnings({
+    shp.box %>%
+    map(~shp.trench %>% st_crop(.x))
+  })
+shp.transform.crop <-
+  suppressWarnings({
+    shp.box %>%
+    map(~shp.transform %>% st_crop(.x))
+  })
 
 # Crop ThermoGlobe data to bounding boxes
 cat('\nCropping ThermoGlobe data to buffers')
@@ -352,6 +411,7 @@ rm(
    proj4.rp,
    proj4.wgs,
    i,
+   shp.box,
    shp.sliver,
    shp.hf,
    shp.hf.filtered,

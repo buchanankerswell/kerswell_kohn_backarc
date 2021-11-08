@@ -24,17 +24,20 @@ p1 <-
     geom_sf(
       data = shp.world,
       size = 0.1,
-      fill = 'grey95'
+      fill = 'grey50'
     ) +
     geom_sf(data = bind_rows(shp.buffer), size = 0.2, fill = 'ivory', alpha = 0.1) +
-    geom_sf(data = bind_rows(shp.contours), size = 0.05, color = 'black') +
-    geom_sf(data = bind_rows(shp.segs), size = 0.5, color = 'black') +
+    geom_sf(data = shp.ridge, size = 0.2) +
+    geom_sf(data = shp.trench, size = 0.2) +
+    geom_sf(data = shp.transform, size = 0.2) +
     geom_sf(
       data = bind_rows(shp.hf.crop),
       aes(color = hf),
-      size = 0.01,
+      size = 0.3,
       shape = 20
     ) +
+    geom_sf(data = bind_rows(shp.contours), size = 0.05, color = 'white') +
+    geom_sf(data = bind_rows(shp.segs), size = 0.5, color = 'white') +
     annotate(
       'label',
       x = -Inf,
@@ -42,7 +45,7 @@ p1 <-
       label = 'ThermoGlobe dataset',
       hjust = 0,
       vjust = 0,
-      size = 4,
+      size = 5,
       fill = 'ivory',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
@@ -50,7 +53,7 @@ p1 <-
     v.scale.white +
     labs(color = bquote(mWm^-2)) +
     coord_sf(expand = F) +
-    theme_map(font_size = 8) +
+    theme_map(font_size = 12) +
     theme(
       axis.text = element_text(),
       legend.position = c(1, 1),
@@ -62,7 +65,7 @@ p1 <-
       legend.key.width = unit(0.3, 'in'),
       legend.title = element_text(vjust = 1),
       panel.grid = element_line(size = 0.1, color = 'white'),
-      panel.background = element_rect(fill = 'grey80', color = NA),
+      panel.background = element_rect(fill = 'grey40', color = NA),
       plot.margin = margin()
     )
 # Save
@@ -87,18 +90,21 @@ p2 <-
     geom_sf(
       data = shp.world,
       size = 0.1,
-      fill = 'grey95'
+      fill = 'grey50'
     ) +
     geom_sf(data = shp.sim, aes(color = est.sim), size = 0.1, shape = 15) +
-    geom_sf(data = shp.world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
+    geom_sf(data = shp.world.buf, size = 0.1, fill = 'grey50', alpha = 0.1) +
+    geom_sf(data = shp.ridge, size = 0.2) +
+    geom_sf(data = shp.trench, size = 0.2) +
+    geom_sf(data = shp.transform, size = 0.2) +
     geom_sf(data = bind_rows(shp.contours), size = 0.05, color = 'white') +
     geom_sf(data = bind_rows(shp.segs), size = 0.5, color = 'white') +
     geom_sf_label_repel(
       data = bind_rows(shp.segs),
-      aes(label = c('AA', 'An', 'CA', 'KM', 'KR', 'LA', 'NP', 'NBS', 'SP', 'SC', 'SBS', 'TNZ', 'VN')),
+      aes(label = c('AA', 'AN', 'CA', 'KM', 'KR', 'LA', 'NP', 'NBS', 'SP', 'SC', 'SBS', 'TNZ', 'VN')),
       fill = 'ivory',
-      size = 2.5,
-      alpha = 0.7,
+      size = 4,
+      alpha = 0.9,
       segment.size = 0.3,
       segment.color = 'white',
       segment.curvature = -1e-20,
@@ -113,7 +119,7 @@ p2 <-
       label = 'Similarity interpolation (Lucazeau, 2019)',
       hjust = 0,
       vjust = 0,
-      size = 4,
+      size = 5,
       fill = 'ivory',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
@@ -121,7 +127,7 @@ p2 <-
     labs(color = bquote(mWm^-2)) +
     v.scale.white +
     coord_sf(expand = F) +
-    theme_map(font_size = 8) +
+    theme_map(font_size = 12) +
     theme(
       axis.text = element_text(),
       legend.position = c(1, 1),
@@ -133,7 +139,7 @@ p2 <-
       legend.key.width = unit(0.3, 'in'),
       legend.title = element_text(vjust = 1),
       panel.grid = element_line(size = 0.1, color = 'white'),
-      panel.background = element_rect(fill = 'grey80', color = NA),
+      panel.background = element_rect(fill = 'grey40', color = NA),
       plot.margin = margin()
     )
 # Save
@@ -152,8 +158,20 @@ suppressWarnings(suppressMessages(
 
 # Global buffer composition
 p3 <-
-  (p1 + theme(legend.position = 'none', plot.margin = margin(0, 0, 2, 0))) /
-  (p2 + theme(plot.margin = margin(2, 0, 0, 0)))
+  (p1 +
+    theme(
+      axis.text = element_blank(),
+      plot.margin = margin(0, 0, 2, 0)
+    )
+  ) /
+  (p2 +
+    theme(
+      legend.position = 'none',
+      plot.margin = margin(2, 0, 0, 0)
+    )
+  ) +
+  plot_annotation(tag_level = 'a') &
+  theme(plot.tag = element_text(margin = margin(10, 4, 4, 4), color = 'ivory', size = 14))
 # Save
 cat('\nSaving plot to: figs/base/ThermoGlobeBufferComp.png')
 suppressWarnings(suppressMessages(
@@ -180,19 +198,45 @@ walk(~{
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
   hf <- shp.hf.crop[[.x]]
   sim <- suppressWarnings(shp.interp.luca %>% st_intersection(buf)) # Similarity interp
+  ridge <- shp.ridge.crop[[.x]]
+  trench <- shp.trench.crop[[.x]]
+  transform <- shp.transform.crop[[.x]]
+  pnt.size <- 3
+  annt.txt.size <- 5
+  base.txt.size <- 12
   # Define map scale 1:50,000
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
-  pnt.size <- wdth*hght/2.3e3
-  annt.txt.size <- wdth/2.2e1
-  base.txt.size <- wdth/1.5e1
+  if(!(.x %in%
+      c(
+        'Alaska Aleutians',
+        'Central America',
+        'Sumatra Banda Sea',
+        'New Britain Solomon'
+      ))
+  ) {
+    if(wdth <= 76.2) {
+      const <- 76.2/wdth
+      wdth <- wdth * const
+      hght <- hght * const
+    }
+  } else {
+    if(wdth <= 152.4) {
+      const <- 152.4/wdth
+      wdth <- wdth * const
+      hght <- hght * const
+    }
+  }
   # ThermoGlobe data
   pp1 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
-      geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3) +
-      geom_sf(data = seg, size = 1.5) +
+      geom_sf(data = world, size = 0.1, fill = 'grey50') +
+      geom_sf(data = ridge, size = 0.5) +
+      geom_sf(data = trench, size = 0.5) +
+      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
+      geom_sf(data = cnt, size = 0.3, color = 'white') +
+      geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
       annotate(
         'label',
@@ -217,11 +261,11 @@ walk(~{
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/35, 'mm'),
-        legend.key.width = unit(wdth/12, 'mm'),
+        legend.key.height = unit(0.1, 'in'),
+        legend.key.width = unit(0.3, 'in'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
+        panel.background = element_rect(fill = 'grey40', color = NA),
         plot.margin = margin()
       )
   # Save
@@ -238,13 +282,15 @@ walk(~{
 #     )
 #   ))
 #  system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Base.png'), wait = F)
-
   # Similarity interpolation
   pp2 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
+      geom_sf(data = world, size = 0.1, fill = 'grey50') +
       geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey50', alpha = 0.1) +
+      geom_sf(data = ridge, size = 0.5) +
+      geom_sf(data = trench, size = 0.5) +
+      geom_sf(data = transform, size = 0.5) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -271,11 +317,11 @@ walk(~{
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/10, 'mm'),
+        legend.key.height = unit(0.1, 'in'),
+        legend.key.width = unit(0.3, 'in'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
+        panel.background = element_rect(fill = 'grey40', color = NA),
         plot.margin = margin()
       )
   # Save
@@ -295,11 +341,14 @@ walk(~{
   # ThermoGlobe data without annotation
   pp3 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
-      geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3) +
-      geom_sf(data = seg, size = 1.5) +
-      geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.15, show.legend = F) +
+      geom_sf(data = world, size = 0.1, fill = 'grey50') +
+      geom_sf(data = ridge, size = 0.5) +
+      geom_sf(data = trench, size = 0.5) +
+      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
+      geom_sf(data = cnt, size = 0.3, color = 'white') +
+      geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3, show.legend = F) +
       v.scale.white +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
@@ -311,18 +360,37 @@ walk(~{
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/15, 'mm'),
+        legend.key.height = unit(0.1, 'in'),
+        legend.key.width = unit(0.3, 'in'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
+        panel.background = element_rect(fill = 'grey40', color = NA),
         plot.margin = margin()
       )
-  if(.x != 'Alaska Aleutians') {
+  if(!(.x %in%
+      c(
+        'Alaska Aleutians',
+        'Central America',
+        'Sumatra Banda Sea',
+        'New Britain Solomon'
+      ))
+  ) {
     # Composition
     pp4 <-
-      (pp3 + theme(plot.margin = margin(0, 2, 0, 0))) +
-      (pp2 + theme(axis.text.y = element_blank(), plot.margin = margin(0, 0, 0, 2)))
+      (pp3 +
+        theme(
+          plot.margin = margin(0, 2, 0, 0),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 30), size = 14)
+        )
+      ) +
+      (pp2 +
+        theme(
+          axis.text.y = element_blank(),
+          plot.margin = margin(0, 0, 0, 2),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 4), size = 14)
+        )
+      ) +
+      plot_annotation(tag_level = 'a')
     # Save
     cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png', sep = '')
     suppressWarnings(suppressMessages(
@@ -340,8 +408,20 @@ walk(~{
   } else {
     # Composition
     pp4 <-
-      (pp3 + theme(axis.text.x = element_blank(), plot.margin = margin(0, 0, 2, 0))) /
-      (pp2 + theme(plot.margin = margin(2, 0, 0, 0)))
+      (pp3 +
+        theme(
+          axis.text.x = element_blank(),
+          plot.margin = margin(0, 0, 2, 0),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 30), size = 14)
+        )
+      ) /
+      (pp2 +
+        theme(
+          plot.margin = margin(2, 0, 0, 0),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 30), size = 14)
+        )
+      ) +
+      plot_annotation(tag_level = 'a')
     # Save
     cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png', sep = '')
     suppressWarnings(suppressMessages(
