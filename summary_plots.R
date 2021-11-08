@@ -24,8 +24,8 @@ load('data/hf.Rdata')
 load(paste0('data/opt', cntr, '.RData'))
 dir.create('figs/summary', showWarnings = F)
 dir.create('figs/vgrms', showWarnings = F)
-cat('\nSaving plots to: figs/summary/*', cntr, '.RData', sep = '')
-cat('\nSaving plots to: figs/vgrms/*', cntr, '.png', sep = '')
+cat('\nSaving plots to: figs/summary/', cntr, '.RData', sep = '')
+cat('\nSaving plots to: figs/vgrms/', cntr, '.png', sep = '')
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
@@ -76,7 +76,6 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-# system('open figs/summary/hfSummary.png', wait = F)
 }
 
 # Plot all variogram models
@@ -106,16 +105,6 @@ walk(~{
     width = 6,
     height = 6
   )
-  # system(
-  #   paste0(
-  #     'open figs/vgrms/',
-  #     str_replace_all(.x, ' ', ''),
-  #     'Vgrms',
-  #     cntr,
-  #     '.png'
-  #   ),
-  #   wait = F
-  # )
 })
 
 # Summarise variogram models
@@ -177,7 +166,6 @@ suppressWarnings(suppressMessages(
     height = 6
   )
 ))
-# system(paste0('open figs/summary/vgrmSummary', cntr, '.png'), wait = F)
 
 # Interpolation differences
 dif <-
@@ -226,7 +214,6 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-# system(paste0('open figs/summary/interpDiffSummary', cntr, '.png'), wait = F)
 
 p3b <-
   dif$shp.interp.diff %>%
@@ -269,7 +256,6 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-# system(paste0('open figs/summary/interpSigmaDiffSummary', cntr, '.png'), wait = F)
 # nloptr trace
 p4 <-
   opt.trace %>%
@@ -299,14 +285,13 @@ ggsave(
   width = 6,
   height = 3.5
 )
-# system(paste0('open figs/summary/optTrace', cntr, '.png'), wait = F)
 
 # Cut up segments and visualize heat flow
 # within sectors
 tibble(
   seg.names = seg.names,
   buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
-  seg.num = c(4, 8, 4, 8, 8, 5, 3, 3, 6, 2, 6, 8, 6),
+  seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
   scale.bar.width = c(5, 3, 4, 4, 3.5, 3, 4, 4, 2.5, 4, 5.5, 3, 2.5),
   scale.bar.height = c(0.05, 0.02, 0.05, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02),
   scale.bar.text = c(3.5, 4, 4, 4, 3.5, 4, 4, 4, 3.5, 3.5, 3.5, 4, 3.5),
@@ -317,36 +302,32 @@ tibble(
   label.size = c(6, 6, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
 ) %>%
 pwalk(~{
-  split_segment(
-    seg.name = ..1,
-    buf.dir = ..2,
-    seg.num = ..3
-  ) %>%
-  plot_split_segment(
-    running.avg = 5,
-    scale.bar.width = ..4,
-    scale.bar.height = ..5,
-    scale.bar.text = ..6,
-    scale.bar.just = ..7,
-    scale.bar.position = ..8,
-    north.scale = ..9,
-    north.position = ..10,
-    label.size = ..11
-  ) -> p
-  ggsave(
-    file = paste0('figs/upperPlate/', str_replace_all(..1, ' ', ''), 'UpperPlate.png'),
-    plot = p,
-    device = 'png',
-    type = 'cairo',
-    width = 6,
-    height = 6
-  )
-  # system(
-  #   paste0(
-  #     'open ',
-  #     paste0('figs/upperPlate/', str_replace_all(..1, ' ', ''), 'UpperPlate.png')
-  #   )
-  # )
+  suppressMessages({suppressWarnings({
+    split_segment(
+      seg.name = ..1,
+      buf.dir = ..2,
+      seg.num = ..3
+    ) %>%
+    plot_split_segment(
+      running.avg = 5,
+      scale.bar.width = ..4,
+      scale.bar.height = ..5,
+      scale.bar.text = ..6,
+      scale.bar.just = ..7,
+      scale.bar.position = ..8,
+      north.scale = ..9,
+      north.position = ..10,
+      label.size = ..11
+    ) -> p
+    ggsave(
+      file = paste0('figs/upperPlate/', str_replace_all(..1, ' ', ''), 'UpperPlate.png'),
+      plot = p,
+      device = 'png',
+      type = 'cairo',
+      width = 6,
+      height = 6
+    )
+  })})
 })
 
 cat('\nDone!\n')

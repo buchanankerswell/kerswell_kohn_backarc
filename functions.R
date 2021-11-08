@@ -518,88 +518,18 @@ split_lines <- function(input_lines, max_length, id = NULL) {
   return(split_lines)
 }
 
-# Plot variogram
-plot_vgrm <-
-  function(
-    experimental.vgrm,
-    fitted.vgrm = NULL,
-    cost = NULL,
-    v.mod = NULL,
-    lineCol = 'deeppink'
-  ){
-  # Check for missing arguments
-  if(is.null(experimental.vgrm)) stop('\nMissing experimental variogram!')
-  p <- 
-    ggplot() +
-    labs(
-      x = 'Lag Distance (km)',
-      y = bquote('Semivariance'~(mWm^-2))
-    ) +
-    theme_classic() +
-    theme(
-      axis.title = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks.y = element_blank()
-    )
-  plt <- tryCatch(
-    {
-      p +
-      geom_line(
-        data = variogramLine(fitted.vgrm, maxdist = max(experimental.vgrm$dist)),
-        aes(x = dist/1000, y = gamma),
-        color = lineCol
-      ) +
-      geom_point(
-        data = experimental.vgrm,
-        aes(x = dist/1000, y = gamma),
-        size = 0.8,
-        shape = 19
-      ) +
-      annotate(
-        'label',
-        x = -Inf,
-        y = Inf,
-        label = paste('Model:', v.mod, '\nCost:', round(cost, 3)),
-        label.padding = unit(0.1, 'lines'),
-        label.r = unit(0, 'lines'),
-        alpha = 0.8,
-        fill = 'grey90',
-        size = 3,
-        vjust = 1.1,
-        hjust = -0.1
-      )
-    },
-    error=function(cond) {
-      # If there was an error with the variogram fit ...
-      # plot only the experimental variogram
-      cat('Somthing is up with variogram model!')
-      cat('\nPlotting experimental variogram only\n')
-      exp.plt <- p +
-      geom_point(
-        data = experimental.vgrm,
-        aes(x = dist/1000, y = gamma),
-        size = 0.8,
-        shape = 19
-      )
-      return(exp.plt)
-    }
-  )
-  return(plt)
-}
-
 # Splits SZ segment buffers into equal parts and crops data points and
 # interpolations by intersection for each buffer segment
-split_segment <- function(seg.name, buf.dir = 'l', seg.num = 6, buf.len = 1e6) {
+split_segment <- function(seg.name, buf.dir = 'l', seg.num = 6, buf.len = 5e5) {
   pnts <- shp.hf.crop[[seg.name]]
   seg <- shp.segs[[seg.name]]
   split.seg <- split_lines(seg, as.numeric(st_length(seg)/seg.num))
-  buf <- st_buffer(seg, dist = buf.len, endCapStyle = 'FLAT')
+  buf <- st_buffer(seg, dist = buf.len, endCapStyle = 'ROUND')
   split.buf <-
     st_buffer(
       split.seg,
-      dist = ifelse(buf.dir == 'l', -5*buf.len, 5*buf.len),
-      singleSide = T,
-      endCapStyle = 'FLAT'
+      dist = ifelse(buf.dir == 'l', -1*buf.len, 1*buf.len),
+      singleSide = T
     ) %>%
     st_intersection(buf)
   pnts.buf <-
@@ -652,8 +582,9 @@ plot_split_segment <-
       geom_sf(
         data = split.seg$buf,
         aes(fill = split_fID),
+        alpha = 0.8,
         size = 0.5,
-        color = 'grey90',
+        color = 'grey50',
         show.legend = F
       ) +
       geom_sf(data = split.seg$seg, size = 2) +
@@ -665,21 +596,14 @@ plot_split_segment <-
         alpha = 0.8,
         show.legend = F
       ) +
-      ggsn::north(split.seg$buf, scale = north.scale, location = north.position) +
-      ggsn::scalebar(
-        split.seg$buf,
-        dist = sbar,
-        location = scale.bar.position,
-        st.size = scale.bar.text,
-        height = scale.bar.height,
-        st.dist = scale.bar.just,
-        border.size = 0.1,
-        dist_unit = 'km',
-        transform = F,
-        model = 'WGS84'
-      ) +
-      theme_map() +
-      theme(plot.margin = margin())
+      theme_map(font_size = 8) +
+      theme(
+        plot.tag = element_text(face = 'bold', size = 14),
+        axis.text = element_text(),
+        panel.grid = element_line(size = 0.1, color = 'white'),
+        panel.background = element_rect(fill = 'grey50', color = NA),
+        plot.margin = margin()
+      )
   p1 <-
     split.seg$interp %>%
     st_set_geometry(NULL) %>%
@@ -690,9 +614,9 @@ plot_split_segment <-
     ggplot() +
     geom_density_ridges(
       aes(x = value, y = split_fID, fill = split_fID, linetype = name),
-      calc_ecdf = T,
-      quantiles = 4,
-      quantile_lines = T,
+#      calc_ecdf = T,
+#      quantiles = 4,
+#      quantile_lines = T,
       alpha = 0.9
     ) +
     coord_cartesian(xlim = range(y.lim)) +
@@ -704,125 +628,132 @@ plot_split_segment <-
       legend.box.margin = margin(),
       legend.background = element_rect(fill = NA, color = NA),
       legend.key.size = unit(0.8, 'lines'),
-      panel.background = element_rect(fill = 'grey90')
+      panel.background = element_rect(fill = 'grey50')
     )
-  if(!(split.seg$interp$segment[1] %in% c('Andes', 'Kamchatka Marianas', 'Tonga New Zealand'))) {
-    p2 <-
-      split.seg$interp %>%
-      st_set_geometry(NULL) %>%
-      filter(distance.from.seg <= 1000000) %>%
-      select(est.sim, est.krige, split_fID, distance.from.seg) %>%
-      mutate(
-        Similarity = zoo::rollmean(est.sim, running.avg, fill = NA),
-        Krige = zoo::rollmean(est.krige, running.avg, fill = NA)
-      ) %>%
-      select(-c(est.sim, est.krige)) %>%
-      pivot_longer(-c(split_fID, distance.from.seg)) %>%
-      group_by(name) %>%
-      ggplot() +
-        geom_point(
-          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-          size = 0.1,
-          shape = 19,
-          alpha = 0.2,
-          show.legend = F
-        ) +
-        geom_smooth(
-          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-          size = 1,
-          se = F
-        ) +
-        labs(
-          x = 'Distance from Trench (km)',
-          y = bquote('Heat Flow'~(mWm^-2)),
-          color = 'Sector'
-        ) +
-        scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
-        coord_cartesian(ylim = range(y.lim)) +
-        facet_wrap(~name) +
-        theme_classic() +
-        theme(
-          panel.background = element_rect(fill = 'grey90'),
-          legend.key.size = unit(0.8, 'lines'),
-          legend.position = c(1, 0),
-          legend.justification = c(1, 0),
-          legend.dir = 'horizontal',
-          legend.background = element_rect(fill = NA)
-        )
-    pp1 <- p0 + p1 + plot_layout(widths = 1)
-    p <-
-      pp1 / p2 +
-      plot_layout(widths = c(1, 2), guides = 'collect') +
-      plot_annotation(
-        tag_level = 'a',
-        caption = split.seg$interp$segment[1]
-      ) &
+  p2 <-
+    split.seg$interp %>%
+    st_set_geometry(NULL) %>%
+    filter(distance.from.seg <= 500000) %>%
+    select(est.sim, est.krige, split_fID, distance.from.seg) %>%
+    mutate(
+      Similarity = zoo::rollmean(est.sim, running.avg, fill = NA),
+      Krige = zoo::rollmean(est.krige, running.avg, fill = NA)
+    ) %>%
+    select(-c(est.sim, est.krige)) %>%
+    pivot_longer(-c(split_fID, distance.from.seg)) %>%
+    group_by(name) %>%
+    ggplot() +
+      geom_point(
+        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        size = 0.3,
+        shape = 19,
+        alpha = 0.3,
+        show.legend = F
+      ) +
+      geom_smooth(
+        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        size = 1,
+        se = F
+      ) +
+      labs(
+        x = 'Distance from Trench (km)',
+        y = bquote('Heat Flow'~(mWm^-2)),
+        color = 'Sector'
+      ) +
+      guides(color = guide_legend(nrow = 1)) +
+      scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
+      coord_cartesian(ylim = range(y.lim)) +
+      facet_wrap(~name) +
+      theme_classic() +
       theme(
-        plot.margin = margin(2, 2, 2, 2),
-        plot.tag = element_text(face = 'bold'),
-        legend.position = 'bottom'
+        panel.background = element_rect(fill = 'grey50'),
+        legend.key.size = unit(0.8, 'lines'),
+        legend.position = c(1, 0),
+        legend.justification = c(1, 0),
+        legend.dir = 'horizontal',
+        legend.background = element_rect(fill = NA)
       )
-  } else {
-    p2 <-
-      split.seg$interp %>%
-      st_set_geometry(NULL) %>%
-      filter(distance.from.seg <= 1000000) %>%
-      select(est.sim, est.krige, split_fID, distance.from.seg) %>%
-      mutate(
-        Similarity = zoo::rollmean(est.sim, running.avg, fill = NA),
-        Krige = zoo::rollmean(est.krige, running.avg, fill = NA)
-      ) %>%
-      select(-c(est.sim, est.krige)) %>%
-      pivot_longer(-c(split_fID, distance.from.seg)) %>%
-      group_by(name) %>%
-      ggplot() +
-        geom_point(
-          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-          size = 0.1,
-          shape = 19,
-          alpha = 0.2,
-          show.legend = F
-        ) +
-        geom_smooth(
-          aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-          size = 0.6,
-          se = F
-        ) +
-        labs(
-          x = 'Distance from Trench (km)',
-          y = bquote('Heat Flow'~(mWm^-2)),
-          color = 'Sector'
-        ) +
-        scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
-        coord_cartesian(ylim = range(y.lim)) +
-        facet_wrap(~name, nrow = 2, ncol = 1) +
-        theme_classic() +
-        theme(
-          panel.background = element_rect(fill = 'grey90'),
-          legend.key.size = unit(0.8, 'lines'),
-          legend.position = c(1, 0),
-          legend.justification = c(1, 0),
-          legend.dir = 'horizontal',
-          legend.background = element_rect(fill = NA)
-        )
-    layout <- '
-    AABB
-    AABB
-    AACC
-    AACC
-    '
-    p <-
-      p0 + p1 + p2 +
-      plot_layout(design = layout, guides = 'collect') +
-      plot_annotation(
-        tag_level = 'a',
-        caption = split.seg$interp$segment[1]
-      ) &
-      theme(
-        plot.margin = margin(2, 2, 2, 2),
-        plot.tag = element_text(face = 'bold'),
-        legend.position = 'bottom'
-      )
-    }
+  pp1 <- p0 + p1 + plot_layout(widths = 1)
+  p <-
+    pp1 / p2 +
+    plot_layout(widths = c(1, 2), guides = 'collect') +
+    plot_annotation(
+      tag_level = 'a',
+      caption = split.seg$interp$segment[1]
+    ) &
+    theme(
+      plot.margin = margin(2, 2, 2, 2),
+      plot.tag = element_text(face = 'bold'),
+      legend.position = 'bottom'
+    )
   p
+}
+
+# Plot variogram
+plot_vgrm <-
+  function(
+    experimental.vgrm,
+    fitted.vgrm = NULL,
+    cost = NULL,
+    v.mod = NULL,
+    lineCol = 'deeppink'
+  ){
+  # Check for missing arguments
+  if(is.null(experimental.vgrm)) stop('\nMissing experimental variogram!')
+  p <- 
+    ggplot() +
+    labs(
+      x = 'Lag Distance (km)',
+      y = bquote('Semivariance'~(mWm^-2))
+    ) +
+    theme_classic() +
+    theme(
+      axis.title = element_blank(),
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  plt <- tryCatch(
+    {
+      p +
+      geom_line(
+        data = variogramLine(fitted.vgrm, maxdist = max(experimental.vgrm$dist)),
+        aes(x = dist/1000, y = gamma),
+        color = lineCol
+      ) +
+      geom_point(
+        data = experimental.vgrm,
+        aes(x = dist/1000, y = gamma),
+        size = 0.8,
+        shape = 19
+      ) +
+      annotate(
+        'label',
+        x = -Inf,
+        y = Inf,
+        label = paste('Model:', v.mod, '\nCost:', round(cost, 3)),
+        label.padding = unit(0.1, 'lines'),
+        label.r = unit(0, 'lines'),
+        alpha = 0.8,
+        fill = 'grey80',
+        size = 3,
+        vjust = 1.1,
+        hjust = -0.1
+      )
+    },
+    error=function(cond) {
+      # If there was an error with the variogram fit ...
+      # plot only the experimental variogram
+      cat('Somthing is up with variogram model!')
+      cat('\nPlotting experimental variogram only\n')
+      exp.plt <- p +
+      geom_point(
+        data = experimental.vgrm,
+        aes(x = dist/1000, y = gamma),
+        size = 0.8,
+        shape = 19
+      )
+      return(exp.plt)
+    }
+  )
+  return(plt)
 }

@@ -43,23 +43,49 @@ pwalk(~{
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
   volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
   sim <- suppressWarnings(shp.interp.luca %>% st_intersection(buf)) # Similarity interp
+  ridge <- shp.ridge.crop[[..1]]
+  trench <- shp.trench.crop[[..1]]
+  transform <- shp.transform.crop[[..1]]
   dif <- ..6
   fts <- shp.fts[shp.fts$segment == ..1,]
   v.mod <- ..2
   cost <- ..7
+  pnt.size <- 3
+  annt.txt.size <- 5
+  base.txt.size <- 12
   # Define map scale 1:50,000
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
-  # Define points and text sizes
-  pnt.size <- log(wdth*hght, base = 20)
-  annt.txt.size <- log(wdth*hght, base = 12)
-  base.txt.size <- log(wdth*hght, base = 3)
+  if(!(.x %in%
+      c(
+        'Alaska Aleutians',
+        'Central America',
+        'Kyushu Ryukyu',
+        'Lesser Antilles',
+        'N Philippines',
+        'Scotia',
+        'Sumatra Banda Sea',
+        'New Britain Solomon',
+        'Vanuatu'
+      ))
+  ) {
+    const <- 76.2/wdth
+    wdth <- wdth * const
+    hght <- hght * const
+  } else {
+    const <- 101.6/hght
+    wdth <- wdth * const
+    hght <- hght * const
+  }
   # Similarity interpolation
   pp1 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
+      geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
+      geom_sf(data = ridge, size = 0.5) +
+      geom_sf(data = trench, size = 0.5) +
+      geom_sf(data = transform, size = 0.5) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -106,19 +132,22 @@ pwalk(~{
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/12, 'mm'),
+        legend.key.height = unit(0.1, 'in'),
+        legend.key.width = unit(0.3, 'in'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
+        panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
       )
   # Krige interpolation
   pp2 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
+      geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
+      geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
+      geom_sf(data = ridge, size = 0.5) +
+      geom_sf(data = trench, size = 0.5) +
+      geom_sf(data = transform, size = 0.5) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -157,100 +186,106 @@ pwalk(~{
         legend.direction = 'horizontal',
         legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/12, 'mm'),
+        legend.key.height = unit(0.1, 'in'),
+        legend.key.width = unit(0.3, 'in'),
         legend.title = element_text(vjust = 1),
         panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
+        panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
       )
   # Interpolation difference
-  pp3 <- 
-    ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
-      geom_sf(data = dif, aes(color = est.diff), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
-      geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
-      geom_sf(data = seg, size = 1.5, color = 'white') +
-      annotate(
-        'label',
-        x = Inf,
-        y = -Inf,
-        label = 'Estimate Difference',
-        hjust = 1,
-        vjust = 0,
-        size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      scale_color_continuous_diverging(
-        palette = 'Berlin',
-        limits = c(-100, 125),
-        na.value = 'grey80'
-      ) +
-      labs(color = bquote(mWm^-2)) +
-      coord_sf(expand = F) +
-      theme_map(font_size = base.txt.size) +
-      theme(
-        axis.text = element_text(color = 'grey20'),
-        legend.position = c(1, 1),
-        legend.justification = c(1, 1),
-        legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
-        legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/12, 'mm'),
-        legend.title = element_text(vjust = 1),
-        panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
-        plot.margin = margin()
-      )
+#  pp3 <- 
+#    ggplot() +
+#      geom_sf(data = world, size = 0.1, fill = 'grey60') +
+#      geom_sf(data = dif, aes(color = est.diff), size = pnt.size, shape = 15) +
+#      geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
+#      geom_sf(data = ridge, size = 0.5) +
+#      geom_sf(data = trench, size = 0.5) +
+#      geom_sf(data = transform, size = 0.5) +
+#      geom_sf(data = buf, size = 0.3, fill = NA) +
+#      geom_sf(data = cnt, size = 0.3, color = 'white') +
+#      geom_sf(data = seg, size = 1.5, color = 'white') +
+#      annotate(
+#        'label',
+#        x = Inf,
+#        y = -Inf,
+#        label = 'Estimate Difference',
+#        hjust = 1,
+#        vjust = 0,
+#        size = annt.txt.size,
+#        fill = rgb(1, 1, 0.941, 0.7),
+#        label.padding = unit(0.15, 'lines'),
+#        label.r = unit(0.05, 'lines')
+#      ) +
+#      scale_color_continuous_diverging(
+#        palette = 'Berlin',
+#        limits = c(-100, 125),
+#        na.value = 'grey50'
+#      ) +
+#      labs(color = bquote(mWm^-2)) +
+#      coord_sf(expand = F) +
+#      theme_map(font_size = base.txt.size) +
+#      theme(
+#        axis.text = element_text(color = 'grey20'),
+#        legend.position = c(1, 1),
+#        legend.justification = c(1, 1),
+#        legend.direction = 'horizontal',
+#        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+#        legend.box.margin = margin(1, 8, 1, 2),
+#        legend.key.height = unit(0.1, 'in'),
+#        legend.key.width = unit(0.3, 'in'),
+#        legend.title = element_text(vjust = 1),
+#        panel.grid = element_line(size = 0.1, color = 'white'),
+#        panel.background = element_rect(fill = 'grey50', color = NA),
+#        plot.margin = margin()
+#      )
   # Uncertainty difference
-  pp4 <- 
-    ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey95') +
-      geom_sf(data = dif, aes(color = sigma.diff), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
-      geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
-      geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, shape = 2, size = pnt.size, color = 'deeppink') +
-      annotate(
-        'label',
-        x = Inf,
-        y = -Inf,
-        label = 'Uncertainty Difference',
-        hjust = 1,
-        vjust = 0,
-        size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      scale_color_continuous_diverging(
-        palette = 'Berlin',
-        limits = c(-125, 100),
-        na.value = 'grey80'
-      ) +
-      labs(color = bquote(mWm^-2)) +
-      coord_sf(expand = F) +
-      theme_map(font_size = base.txt.size) +
-      theme(
-        axis.text = element_text(color = 'grey20'),
-        legend.position = c(1, 1),
-        legend.justification = c(1, 1),
-        legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
-        legend.box.margin = margin(1, 8, 1, 2),
-        legend.key.height = unit(hght/30, 'mm'),
-        legend.key.width = unit(wdth/12, 'mm'),
-        legend.title = element_text(vjust = 1),
-        panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey80', color = NA),
-        plot.margin = margin()
-      )
+#  pp4 <- 
+#    ggplot() +
+#      geom_sf(data = world, size = 0.1, fill = 'grey60') +
+#      geom_sf(data = dif, aes(color = sigma.diff), size = pnt.size, shape = 15) +
+#      geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
+#      geom_sf(data = ridge, size = 0.5) +
+#      geom_sf(data = trench, size = 0.5) +
+#      geom_sf(data = transform, size = 0.5) +
+#      geom_sf(data = buf, size = 0.3, fill = NA) +
+#      geom_sf(data = cnt, size = 0.3, color = 'white') +
+#      geom_sf(data = seg, size = 1.5, color = 'white') +
+#      geom_sf(data = volc, shape = 2, size = pnt.size, color = 'deeppink') +
+#      annotate(
+#        'label',
+#        x = Inf,
+#        y = -Inf,
+#        label = 'Uncertainty Difference',
+#        hjust = 1,
+#        vjust = 0,
+#        size = annt.txt.size,
+#        fill = rgb(1, 1, 0.941, 0.7),
+#        label.padding = unit(0.15, 'lines'),
+#        label.r = unit(0.05, 'lines')
+#      ) +
+#      scale_color_continuous_diverging(
+#        palette = 'Berlin',
+#        limits = c(-125, 100),
+#        na.value = 'grey50'
+#      ) +
+#      labs(color = bquote(mWm^-2)) +
+#      coord_sf(expand = F) +
+#      theme_map(font_size = base.txt.size) +
+#      theme(
+#        axis.text = element_text(color = 'grey20'),
+#        legend.position = c(1, 1),
+#        legend.justification = c(1, 1),
+#        legend.direction = 'horizontal',
+#        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+#        legend.box.margin = margin(1, 8, 1, 2),
+#        legend.key.height = unit(0.1, 'in'),
+#        legend.key.width = unit(0.3, 'in'),
+#        legend.title = element_text(vjust = 1),
+#        panel.grid = element_line(size = 0.1, color = 'white'),
+#        panel.background = element_rect(fill = 'grey50', color = NA),
+#        plot.margin = margin()
+#      )
   # Save
   cat(
     '\nSaving plot to: figs/diff/',
@@ -260,108 +295,108 @@ pwalk(~{
     '.png',
     sep = ''
   )
-  if(..1 == 'Andes') {
+  if(!(.x %in%
+      c(
+        'Alaska Aleutians',
+        'Central America',
+        'Kyushu Ryukyu',
+        'Lesser Antilles',
+        'N Philippines',
+        'Scotia',
+        'Sumatra Banda Sea',
+        'New Britain Solomon',
+        'Vanuatu'
+      ))
+  ) {
+    # Composition
     p <-
       (pp1 +
-        (pp2 +
-          theme(
-            legend.position = 'none',
-            axis.text.y = element_blank()
-          )
+        theme(
+          plot.margin = margin(0, 2, 0, 0),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
         )
       ) +
-      (
-        (pp3 +
-          theme(
-            legend.position = 'none',
-            axis.text.y = element_blank()
-          )
-        ) +
-        (pp4 +
-          theme(
-            axis.text.y = element_blank()
-          )
+      (pp2 +
+        theme(
+          legend.position = 'none',
+          axis.text.y = element_blank(),
+          plot.margin = margin(0, 0, 0, 2),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 4), size = 20)
         )
-      ) &
-      theme(plot.margin = margin(2, 2, 2, 2))
+      ) +
+      plot_annotation(tag_level = 'a')
+    # Save
     suppressWarnings(suppressMessages(
       ggsave(
-        file = paste0('figs/diff/', str_replace_all(..1, ' ', ''), 'DiffComp', cntr, '.png'),
-        plot = p,
-        device = 'png',
-        type = 'cairo',
-        width = wdth*4+(wdth*0.06),
-        height = hght,
-        units = 'mm'
-      )
-    ))
-    # system(
-    #   paste0(
-    #     'open figs/diff/',
-    #     str_replace_all(..1, ' ', ''),
-    #     'DiffComp',
-    #     cntr,
-    #     '.png'
-    #   ), wait = F
-    # )
-  } else {
-    p <-
-      (
-        (pp1 +
-          theme(
-            axis.text.x = element_blank()
-          )
-        ) +
-        (pp2 +
-          theme(
-            legend.position = 'none',
-            axis.text = element_blank()
-          )
-        )
-      ) /
-      (
-        (pp3 +
-          theme(
-            legend.position = 'none'
-          )
-        ) +
-        (pp4 +
-          theme(
-            axis.text.y = element_blank()
-          )
-        )
-      ) &
-      theme(plot.margin = margin(2, 2, 2, 2))
-    suppressWarnings(suppressMessages(
-      ggsave(
-        file = paste0('figs/diff/', str_replace_all(..1, ' ', ''), 'DiffComp', cntr, '.png'),
+        file = paste0('figs/diff/', str_replace_all(..1, ' ', ''), 'DiffComp.png'),
         plot = p,
         device = 'png',
         type = 'cairo',
         width = wdth*2,
+        height = hght,
+        units = 'mm'
+      )
+    ))
+  } else {
+    # Composition
+    p <-
+      (pp1 +
+        theme(
+          axis.text.x = element_blank(),
+          plot.margin = margin(0, 0, 2, 0),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
+        )
+      ) /
+      (pp2 +
+        theme(
+          legend.position = 'none',
+          plot.margin = margin(2, 0, 0, 0),
+          plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
+        )
+      ) +
+      plot_annotation(tag_level = 'a')
+    # Save
+    suppressWarnings(suppressMessages(
+      ggsave(
+        file = paste0('figs/diff/', str_replace_all(..1, ' ', ''), 'DiffComp.png'),
+        plot = p,
+        device = 'png',
+        type = 'cairo',
+        width = wdth,
         height = hght*2,
         units = 'mm'
       )
     ))
-    # system(
-    #   paste0(
-    #     'open figs/diff/',
-    #     str_replace_all(..1, ' ', ''),
-    #     'DiffComp',
-    #     cntr,
-    #     '.png'
-    #     ),
-    #   wait = F
-    # )
   }
 })
 
 walk(unique(solns$segment), ~{
   # Define mapping scale
-  buf <- shp.buffer[[..1]] # Buffer
+  buf <- shp.buffer[[.x]] # Buffer
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
+  if(!(.x %in%
+      c(
+        'Alaska Aleutians',
+        'Central America',
+        'Kyushu Ryukyu',
+        'Lesser Antilles',
+        'N Philippines',
+        'Scotia',
+        'Sumatra Banda Sea',
+        'New Britain Solomon',
+        'Vanuatu'
+      ))
+  ) {
+    const <- 50.8/wdth
+    wdth <- wdth * const
+    hght <- hght * const
+  } else {
+    const <- 76.2/wdth
+    wdth <- wdth * const
+    hght <- hght * const
+  }
   plts <-
     solns %>%
     filter(segment == .x) %>%
@@ -374,22 +409,36 @@ walk(unique(solns$segment), ~{
       world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
       world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
       volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
+      ridge <- shp.ridge.crop[[..1]]
+      trench <- shp.trench.crop[[..1]]
+      transform <- shp.transform.crop[[..1]]
       dif <- ..6
-#      fts <- shp.fts[shp.fts$segment == ..1,]
       v.mod <- ..2
       cost <- ..7
+      # Define points and text sizes
+      pnt.size <- 2
+      annt.txt.size <- 4
+      base.txt.size <- 12
       # Define map scale 1:50,000
       wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
       hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
-      # Define points and text sizes
-      pnt.size <- log(wdth*hght, base = 20)
-      annt.txt.size <- log(wdth*hght, base = 12)
-      base.txt.size <- log(wdth*hght, base = 3)
+      if(..1 == 'Andes') {
+        const <- 38.1/wdth
+        wdth <- wdth * const
+        hght <- hght * const
+      } else {
+        const <- 76.2/hght
+        wdth <- wdth * const
+        hght <- hght * const
+      }
       # Krige interpolation
       ggplot() +
-        geom_sf(data = world, size = 0.1, fill = 'grey95') +
+        geom_sf(data = world, size = 0.1, fill = 'grey60') +
         geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
-        geom_sf(data = world.buf, size = 0.1, fill = 'grey95', alpha = 0.1) +
+        geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
+        geom_sf(data = ridge, size = 0.5) +
+        geom_sf(data = trench, size = 0.5) +
+        geom_sf(data = transform, size = 0.5) +
         geom_sf(data = buf, size = 0.3, fill = NA) +
         geom_sf(data = cnt, size = 0.3, color = 'white') +
         geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -428,11 +477,11 @@ walk(unique(solns$segment), ~{
           legend.direction = 'horizontal',
           legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
           legend.box.margin = margin(1, 8, 1, 2),
-          legend.key.height = unit(hght/30, 'mm'),
-          legend.key.width = unit(wdth/12, 'mm'),
+          legend.key.height = unit(0.05, 'in'),
+          legend.key.width = unit(0.2, 'in'),
           legend.title = element_text(vjust = 1),
           panel.grid = element_line(size = 0.1, color = 'white'),
-          panel.background = element_rect(fill = 'grey80', color = NA),
+          panel.background = element_rect(fill = 'grey50', color = NA),
           plot.margin = margin(2, 2, 2, 2)
         )
     })
@@ -445,15 +494,58 @@ walk(unique(solns$segment), ~{
     '.png',
     sep = ''
   )
-  if(.x == 'Andes') {
+  if(!(.x %in%
+      c(
+        'Alaska Aleutians',
+        'Central America',
+        'Kyushu Ryukyu',
+        'Lesser Antilles',
+        'N Philippines',
+        'Scotia',
+        'Sumatra Banda Sea',
+        'New Britain Solomon',
+        'Vanuatu'
+      ))
+  ) {
     p <-
-      plts[[1]] +
-      (plts[[2]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
-      (plts[[3]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
-      (plts[[4]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
-      (plts[[5]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
-      (plts[[6]] + theme(legend.position = 'none', axis.text.y = element_blank())) +
-      plot_layout(ncol = 6)
+      (
+        (plts[[1]] +
+          theme(
+            axis.text.x = element_blank()
+          )
+        ) +
+        (plts[[2]] +
+          theme(
+            legend.position = 'none',
+            axis.text = element_blank()
+          )
+        ) +
+        (plts[[3]] +
+          theme(
+            legend.position = 'none',
+            axis.text = element_blank()
+          )
+        )
+      ) /
+      (
+        (plts[[4]] +
+          theme(
+            legend.position = 'none'
+          )
+        ) +
+        (plts[[5]] +
+          theme(
+            legend.position = 'none',
+            axis.text.y = element_blank()
+          )
+        ) +
+        (plts[[6]] +
+          theme(
+            legend.position = 'none',
+            axis.text.y = element_blank()
+          )
+        )
+      )
     suppressWarnings(suppressMessages(
       ggsave(
         file =
@@ -461,21 +553,11 @@ walk(unique(solns$segment), ~{
         plot = p,
         device = 'png',
         type = 'cairo',
-        width = wdth*6,
-        height = hght,
+        width = wdth*3,
+        height = hght*2,
         units = 'mm'
       )
     ))
-    # system(
-    #   paste0(
-    #     'open figs/diff/',
-    #     str_replace_all(.x, ' ', ''),
-    #     'ModelComparison',
-    #     cntr,
-    #     '.png'
-    #   ),
-    #   wait = F
-    # )
   } else {
     p <-
       (
@@ -525,21 +607,11 @@ walk(unique(solns$segment), ~{
         plot = p,
         device = 'png',
         type = 'cairo',
-        width = wdth*3,
+        width = wdth*2,
         height = hght*3,
         units = 'mm'
       )
     ))
-    # system(
-    #   paste0(
-    #     'open figs/diff/',
-    #     str_replace_all(.x, ' ', ''),
-    #     'ModelComparison',
-    #     cntr,
-    #     '.png'
-    #   ),
-    #   wait = F
-    # )
   }
 })
 
