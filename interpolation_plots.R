@@ -61,12 +61,12 @@ pwalk(~{
         'Alaska Aleutians',
         'Central America',
         'Kyushu Ryukyu',
+        'Scotia',
+        'Vanuatu',
         'Lesser Antilles',
         'N Philippines',
-        'Scotia',
         'Sumatra Banda Sea',
-        'New Britain Solomon',
-        'Vanuatu'
+        'New Britain Solomon'
       ))
   ) {
     const <- 76.2/wdth
@@ -83,12 +83,12 @@ pwalk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 0.5) +
-      geom_sf(data = trench, size = 0.5) +
-      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
       geom_sf_label(
         data = fts,
         aes(label = label),
@@ -145,12 +145,12 @@ pwalk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 0.5) +
-      geom_sf(data = trench, size = 0.5) +
-      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
       annotate(
         'label',
         x = Inf,
@@ -193,99 +193,6 @@ pwalk(~{
         panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
       )
-  # Interpolation difference
-#  pp3 <- 
-#    ggplot() +
-#      geom_sf(data = world, size = 0.1, fill = 'grey60') +
-#      geom_sf(data = dif, aes(color = est.diff), size = pnt.size, shape = 15) +
-#      geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-#      geom_sf(data = ridge, size = 0.5) +
-#      geom_sf(data = trench, size = 0.5) +
-#      geom_sf(data = transform, size = 0.5) +
-#      geom_sf(data = buf, size = 0.3, fill = NA) +
-#      geom_sf(data = cnt, size = 0.3, color = 'white') +
-#      geom_sf(data = seg, size = 1.5, color = 'white') +
-#      annotate(
-#        'label',
-#        x = Inf,
-#        y = -Inf,
-#        label = 'Estimate Difference',
-#        hjust = 1,
-#        vjust = 0,
-#        size = annt.txt.size,
-#        fill = rgb(1, 1, 0.941, 0.7),
-#        label.padding = unit(0.15, 'lines'),
-#        label.r = unit(0.05, 'lines')
-#      ) +
-#      scale_color_continuous_diverging(
-#        palette = 'Berlin',
-#        limits = c(-100, 125),
-#        na.value = 'grey50'
-#      ) +
-#      labs(color = bquote(mWm^-2)) +
-#      coord_sf(expand = F) +
-#      theme_map(font_size = base.txt.size) +
-#      theme(
-#        axis.text = element_text(color = 'grey20'),
-#        legend.position = c(1, 1),
-#        legend.justification = c(1, 1),
-#        legend.direction = 'horizontal',
-#        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
-#        legend.box.margin = margin(1, 8, 1, 2),
-#        legend.key.height = unit(0.1, 'in'),
-#        legend.key.width = unit(0.3, 'in'),
-#        legend.title = element_text(vjust = 1),
-#        panel.grid = element_line(size = 0.1, color = 'white'),
-#        panel.background = element_rect(fill = 'grey50', color = NA),
-#        plot.margin = margin()
-#      )
-  # Uncertainty difference
-#  pp4 <- 
-#    ggplot() +
-#      geom_sf(data = world, size = 0.1, fill = 'grey60') +
-#      geom_sf(data = dif, aes(color = sigma.diff), size = pnt.size, shape = 15) +
-#      geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-#      geom_sf(data = ridge, size = 0.5) +
-#      geom_sf(data = trench, size = 0.5) +
-#      geom_sf(data = transform, size = 0.5) +
-#      geom_sf(data = buf, size = 0.3, fill = NA) +
-#      geom_sf(data = cnt, size = 0.3, color = 'white') +
-#      geom_sf(data = seg, size = 1.5, color = 'white') +
-#      geom_sf(data = volc, shape = 2, size = pnt.size, color = 'deeppink') +
-#      annotate(
-#        'label',
-#        x = Inf,
-#        y = -Inf,
-#        label = 'Uncertainty Difference',
-#        hjust = 1,
-#        vjust = 0,
-#        size = annt.txt.size,
-#        fill = rgb(1, 1, 0.941, 0.7),
-#        label.padding = unit(0.15, 'lines'),
-#        label.r = unit(0.05, 'lines')
-#      ) +
-#      scale_color_continuous_diverging(
-#        palette = 'Berlin',
-#        limits = c(-125, 100),
-#        na.value = 'grey50'
-#      ) +
-#      labs(color = bquote(mWm^-2)) +
-#      coord_sf(expand = F) +
-#      theme_map(font_size = base.txt.size) +
-#      theme(
-#        axis.text = element_text(color = 'grey20'),
-#        legend.position = c(1, 1),
-#        legend.justification = c(1, 1),
-#        legend.direction = 'horizontal',
-#        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
-#        legend.box.margin = margin(1, 8, 1, 2),
-#        legend.key.height = unit(0.1, 'in'),
-#        legend.key.width = unit(0.3, 'in'),
-#        legend.title = element_text(vjust = 1),
-#        panel.grid = element_line(size = 0.1, color = 'white'),
-#        panel.background = element_rect(fill = 'grey50', color = NA),
-#        plot.margin = margin()
-#      )
   # Save
   cat(
     '\nSaving plot to: figs/diff/',
@@ -300,12 +207,12 @@ pwalk(~{
         'Alaska Aleutians',
         'Central America',
         'Kyushu Ryukyu',
+        'Scotia',
+        'Vanuatu',
         'Lesser Antilles',
         'N Philippines',
-        'Scotia',
         'Sumatra Banda Sea',
-        'New Britain Solomon',
-        'Vanuatu'
+        'New Britain Solomon'
       ))
   ) {
     # Composition
@@ -381,12 +288,15 @@ walk(unique(solns$segment), ~{
         'Alaska Aleutians',
         'Central America',
         'Kyushu Ryukyu',
+        'Kamchatka Marianas',
+        'Scotia',
+        'Vanuatu',
         'Lesser Antilles',
         'N Philippines',
-        'Scotia',
         'Sumatra Banda Sea',
         'New Britain Solomon',
-        'Vanuatu'
+        'S Philippines',
+        'Tonga New Zealand'
       ))
   ) {
     const <- 50.8/wdth
@@ -436,12 +346,12 @@ walk(unique(solns$segment), ~{
         geom_sf(data = world, size = 0.1, fill = 'grey60') +
         geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
         geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-        geom_sf(data = ridge, size = 0.5) +
-        geom_sf(data = trench, size = 0.5) +
-        geom_sf(data = transform, size = 0.5) +
+        geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
+        geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
+        geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
         geom_sf(data = buf, size = 0.3, fill = NA) +
-        geom_sf(data = cnt, size = 0.3, color = 'white') +
         geom_sf(data = seg, size = 1.5, color = 'white') +
+        geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
         annotate(
           'label',
           x = Inf,
@@ -466,7 +376,12 @@ walk(unique(solns$segment), ~{
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
-        v.scale.white +
+        scale_color_viridis_c(
+          option = 'magma',
+          limits = c(0, 250),
+          breaks = c(0, 125, 250),
+          na.value = 'white'
+        ) +
         labs(color = bquote(mWm^-2)) +
         coord_sf(expand = F) +
         theme_map(font_size = base.txt.size) +
@@ -499,12 +414,15 @@ walk(unique(solns$segment), ~{
         'Alaska Aleutians',
         'Central America',
         'Kyushu Ryukyu',
+        'Kamchatka Marianas',
+        'Scotia',
+        'Vanuatu',
         'Lesser Antilles',
         'N Philippines',
-        'Scotia',
         'Sumatra Banda Sea',
         'New Britain Solomon',
-        'Vanuatu'
+        'S Philippines',
+        'Tonga New Zealand'
       ))
   ) {
     p <-

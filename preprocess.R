@@ -49,19 +49,19 @@ cat(
 shp.fts <-
   tibble(
     lat =
-      c(2.5, 12.5, 2, 6, 27.5, 15, 5, -60, -57.5,
+      c(2.5, 12.5, 2, 6, 15, 5, -60, -57.5,
         -65, -57.5, -56.5, 5, 15, -10, -20, -12, -17.5),
     lon =
-      c(258, 255, 270, 263, 310, 287.5, 300, 329, 340,
+      c(258, 255, 270, 263, 287.5, 300, 329, 340,
         345, 322, 332.5, 115, 130, 90, 171, 175, 174),
     segment =
       c('Central America', 'Central America', 'Central America',
-        'Central America', 'Lesser Antilles', 'Lesser Antilles',
+        'Central America', 'Lesser Antilles',
         'Lesser Antilles', 'Scotia', 'Scotia', 'Scotia', 'Scotia',
         'Scotia', 'Sumatra Banda Sea', 'Sumatra Banda Sea',
         'Sumatra Banda Sea', 'Vanuatu', 'Vanuatu', 'Vanuatu'),
     label =
-      c('GTJ', 'EPR', 'CR', 'CP', 'MAR', 'CBP', 'SA', 'ESR', 'TF',
+      c('GTJ', 'EPR', 'CR', 'CP', 'CBP', 'SA', 'ESR', 'TF',
         'AP', 'SP', 'SAN', 'SNP', 'PSP', 'AUP', 'NHP', 'BR', 'CWR')
   ) %>%
   st_as_sf(coords = c(2, 1), crs = proj4.wgs) %>%

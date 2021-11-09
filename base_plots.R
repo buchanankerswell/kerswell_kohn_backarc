@@ -27,16 +27,15 @@ p1 <-
       fill = 'grey60'
     ) +
     geom_sf(data = bind_rows(shp.buffer), size = 0.2, fill = 'ivory', alpha = 0.3) +
-    geom_sf(data = shp.ridge, size = 0.3) +
-    geom_sf(data = shp.trench, size = 0.3) +
-    geom_sf(data = shp.transform, size = 0.3) +
+    geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
+    geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
+    geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
     geom_sf(
       data = bind_rows(shp.hf.crop),
       aes(color = hf),
       size = 0.3,
       shape = 20
     ) +
-    geom_sf(data = bind_rows(shp.contours), size = 0.1, color = 'white') +
     geom_sf(data = bind_rows(shp.segs), size = 0.8, color = 'white') +
     annotate(
       'label',
@@ -94,10 +93,9 @@ p2 <-
     ) +
     geom_sf(data = shp.sim, aes(color = est.sim), size = 0.1, shape = 15) +
     geom_sf(data = shp.world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-    geom_sf(data = shp.ridge, size = 0.3) +
-    geom_sf(data = shp.trench, size = 0.3) +
-    geom_sf(data = shp.transform, size = 0.3) +
-    geom_sf(data = bind_rows(shp.contours), size = 0.1, color = 'white') +
+    geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
+    geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
+    geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
     geom_sf(data = bind_rows(shp.segs), size = 0.8, color = 'white') +
     geom_sf_label_repel(
       data = bind_rows(shp.segs),
@@ -212,12 +210,12 @@ walk(~{
         'Alaska Aleutians',
         'Central America',
         'Kyushu Ryukyu',
+        'Scotia',
+        'Vanuatu',
         'Lesser Antilles',
         'N Philippines',
-        'Scotia',
         'Sumatra Banda Sea',
-        'New Britain Solomon',
-        'Vanuatu'
+        'New Britain Solomon'
       ))
   ) {
     const <- 76.2/wdth
@@ -232,11 +230,10 @@ walk(~{
   pp1 <- 
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
-      geom_sf(data = ridge, size = 0.5) +
-      geom_sf(data = trench, size = 0.5) +
-      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
       annotate(
@@ -289,11 +286,10 @@ walk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 0.5) +
-      geom_sf(data = trench, size = 0.5) +
-      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       annotate(
         'label',
@@ -343,11 +339,10 @@ walk(~{
   pp3 <- 
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
-      geom_sf(data = ridge, size = 0.5) +
-      geom_sf(data = trench, size = 0.5) +
-      geom_sf(data = transform, size = 0.5) +
+      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
-      geom_sf(data = cnt, size = 0.3, color = 'white') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3, show.legend = F) +
       v.scale.white +
@@ -373,12 +368,12 @@ walk(~{
         'Alaska Aleutians',
         'Central America',
         'Kyushu Ryukyu',
+        'Scotia',
+        'Vanuatu',
         'Lesser Antilles',
         'N Philippines',
-        'Scotia',
         'Sumatra Banda Sea',
-        'New Britain Solomon',
-        'Vanuatu'
+        'New Britain Solomon'
       ))
   ) {
     # Composition

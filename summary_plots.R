@@ -32,7 +32,6 @@ cat('\n', rep('~', 60), sep='')
 cat('\nVisualizing ...\n')
 
 # Heat flow summary ridges plot
-if(!file.exists('figs/summary/hfSummary.png')) {
 p1 <-
   shp.hf.crop %>%
   map_df(
@@ -59,8 +58,9 @@ p1 <-
     scale_y_discrete(
       limits = rev(levels(as.factor(seg.names)))
     ) +
-    theme_classic() +
+    theme_classic(base_size = 12) +
     theme(
+      panel.background = element_rect(fill = 'grey50', color = NA),
       legend.position = 'none',
       plot.margin = margin()
     )
@@ -76,7 +76,6 @@ suppressWarnings(suppressMessages(
     height = 3.5
   )
 ))
-}
 
 # Plot all variogram models
 cat('\nSaving plots to: figs/vgrms/')
@@ -133,26 +132,25 @@ p2 <-
     cv.rmse,
     cv.cost
   )) %>%
-  ggplot(aes(x = cost, y = value, shape = v.mod, color = segment)) +
+  ggplot(aes(x = cost, y = value, shape = v.mod)) +
     geom_point(size = 2) +
     facet_wrap(
       ~name,
-      ncol = 2,
+      ncol = 3,
       scales = 'free'
     ) +
+    guides(shape = guide_legend(nrow = 1)) +
     labs(
       y = NULL,
       x = bquote('Cost'~(mWm^-2)),
-      color = 'Segment',
       shape = 'Variogram model'
     ) +
-    scale_color_discrete_qualitative('Dark 3') +
-    theme_classic() +
+    theme_classic(base_size = 12) +
     theme(
-      legend.box.margin = margin(),
-      legend.text = element_text(size = 8),
-      plot.margin = margin(),
-      strip.background = element_rect(fill = 'grey90', color=NA)
+      legend.position = 'bottom',
+      legend.box.margin = margin(-10, 0, 0, 0),
+      panel.background = element_rect(fill = 'grey50', color = NA),
+      plot.margin = margin()
     )
 # Save
 cat('\nSaving plot to: figs/summary/vgrmSummary', cntr, '.png', sep = '')
@@ -163,7 +161,7 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6,
-    height = 6
+    height = 4.5
   )
 ))
 
@@ -197,8 +195,9 @@ p3 <-
     scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-    theme_classic() +
+    theme_classic(base_size = 12) +
     theme(
+      panel.background = element_rect(fill = 'grey50', color = NA),
       legend.position = 'none',
       plot.margin = margin()
     )
@@ -239,8 +238,9 @@ p3b <-
     scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-    theme_classic() +
+    theme_classic(base_size = 12) +
     theme(
+      panel.background = element_rect(fill = 'grey50', color = NA),
       legend.position = 'none',
       plot.margin = margin()
     )
@@ -261,20 +261,13 @@ p4 <-
   opt.trace %>%
   group_by(segment, v.mod) %>%
   ggplot() +
-    geom_path(aes(itr, cost, color = segment, group = segment)) +
-    facet_wrap(~v.mod, scales = 'free') +
+    geom_path(aes(itr, cost, group = segment)) +
+    facet_wrap(~v.mod, nrow = 2, scales = 'free') +
     labs(x = 'Iteration', y = 'Cost', color = NULL) +
-    guides(color = guide_legend(nrow = 3)) +
-    theme_classic() +
+    theme_classic(base_size = 12) +
     theme(
-      plot.margin = margin(),
-      legend.position = 'bottom',
-      legend.justification = 'left',
-      legend.box.margin = margin(-10),
-      legend.text = element_text(size = 7),
-      legend.title = element_text(size = 9),
-      legend.key.size = unit(0.8, 'lines'),
-      strip.background = element_rect(fill = 'grey90')
+      panel.background = element_rect(fill = 'grey50', color = NA),
+      plot.margin = margin()
     )
 ggsave(
   file =
@@ -283,7 +276,7 @@ ggsave(
   device = 'png',
   type = 'cairo',
   width = 6,
-  height = 3.5
+  height = 4
 )
 
 # Cut up segments and visualize heat flow
