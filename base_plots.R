@@ -79,7 +79,6 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-# system('open figs/base/ThermoGlobeBuffer.png', wait = F)
 
 # Crop countries and similarity to buffer
 shp.world.buf <- suppressWarnings(shp.world %>% st_intersection(bind_rows(shp.buffer)))
@@ -152,7 +151,6 @@ suppressWarnings(suppressMessages(
     height = 3
   )
 ))
-# system('open figs/base/similarityBuffer.png', wait = F)
 
 # Global buffer composition
 p3 <-
@@ -182,7 +180,6 @@ suppressWarnings(suppressMessages(
     height = 6
   )
 ))
-# system('open figs/base/ThermoGlobeBufferComp.png', wait = F)
 
 # Individual Segments
 seg.names %>%
@@ -279,7 +276,6 @@ walk(~{
 #       units = 'mm'
 #     )
 #   ))
-#  system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Base.png'), wait = F)
   # Similarity interpolation
   pp2 <- 
     ggplot() +
@@ -334,7 +330,6 @@ walk(~{
 #       units = 'mm'
 #     )
 #   ))
-  # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Similarity.png'), wait = F)
   # ThermoGlobe data without annotation
   pp3 <- 
     ggplot() +
@@ -405,7 +400,6 @@ walk(~{
         units = 'mm'
       )
     ))
-    # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'), wait = F)
   } else {
     # Composition
     pp4 <-
@@ -436,7 +430,6 @@ walk(~{
         units = 'mm'
       )
     ))
-    # system(paste0('open figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'), wait = F)
   }
 })
 
