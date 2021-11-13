@@ -49,7 +49,7 @@ p1 <-
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
     ) +
-    v.scale.white +
+    v.scale.grey +
     labs(color = bquote(mWm^-2)) +
     coord_sf(expand = F) +
     theme_map(font_size = 12) +
@@ -58,7 +58,7 @@ p1 <-
       legend.position = c(1, 1),
       legend.justification = c(1, 1),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+      legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
       legend.box.margin = margin(1, 8, 1, 2),
       legend.key.height = unit(0.1, 'in'),
       legend.key.width = unit(0.3, 'in'),
@@ -122,7 +122,7 @@ p2 <-
       label.r = unit(0.05, 'lines')
     ) +
     labs(color = bquote(mWm^-2)) +
-    v.scale.white +
+    v.scale.grey +
     coord_sf(expand = F) +
     theme_map(font_size = 12) +
     theme(
@@ -130,7 +130,7 @@ p2 <-
       legend.position = c(1, 1),
       legend.justification = c(1, 1),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+      legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
       legend.box.margin = margin(1, 8, 1, 2),
       legend.key.height = unit(0.1, 'in'),
       legend.key.width = unit(0.3, 'in'),
@@ -241,11 +241,11 @@ walk(~{
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      v.scale.white +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -254,7 +254,7 @@ walk(~{
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(0.1, 'in'),
         legend.key.width = unit(0.3, 'in'),
@@ -263,19 +263,6 @@ walk(~{
         panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
       )
-  # Save
-#   cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Base.png', sep = '')
-#   suppressWarnings(suppressMessages(
-#     ggsave(
-#       file = paste0('figs/base/', str_replace_all(.x, ' ', ''), 'Base.png'),
-#       plot = pp1,
-#       device = 'png',
-#       type = 'cairo',
-#       width = wdth,
-#       height = hght,
-#       units = 'mm'
-#     )
-#   ))
   # Similarity interpolation
   pp2 <- 
     ggplot() +
@@ -295,11 +282,11 @@ walk(~{
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      v.scale.white +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -308,7 +295,7 @@ walk(~{
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(0.1, 'in'),
         legend.key.width = unit(0.3, 'in'),
@@ -317,19 +304,6 @@ walk(~{
         panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
       )
-  # Save
-#   cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Similarity.png', sep = '')
-#   suppressWarnings(suppressMessages(
-#     ggsave(
-#       file = paste0('figs/base/', str_replace_all(.x, ' ', ''), 'Similarity.png'),
-#       plot = pp2,
-#       device = 'png',
-#       type = 'cairo',
-#       width = wdth,
-#       height = hght,
-#       units = 'mm'
-#     )
-#   ))
   # ThermoGlobe data without annotation
   pp3 <- 
     ggplot() +
@@ -340,7 +314,7 @@ walk(~{
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3, show.legend = F) +
-      v.scale.white +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -349,7 +323,7 @@ walk(~{
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(0.1, 'in'),
         legend.key.width = unit(0.3, 'in'),
@@ -433,5 +407,4 @@ walk(~{
   }
 })
 
-cat('\n\n', rep('~', 60), sep='')
-cat('\nDone!\n')
+cat('\n\nDone!\n')

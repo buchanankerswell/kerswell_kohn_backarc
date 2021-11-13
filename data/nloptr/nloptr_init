@@ -13,7 +13,7 @@ Variogram weight:  0.5
 ~~~~~  Random Initial values  ~~~~~~ 
 ~~~~~                         ~~~~~~ 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-Lag cutoff      : 10.58265 
-Number of lags  : 39.49637 
-Lag shift       : 7.778679 
-Max local pairs : 12.5657
+Lag cutoff      : 9.663842 
+Number of lags  : 44.76038 
+Lag shift       : 7.687319 
+Max local pairs : 17.93159

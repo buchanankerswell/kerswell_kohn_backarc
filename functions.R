@@ -223,7 +223,6 @@ interp_diff <- function(shp.interp.krige, shp.interp.sim) {
   dif <-
     suppressWarnings(
       shp.interp.sim %>%
-      select(-obs.sim) %>%
       st_intersection(shp.interp.krige) %>%
       mutate(
         est.diff = est.sim - est.krige,

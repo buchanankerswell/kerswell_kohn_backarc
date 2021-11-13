@@ -23,7 +23,7 @@ v.scale.grey <-
   scale_color_viridis_c(
     option = 'magma',
     limits = c(0, 250),
-    na.value = 'grey80'
+    na.value = 'grey50'
   )
 
 # Projections
@@ -50,10 +50,10 @@ shp.fts <-
   tibble(
     lat =
       c(2.5, 12.5, 2, 6, 15, 5, -60, -57.5,
-        -65, -57.5, -56.5, 5, 15, -10, -20, -12, -17.5),
+        -65, -57.5, -56.5, 5, 15, -10, -20, -16, -17.5),
     lon =
       c(258, 255, 270, 263, 287.5, 300, 329, 340,
-        345, 322, 332.5, 115, 130, 90, 171, 175, 174),
+        345, 322, 332.5, 115, 130, 90, 171, 175, 175),
     segment =
       c('Central America', 'Central America', 'Central America',
         'Central America', 'Lesser Antilles',
@@ -285,7 +285,8 @@ interp.luca <-
     est.sim = HF_pred,
     sigma.sim = sHF_pred,
     obs.sim = Hf_obs
-  )
+  ) %>%
+  filter(est.sim > 0 & est.sim <= 250)
 
 # Make simple feature object and project to robinson pacific centered
 shp.interp.luca <-
@@ -305,7 +306,7 @@ cat('\n\n', rep('~', 60), sep='')
 cat('\nDefining interpolation domain ...\n')
 
 # Draw 1000 km buffer around segment boundaries
-buf.dist <- 1000000
+buf.dist <- 1e6
 
 cat('\nDrawing', buf.dist/1000, 'km buffers around segments')
 
@@ -316,6 +317,23 @@ shp.buffer <-
 shp.box <-
   shp.buffer %>%
   map(~st_bbox(.x) %>% bbox_widen(crs = proj4.rp))
+
+# Calculate regional Similarity RMSE
+rmse.luca <-
+  suppressWarnings({
+    shp.buffer %>%
+    map_df(
+      ~shp.interp.luca %>%
+      st_intersection(.x) %>%
+      filter(!is.na(obs.sim)) %>%
+      st_set_geometry(NULL) %>%
+      group_by(segment) %>%
+      summarise(
+        rmse.sim = sqrt(sum((obs.sim - est.sim)^2)/n()),
+        n.obs.sim = n()
+      )
+    ) 
+  })
 
 # Crop UTIG plate boundaries to bounding boxes
 cat('\nCropping UTIG plate boundaries to segment bounding boxes')
@@ -341,9 +359,7 @@ cat('\nCropping ThermoGlobe data to buffers')
 
 shp.hf.crop <-
   suppressWarnings({
-#     shp.box %>%
     shp.buffer %>%
-#     map(~shp.hf.filtered %>% st_crop(.x))
     map(~shp.hf.filtered %>% st_intersection(.x) %>% select(-segment))
   })
 
@@ -366,9 +382,7 @@ hf.crop <-
 cat('\n\nCropping interpolation grids to buffers')
 
 shp.grid.crop <-
-#   shp.box %>%
   shp.buffer %>%
-#   map(~shp.grid %>% st_crop(.x))
   map(~shp.grid %>% st_intersection(.x))
 
 cat('\nNumber of Kriging estimates by segment:')

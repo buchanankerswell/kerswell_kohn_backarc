@@ -460,7 +460,8 @@ vgrm.summary <-
     sill = map_dbl(solns$opt.fit.vgrm, ~.x$psill),
     range = map_dbl(solns$opt.fit.vgrm, ~.x$range),
   ) %>%
-  left_join(opt.trace.end, by = c('segment', 'v.mod'))
+  left_join(opt.trace.end, by = c('segment', 'v.mod')) %>%
+  left_join(rmse.luca, by = c('segment'))
 print(vgrm.summary)
 
 # Kriging segments

@@ -58,7 +58,10 @@ package.list <- c(
   'rgeos',
   'sf',
   'rnaturalearth',
-  'nloptr'
+  'nloptr',
+  'future',
+  'zoo',
+  'sp'
 )
 
 using(package.list)

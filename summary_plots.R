@@ -24,8 +24,9 @@ load('data/hf.Rdata')
 load(paste0('data/opt', cntr, '.RData'))
 dir.create('figs/summary', showWarnings = F)
 dir.create('figs/vgrms', showWarnings = F)
-cat('\nSaving plots to: figs/summary/', cntr, '.RData', sep = '')
-cat('\nSaving plots to: figs/vgrms/', cntr, '.png', sep = '')
+dir.create('figs/upperPlate', showWarnings = F)
+cat('\nSaving plots to: figs/summary/')
+cat('\nSaving plots to: figs/vgrms/')
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
@@ -47,14 +48,14 @@ p1 <-
       geom='density_ridges_gradient',
       calc_ecdf=T,
       quantiles=4,
-      quantile_lines=T
+      quantile_lines=T,
+      bandwidth = 10
     ) +
     labs(
       x = bquote('Heat flow'~(mWm^-2)),
       y = NULL
     ) +
     scale_fill_viridis_d() +
-    scale_x_continuous(breaks = seq(0, 250, 50)) +
     scale_y_discrete(
       limits = rev(levels(as.factor(seg.names)))
     ) +
@@ -110,6 +111,7 @@ walk(~{
 p2 <-
   vgrm.summary %>%
   drop_na() %>%
+  select(-c(n.obs.sim, rmse.sim)) %>%
   mutate('range' = range/1000) %>%
   filter(cost < (median(cost)+(5*IQR(cost))) & range < (median(range)+(5*IQR(range)))) %>%
   rename(
@@ -186,13 +188,15 @@ p3 <-
       geom = 'density_ridges_gradient',
       calc_ecdf = T,
       quantiles = 4,
-      quantile_lines = T
+      quantile_lines = T,
+      bandwidth = 5,
+      rel_min_height = 0.01
     ) +
     labs(
       x = bquote('Interpolation estimate difference'~(mWm^-2)),
       y = NULL
     ) +
-    scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
+    coord_cartesian(xlim = c(-100, 100)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic(base_size = 12) +
@@ -229,13 +233,15 @@ p3b <-
       geom = 'density_ridges_gradient',
       calc_ecdf = T,
       quantiles = 4,
-      quantile_lines = T
+      quantile_lines = T,
+      bandwidth = 5,
+      rel_min_height = 0.01
     ) +
     labs(
       x = bquote('Interpolation'~sigma~'difference'~(mWm^-2)),
       y = NULL
     ) +
-    scale_x_continuous(limits = c(-100, 100), breaks = seq(-100, 100, 50)) +
+    coord_cartesian(xlim = c(-75, 75)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic(base_size = 12) +

@@ -89,11 +89,15 @@ pwalk(~{
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
-      geom_sf_label(
+      geom_sf_label_repel(
         data = fts,
         aes(label = label),
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
+        segment.size = annt.txt.size/10,
+        segment.color = 'white',
+        segment.curvature = -1e-20,
+        arrow = arrow(length = unit(0.015, 'npc')),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -105,7 +109,7 @@ pwalk(~{
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -117,11 +121,11 @@ pwalk(~{
         hjust = 1,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      v.scale.white +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -130,7 +134,7 @@ pwalk(~{
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(0.1, 'in'),
         legend.key.width = unit(0.3, 'in'),
@@ -159,7 +163,7 @@ pwalk(~{
         hjust = 1,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -171,11 +175,11 @@ pwalk(~{
         hjust = 0,
         vjust = 0,
         size = annt.txt.size,
-        fill = rgb(1, 1, 0.941, 0.7),
+        fill = rgb(1, 1, 0.941),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
-      v.scale.white +
+      v.scale.grey +
       labs(color = bquote(mWm^-2)) +
       coord_sf(expand = F) +
       theme_map(font_size = base.txt.size) +
@@ -184,7 +188,7 @@ pwalk(~{
         legend.position = c(1, 1),
         legend.justification = c(1, 1),
         legend.direction = 'horizontal',
-        legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
         legend.box.margin = margin(1, 8, 1, 2),
         legend.key.height = unit(0.1, 'in'),
         legend.key.width = unit(0.3, 'in'),
@@ -360,7 +364,7 @@ walk(unique(solns$segment), ~{
           hjust = 1,
           vjust = 0,
           size = annt.txt.size,
-          fill = rgb(1, 1, 0.941, 0.7),
+          fill = rgb(1, 1, 0.941),
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
@@ -372,7 +376,7 @@ walk(unique(solns$segment), ~{
           hjust = 0,
           vjust = 0,
           size = annt.txt.size,
-          fill = rgb(1, 1, 0.941, 0.7),
+          fill = rgb(1, 1, 0.941),
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
@@ -380,7 +384,7 @@ walk(unique(solns$segment), ~{
           option = 'magma',
           limits = c(0, 250),
           breaks = c(0, 125, 250),
-          na.value = 'white'
+          na.value = 'grey50'
         ) +
         labs(color = bquote(mWm^-2)) +
         coord_sf(expand = F) +
@@ -390,7 +394,7 @@ walk(unique(solns$segment), ~{
           legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.direction = 'horizontal',
-          legend.box.background = element_rect(fill = rgb(1, 1, 0.941, 0.7), color = NA),
+          legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
           legend.box.margin = margin(1, 8, 1, 2),
           legend.key.height = unit(0.05, 'in'),
           legend.key.width = unit(0.2, 'in'),
