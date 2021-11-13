@@ -560,7 +560,6 @@ interp.diff.summary <-
     mutate(segment = ..1, v.mod = ..2, cost = ..8, .before = est.sim)
   ) %>%
   group_by(segment, v.mod, cost) %>%
-  drop_na() %>%
   summarise(
     n = n(),
     min = round(min(est.diff, na.rm = T)),
