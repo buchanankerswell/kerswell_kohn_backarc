@@ -595,7 +595,7 @@ plot_split_segment <-
         alpha = 0.8,
         show.legend = F
       ) +
-      theme_map(font_size = 8) +
+      theme_map(font_size = 12) +
       theme(
         plot.tag = element_text(face = 'bold', size = 14),
         axis.text = element_text(),
@@ -613,16 +613,13 @@ plot_split_segment <-
     ggplot() +
     geom_density_ridges(
       aes(x = value, y = split_fID, fill = split_fID, linetype = name),
-#      calc_ecdf = T,
-#      quantiles = 4,
-#      quantile_lines = T,
       alpha = 0.9
     ) +
     coord_cartesian(xlim = range(y.lim)) +
     scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
     labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = 'Sector') +
     guides(fill = 'none') +
-    theme_classic() +
+    theme_classic(base_size = 12) +
     theme(
       legend.box.margin = margin(),
       legend.background = element_rect(fill = NA, color = NA),
@@ -663,7 +660,7 @@ plot_split_segment <-
       scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
       coord_cartesian(ylim = range(y.lim)) +
       facet_wrap(~name) +
-      theme_classic() +
+      theme_classic(base_size = 12) +
       theme(
         panel.background = element_rect(fill = 'grey50'),
         legend.key.size = unit(0.8, 'lines'),

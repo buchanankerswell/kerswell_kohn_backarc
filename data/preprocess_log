@@ -69,7 +69,7 @@ otherwise randomly keep either x or y
 
 Parsed 14119 duplicates
 
-Final ThermoGlobe dataset contains 52365 observations
+Final ThermoGlobe dataset contains 52371 observations
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Reading similarity interpolation from Lucazeau (2019) ...
@@ -86,18 +86,18 @@ Cropping ThermoGlobe data to buffers
 Number of observations by segment:
 
 ++++++++++++++++++++++++++++++++++++++++
- Alaska Aleutians : 290
+ Alaska Aleutians : 289
  Andes : 1399
- Central America : 1442
+ Central America : 1443
  Kamchatka Marianas : 2269
  Kyushu Ryukyu : 1894
  Lesser Antilles : 3010
- N Philippines : 568
- New Britain Solomon : 100
+ N Philippines : 566
+ New Britain Solomon : 101
  S Philippines : 459
  Scotia : 25
- Sumatra Banda Sea : 1415
- Tonga New Zealand : 356
+ Sumatra Banda Sea : 1417
+ Tonga New Zealand : 355
  Vanuatu : 137
 ++++++++++++++++++++++++++++++++++++++++
 
@@ -124,18 +124,18 @@ Heat flow summary:
 [38;5;246m# A tibble: 13 × 8[39m
    segment                 n   min   max median   IQR  mean    sd
    [3m[38;5;246m<chr>[39m[23m               [3m[38;5;246m<int>[39m[23m [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m  [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m [3m[38;5;246m<dbl>[39m[23m
-[38;5;250m 1[39m Alaska Aleutians      290     6   196     66    27    70    28
-[38;5;250m 2[39m Andes                [4m1[24m399     7   250    108   120   119    66
-[38;5;250m 3[39m Central America      [4m1[24m442     8   250     90   123   110    67
+[38;5;250m 1[39m Alaska Aleutians      289     6   196     66    27    71    28
+[38;5;250m 2[39m Andes                [4m1[24m399     7   250    107   120   119    66
+[38;5;250m 3[39m Central America      [4m1[24m443     8   250     89   123   110    67
 [38;5;250m 4[39m Kamchatka Marianas   [4m2[24m269     1   248     78    51    83    42
 [38;5;250m 5[39m Kyushu Ryukyu        [4m1[24m894     3   250     76    42    84    42
 [38;5;250m 6[39m Lesser Antilles      [4m3[24m010    13   242     41     8    46    18
-[38;5;250m 7[39m N Philippines         568     3   231     71    26    75    33
-[38;5;250m 8[39m New Britain Solomon   100     3   143     58    34    61    26
+[38;5;250m 7[39m N Philippines         566     3   231     71    27    75    33
+[38;5;250m 8[39m New Britain Solomon   101     3   143     58    34    61    26
 [38;5;250m 9[39m S Philippines         459     1   224     71    32    74    33
 [38;5;250m10[39m Scotia                 25    13   145     81    62    79    43
-[38;5;250m11[39m Sumatra Banda Sea    [4m1[24m415     1   247     59    63    67    42
-[38;5;250m12[39m Tonga New Zealand     356     5   218     49    41    60    37
+[38;5;250m11[39m Sumatra Banda Sea    [4m1[24m417     1   247     59    63    67    42
+[38;5;250m12[39m Tonga New Zealand     355     5   218     49    40    59    37
 [38;5;250m13[39m Vanuatu               137     2   223     61    62    80    52
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

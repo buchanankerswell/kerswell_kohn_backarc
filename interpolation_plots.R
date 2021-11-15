@@ -83,21 +83,17 @@ pwalk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
-      geom_sf_label_repel(
+      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf_label(
         data = fts,
         aes(label = label),
         size = annt.txt.size,
         fill = rgb(1, 1, 0.941),
-        segment.size = annt.txt.size/10,
-        segment.color = 'white',
-        segment.curvature = -1e-20,
-        arrow = arrow(length = unit(0.015, 'npc')),
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
       ) +
@@ -149,12 +145,12 @@ pwalk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
+      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
       annotate(
         'label',
         x = Inf,
@@ -350,12 +346,12 @@ walk(unique(solns$segment), ~{
         geom_sf(data = world, size = 0.1, fill = 'grey60') +
         geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
         geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-        geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
-        geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
-        geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
+        geom_sf(data = ridge, size = 0.66, color = 'mediumspringgreen', alpha = 0.8) +
+        geom_sf(data = trench, size = 0.66, color = 'mediumspringgreen', alpha = 0.8) +
+        geom_sf(data = transform, size = 0.66, color = 'mediumspringgreen', alpha = 0.8) +
         geom_sf(data = buf, size = 0.3, fill = NA) +
-        geom_sf(data = seg, size = 1.5, color = 'white') +
-        geom_sf(data = volc, size = 2, color = 'white', alpha = 0.5, shape = 2) +
+        geom_sf(data = seg, size = 1, color = 'white') +
+        geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
         annotate(
           'label',
           x = Inf,

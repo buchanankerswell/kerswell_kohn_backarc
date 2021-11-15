@@ -191,6 +191,7 @@ walk(~{
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
   world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
+  volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
   hf <- shp.hf.crop[[.x]]
   sim <- suppressWarnings(shp.interp.luca %>% st_intersection(buf)) # Similarity interp
   ridge <- shp.ridge.crop[[.x]]
@@ -227,11 +228,12 @@ walk(~{
   pp1 <- 
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
-      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
       annotate(
         'label',
@@ -269,9 +271,9 @@ walk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       annotate(
@@ -308,11 +310,12 @@ walk(~{
   pp3 <- 
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
-      geom_sf(data = ridge, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 0.8, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 0.8, color = 'black', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3, show.legend = F) +
       v.scale.grey +
       labs(color = bquote(mWm^-2)) +

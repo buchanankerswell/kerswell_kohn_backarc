@@ -196,7 +196,7 @@ p3 <-
       x = bquote('Interpolation estimate difference'~(mWm^-2)),
       y = NULL
     ) +
-    coord_cartesian(xlim = c(-100, 100)) +
+    coord_cartesian(xlim = c(-75, 75)) +
     scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic(base_size = 12) +
