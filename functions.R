@@ -519,29 +519,47 @@ split_lines <- function(input_lines, max_length, id = NULL) {
 
 # Splits SZ segment buffers into equal parts and crops data points and
 # interpolations by intersection for each buffer segment
-split_segment <- function(seg.name, buf.dir = 'l', seg.num = 6, buf.len = 5e5) {
+split_segment <-
+  function(
+    seg.name,
+    buf.dir = 'l',
+    seg.num = 6,
+    buf.len = 5e5,
+    sector.exclude = NULL
+  ) {
   pnts <- shp.hf.crop[[seg.name]]
   seg <- shp.segs[[seg.name]]
-  split.seg <- split_lines(seg, as.numeric(st_length(seg)/seg.num))
   buf <- st_buffer(seg, dist = buf.len, endCapStyle = 'ROUND')
+  split.seg <- split_lines(seg, as.numeric(st_length(seg)/seg.num))
   split.buf <-
-    st_buffer(
-      split.seg,
-      dist = ifelse(buf.dir == 'l', -1*buf.len, 1*buf.len),
-      singleSide = T
-    ) %>%
-    st_intersection(buf)
+    map(1:seg.num, ~
+      st_buffer(
+        split.seg[.x,],
+        dist = ifelse(buf.dir == 'l', -1*buf.len, 1*buf.len),
+        singleSide = T
+      ) %>%
+      st_intersection(buf)
+    )
   pnts.buf <-
-    st_intersection(pnts, split.buf) %>%
-    mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+    map(split.buf, ~
+      st_intersection(pnts, .x) %>%
+      mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+    )
   best.mod <-
     solns %>%
     filter(segment == seg.name & v.mod != 'Gau') %>%
     slice_min(cost)
   interp <- best.mod[['shp.interp.diff']][[1]]
   interp.buf <-
-    st_intersection(interp, split.buf) %>%
-    mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+    map(split.buf, ~
+      st_intersection(interp, .x) %>%
+      mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+    )
+  if(!is.null(sector.exclude)) {
+    split.buf <- split.buf[-sector.exclude]
+    pnts.buf <- pnts.buf[-sector.exclude]
+    interp.buf <- interp.buf[-sector.exclude]
+  }
   return(
     list(
       'seg' = split.seg,
@@ -566,32 +584,44 @@ plot_split_segment <-
     north.position = 'topleft',
     label.size = 3
   ) {
-  seg.num <- as.numeric(unique(split.seg$pnts$split_fID))
-  wdth <- range(st_bbox(split.seg$buf)[c('xmin', 'xmax')])/1e3
+  seg.name <- split.seg$interp[[1]]$segment[1]
+  seg.num <- as.numeric(unique(bind_rows(split.seg$pnts)$split_fID))
+  wdth <- range(st_bbox(bind_rows(split.seg$buf))[c('xmin', 'xmax')])/1e3
   sbar <- round((wdth[2]-wdth[1])/scale.bar.width, -1)
   y.lim <- 
     c(
-      median(split.seg$interp$est.sim) - 2*IQR(split.seg$interp$est.sim),
-      median(split.seg$interp$est.sim) + 2*IQR(split.seg$interp$est.sim),
-      median(split.seg$interp$est.krige) - 2*IQR(split.seg$interp$est.krige),
-      median(split.seg$interp$est.krige) + 2*IQR(split.seg$interp$est.krige)
+      median(bind_rows(split.seg$interp)$est.sim) - 2*IQR(bind_rows(split.seg$interp)$est.sim),
+      median(bind_rows(split.seg$interp)$est.sim) + 2*IQR(bind_rows(split.seg$interp)$est.sim),
+      median(bind_rows(split.seg$interp)$est.krige) - 2*IQR(bind_rows(split.seg$interp)$est.krige),
+      median(bind_rows(split.seg$interp)$est.krige) + 2*IQR(bind_rows(split.seg$interp)$est.krige)
     )
   p0 <-
     ggplot() +
       geom_sf(
-        data = split.seg$buf,
-        aes(fill = split_fID),
+        data = bind_rows(split.seg$buf),
+        aes(color = split_fID),
         alpha = 0.8,
-        size = 0.5,
-        color = 'grey50',
+        size = 1,
+        fill = NA,
         show.legend = F
       ) +
+      geom_sf(
+        data = bind_rows(split.seg$interp),
+        shape = 19,
+        size = 0.2,
+        color = 'ivory'
+      ) +
+      geom_sf(
+        data = bind_rows(split.seg$pnts),
+        shape = 15,
+        size = 1
+      ) +
       geom_sf(data = split.seg$seg, size = 2) +
-      geom_sf_text(
-        data = st_centroid(split.seg$buf),
+      geom_sf_label(
+        data = st_centroid(bind_rows(split.seg$buf)),
         aes(label = split_fID, fill = split_fID),
         size = label.size,
-        color = 'white',
+        color = 'ivory',
         alpha = 0.8,
         show.legend = F
       ) +
@@ -604,13 +634,17 @@ plot_split_segment <-
         plot.margin = margin()
       )
   p1 <-
-    split.seg$interp %>%
+    bind_rows(split.seg$interp) %>%
     st_set_geometry(NULL) %>%
     select(est.sim, est.krige, split_fID) %>%
     rename(Similarity = est.sim, Krige = est.krige) %>%
     pivot_longer(-split_fID) %>%
     group_by(name) %>%
     ggplot() +
+    geom_rug(
+      data = shp.hf.crop[[seg.name]],
+      aes(x = hf)
+    ) +
     geom_density_ridges(
       aes(x = value, y = split_fID, fill = split_fID, linetype = name),
       alpha = 0.9
@@ -627,7 +661,7 @@ plot_split_segment <-
       panel.background = element_rect(fill = 'grey50')
     )
   p2 <-
-    split.seg$interp %>%
+    bind_rows(split.seg$interp) %>%
     st_set_geometry(NULL) %>%
     filter(distance.from.seg <= 500000) %>%
     select(est.sim, est.krige, split_fID, distance.from.seg) %>%
@@ -640,12 +674,19 @@ plot_split_segment <-
     group_by(name) %>%
     ggplot() +
       geom_point(
-        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-        size = 0.3,
-        shape = 19,
-        alpha = 0.3,
+        data = bind_rows(split.seg$pnts),
+        aes(distance.from.seg/1e3, hf, color = split_fID, group = split_fID),
+        size = 1.5,
+        shape = 0,
         show.legend = F
       ) +
+#      geom_point(
+#        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+#        size = 0.3,
+#        shape = 19,
+#        alpha = 0.3,
+#        show.legend = F
+#      ) +
       geom_smooth(
         aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
         size = 1,
@@ -675,7 +716,7 @@ plot_split_segment <-
     plot_layout(widths = c(1, 2), guides = 'collect') +
     plot_annotation(
       tag_level = 'a',
-      caption = split.seg$interp$segment[1]
+      caption = seg.name
     ) &
     theme(
       plot.margin = margin(2, 2, 2, 2),

@@ -285,47 +285,63 @@ ggsave(
   height = 4
 )
 
-# Cut up segments and visualize heat flow
-# within sectors
-tibble(
-  seg.names = seg.names,
-  buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
-  seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
-  scale.bar.width = c(5, 3, 4, 4, 3.5, 3, 4, 4, 2.5, 4, 5.5, 3, 2.5),
-  scale.bar.height = c(0.05, 0.02, 0.05, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02),
-  scale.bar.text = c(3.5, 4, 4, 4, 3.5, 4, 4, 4, 3.5, 3.5, 3.5, 4, 3.5),
-  scale.bar.just = c(0.06, 0.02, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.06, 0.05, 0.05),
-  scale.bar.position = c('topleft', 'bottomleft', 'bottomleft', 'topleft', 'topleft', 'bottomleft', 'bottomleft', 'bottomleft', 'bottomleft', 'topleft', 'bottomleft', 'bottomleft', 'bottomleft'),
-  north.scale = c(0.4, 0.25, 0.25, 0.2, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.3, 0.2, 0.25),
-  north.position = c('bottomright', 'topleft', 'topright', 'bottomright', 'bottomright', 'topleft', 'topright', 'topright', 'topright', 'bottomleft', 'topright', 'topleft', 'topright'),
-  label.size = c(6, 6, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
-) %>%
-pwalk(~{
+# Split segments into sectors
+shp.sectors <-
+  tibble(
+    seg.names = seg.names,
+    buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
+    seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
+    sector.exclude = list(2, NULL, NULL, NULL, NULL, 4, NULL, c(1,2), 1, 3, 8, 8, 8)
+  ) %>%
+  pmap(~{
+    suppressMessages({suppressWarnings({
+      split_segment(
+        seg.name = ..1,
+        buf.dir = ..2,
+        seg.num = ..3,
+        sector.exclude = ..4
+      )
+    })})
+  }) %>%
+  set_names(seg.names)
+
+save(shp.sectors, file = 'data/sectors.RData')
+
+plot.vars <-
+  tibble(
+    scale.bar.width = c(5, 3, 4, 4, 3.5, 3, 4, 4, 2.5, 4, 5.5, 3, 2.5),
+    scale.bar.height = c(0.05, 0.02, 0.05, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02),
+    scale.bar.text = c(3.5, 4, 4, 4, 3.5, 4, 4, 4, 3.5, 3.5, 3.5, 4, 3.5),
+    scale.bar.just = c(0.06, 0.02, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.06, 0.05, 0.05),
+    scale.bar.position = c('topleft', 'bottomleft', 'bottomleft', 'topleft', 'topleft', 'bottomleft', 'bottomleft', 'bottomleft', 'bottomleft', 'topleft', 'bottomleft', 'bottomleft', 'bottomleft'),
+    north.scale = c(0.4, 0.25, 0.25, 0.2, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.3, 0.2, 0.25),
+    north.position = c('bottomright', 'topleft', 'topright', 'bottomright', 'bottomright', 'topleft', 'topright', 'topright', 'topright', 'bottomleft', 'topright', 'topleft', 'topright'),
+    label.size = c(6, 6, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
+  )
+
+walk(1:13, ~{
   suppressMessages({suppressWarnings({
-    split_segment(
-      seg.name = ..1,
-      buf.dir = ..2,
-      seg.num = ..3
-    ) %>%
     plot_split_segment(
+      split.seg = shp.sectors[[.x]],
       running.avg = 5,
-      scale.bar.width = ..4,
-      scale.bar.height = ..5,
-      scale.bar.text = ..6,
-      scale.bar.just = ..7,
-      scale.bar.position = ..8,
-      north.scale = ..9,
-      north.position = ..10,
-      label.size = ..11
+      scale.bar.width = plot.vars$scale.bar.width[.x],
+      scale.bar.height = plot.vars$scale.bar.height[.x],
+      scale.bar.text = plot.vars$scale.bar.text[.x],
+      scale.bar.just = plot.vars$scale.bar.just[.x],
+      scale.bar.position = plot.vars$scale.bar.position[.x],
+      north.scale = plot.vars$north.scale[.x],
+      north.position = plot.vars$north.position[.x],
+      label.size = plot.vars$label.size[.x]
     ) -> p
     ggsave(
-      file = paste0('figs/upperPlate/', str_replace_all(..1, ' ', ''), 'UpperPlate.png'),
+      file = paste0('figs/upperPlate/', str_replace_all(names(shp.sectors)[.x], ' ', ''), 'UpperPlate.png'),
       plot = p,
       device = 'png',
       type = 'cairo',
       width = 6,
       height = 6
     )
+    print(p)
   })})
 })
 
