@@ -541,9 +541,12 @@ split_segment <-
       st_intersection(buf)
     )
   pnts.buf <-
-    map(split.buf, ~
-      st_intersection(pnts, .x) %>%
-      mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+    map(1:seg.num, ~
+      st_intersection(pnts, split.buf[[.x]]) %>%
+      mutate(
+        distance.from.seg = as.vector(st_distance(split.seg[.x,]$geometry, geometry)),
+        .before = geometry
+      )
     )
   best.mod <-
     solns %>%
@@ -551,14 +554,22 @@ split_segment <-
     slice_min(cost)
   interp <- best.mod[['shp.interp.diff']][[1]]
   interp.buf <-
-    map(split.buf, ~
-      st_intersection(interp, .x) %>%
-      mutate(distance.from.seg = as.vector(st_distance(seg, geometry)), .before = geometry)
+    map(1:seg.num, ~
+      st_intersection(interp, split.buf[[.x]]) %>%
+      mutate(
+        distance.from.seg = as.vector(st_distance(split.seg[.x,]$geometry, geometry)),
+        .before = geometry
+      )
     )
   if(!is.null(sector.exclude)) {
     split.buf <- split.buf[-sector.exclude]
     pnts.buf <- pnts.buf[-sector.exclude]
     interp.buf <- interp.buf[-sector.exclude]
+  }
+  if(0 %in% map_dbl(pnts.buf, nrow)) {
+    split.buf <- split.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
+    pnts.buf <- pnts.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
+    interp.buf <- interp.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
   }
   return(
     list(
@@ -571,64 +582,67 @@ split_segment <-
 }
 
 # Plot split segment
-plot_split_segment <-
-  function(
-    split.seg,
-    running.avg = 5,
-    scale.bar.width = 5,
-    scale.bar.height = 0.05,
-    scale.bar.text = 2.5,
-    scale.bar.just = 0.05,
-    scale.bar.position = 'bottomright',
-    north.scale = 0.2,
-    north.position = 'topleft',
-    label.size = 3
-  ) {
+plot_split_segment <- function(split.seg, running.avg = 5) {
   seg.name <- split.seg$interp[[1]]$segment[1]
+  world <- shp.world %>%
+    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
+  ridge <-
+    shp.ridge.crop[[seg.name]] %>%
+    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
+  trench <-
+    shp.trench.crop[[seg.name]] %>%
+    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
+  transform <-
+    shp.transform.crop[[seg.name]] %>%
+    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
   seg.num <- as.numeric(unique(bind_rows(split.seg$pnts)$split_fID))
   wdth <- range(st_bbox(bind_rows(split.seg$buf))[c('xmin', 'xmax')])/1e3
-  sbar <- round((wdth[2]-wdth[1])/scale.bar.width, -1)
   y.lim <- 
     c(
-      median(bind_rows(split.seg$interp)$est.sim) - 2*IQR(bind_rows(split.seg$interp)$est.sim),
-      median(bind_rows(split.seg$interp)$est.sim) + 2*IQR(bind_rows(split.seg$interp)$est.sim),
-      median(bind_rows(split.seg$interp)$est.krige) - 2*IQR(bind_rows(split.seg$interp)$est.krige),
-      median(bind_rows(split.seg$interp)$est.krige) + 2*IQR(bind_rows(split.seg$interp)$est.krige)
+      median(bind_rows(split.seg$interp)$est.sim)
+      - 3*IQR(bind_rows(split.seg$interp)$est.sim),
+      median(bind_rows(split.seg$interp)$est.sim)
+      + 3*IQR(bind_rows(split.seg$interp)$est.sim),
+      median(bind_rows(split.seg$interp)$est.krige)
+      - 3*IQR(bind_rows(split.seg$interp)$est.krige),
+      median(bind_rows(split.seg$interp)$est.krige)
+      + 3*IQR(bind_rows(split.seg$interp)$est.krige)
     )
+  if(range(y.lim)[1] < 0) {
+    y.lim[y.lim <= 0] <- 0
+  }
   p0 <-
     ggplot() +
+      geom_sf(data = world, size = 0.1, fill = 'grey60') +
+      geom_sf(data = ridge, size = 0.5, alpha = 0.8) +
+      geom_sf(data = trench, size = 0.5, alpha = 0.8) +
+      geom_sf(data = transform, size = 0.5, alpha = 0.8) +
+      geom_sf(
+        data = bind_rows(split.seg$interp),
+        shape = 3,
+        size = 0.2,
+        color = 'ivory'
+      ) +
+      geom_sf(data = split.seg$seg, size = 2) +
+      geom_sf(
+        data = bind_rows(split.seg$pnts),
+        aes(fill = split_fID, group = split_fID),
+        shape = 22,
+        size = 1,
+        show.legend = F
+      ) +
       geom_sf(
         data = bind_rows(split.seg$buf),
         aes(color = split_fID),
-        alpha = 0.8,
         size = 1,
         fill = NA,
         show.legend = F
       ) +
-      geom_sf(
-        data = bind_rows(split.seg$interp),
-        shape = 19,
-        size = 0.2,
-        color = 'ivory'
-      ) +
-      geom_sf(
-        data = bind_rows(split.seg$pnts),
-        shape = 15,
-        size = 1
-      ) +
-      geom_sf(data = split.seg$seg, size = 2) +
-      geom_sf_label(
-        data = st_centroid(bind_rows(split.seg$buf)),
-        aes(label = split_fID, fill = split_fID),
-        size = label.size,
-        color = 'ivory',
-        alpha = 0.8,
-        show.legend = F
-      ) +
-      theme_map(font_size = 12) +
+      theme_map(font_size = 10) +
       theme(
         plot.tag = element_text(face = 'bold', size = 14),
         axis.text = element_text(),
+        axis.text.x = element_text(angle = 30),
         panel.grid = element_line(size = 0.1, color = 'white'),
         panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
@@ -643,22 +657,23 @@ plot_split_segment <-
     ggplot() +
     geom_rug(
       data = shp.hf.crop[[seg.name]],
-      aes(x = hf)
+      aes(x = hf),
+      size = 0.5
     ) +
     geom_density_ridges(
-      aes(x = value, y = split_fID, fill = split_fID, linetype = name),
+      aes(x = value, y = split_fID, fill = name, linetype = name),
       alpha = 0.9
     ) +
     coord_cartesian(xlim = range(y.lim)) +
-    scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
-    labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = 'Sector') +
-    guides(fill = 'none') +
-    theme_classic(base_size = 12) +
+    scale_fill_grey() +
+    labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = NULL) +
+    theme_classic(base_size = 10) +
     theme(
       legend.box.margin = margin(),
       legend.background = element_rect(fill = NA, color = NA),
       legend.key.size = unit(0.8, 'lines'),
-      panel.background = element_rect(fill = 'grey50')
+      panel.background = element_rect(fill = 'grey50'),
+      axis.title.x = element_text(vjust = 5)
     )
   p2 <-
     bind_rows(split.seg$interp) %>%
@@ -674,34 +689,34 @@ plot_split_segment <-
     group_by(name) %>%
     ggplot() +
       geom_point(
-        data = bind_rows(split.seg$pnts),
-        aes(distance.from.seg/1e3, hf, color = split_fID, group = split_fID),
-        size = 1.5,
-        shape = 0,
+        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        size = 0.3,
+        shape = 3,
+        alpha = 0.3,
         show.legend = F
       ) +
-#      geom_point(
-#        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-#        size = 0.3,
-#        shape = 19,
-#        alpha = 0.3,
-#        show.legend = F
-#      ) +
+      geom_point(
+        data = bind_rows(split.seg$pnts),
+        aes(distance.from.seg/1e3, hf, fill = split_fID, group = split_fID),
+        size = 1.5,
+        shape = 22
+      ) +
       geom_smooth(
         aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
         size = 1,
-        se = F
+        se = F,
+        show.legend = F
       ) +
       labs(
         x = 'Distance from Trench (km)',
         y = bquote('Heat Flow'~(mWm^-2)),
-        color = 'Sector'
+        fill = 'Sector'
       ) +
-      guides(color = guide_legend(nrow = 1)) +
-      scale_fill_discrete_qualitative(palette = 'Dark 3', breaks = seq_len(length(seg.num))) +
+      guides(fill = guide_legend(nrow = 1, override.aes = list(color = NA, size = 5))) +
+      scale_fill_discrete_qualitative(palette = 'Dark 3') +
       coord_cartesian(ylim = range(y.lim)) +
       facet_wrap(~name) +
-      theme_classic(base_size = 12) +
+      theme_classic(base_size = 10) +
       theme(
         panel.background = element_rect(fill = 'grey50'),
         legend.key.size = unit(0.8, 'lines'),
@@ -720,7 +735,8 @@ plot_split_segment <-
     ) &
     theme(
       plot.margin = margin(2, 2, 2, 2),
-      plot.tag = element_text(face = 'bold'),
+      plot.tag = element_text(face = 'bold', vjust = 1),
+      plot.title = element_text(hjust = 0.5, vjust = 0),
       legend.position = 'bottom'
     )
   p

@@ -352,6 +352,7 @@ walk(~{
     pp4 <-
       (pp3 +
         theme(
+          axis.text.x = element_text(angle = 30),
           plot.margin = margin(0, 2, 0, 0),
           plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
         )
@@ -359,6 +360,7 @@ walk(~{
       (pp2 +
         theme(
           axis.text.y = element_blank(),
+          axis.text.x = element_text(angle = 30),
           plot.margin = margin(0, 0, 0, 2),
           plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 4), size = 20)
         )
@@ -389,6 +391,7 @@ walk(~{
       ) /
       (pp2 +
         theme(
+          axis.text.x = element_text(angle = 30),
           plot.margin = margin(2, 0, 0, 0),
           plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
         )

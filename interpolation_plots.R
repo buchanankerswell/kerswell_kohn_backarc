@@ -219,6 +219,7 @@ pwalk(~{
     p <-
       (pp1 +
         theme(
+          axis.text.x = element_text(angle = 30),
           plot.margin = margin(0, 2, 0, 0),
           plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
         )
@@ -227,6 +228,7 @@ pwalk(~{
         theme(
           legend.position = 'none',
           axis.text.y = element_blank(),
+          axis.text.x = element_text(angle = 30),
           plot.margin = margin(0, 0, 0, 2),
           plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 4), size = 20)
         )
@@ -256,6 +258,7 @@ pwalk(~{
       ) /
       (pp2 +
         theme(
+          axis.text.x = element_text(angle = 30),
           legend.position = 'none',
           plot.margin = margin(2, 0, 0, 0),
           plot.tag = element_text(color = 'ivory', margin = margin(10, 0, 0, 35), size = 20)
@@ -448,18 +451,21 @@ walk(unique(solns$segment), ~{
       (
         (plts[[4]] +
           theme(
+            axis.text.x = element_text(angle = 30),
             legend.position = 'none'
           )
         ) +
         (plts[[5]] +
           theme(
             legend.position = 'none',
+            axis.text.x = element_text(angle = 30),
             axis.text.y = element_blank()
           )
         ) +
         (plts[[6]] +
           theme(
             legend.position = 'none',
+            axis.text.x = element_text(angle = 30),
             axis.text.y = element_blank()
           )
         )
@@ -508,12 +514,14 @@ walk(unique(solns$segment), ~{
       (
         (plts[[5]] +
           theme(
+            axis.text.x = element_text(angle = 30),
             legend.position = 'none'
           )
         ) +
         (plts[[6]] +
           theme(
             legend.position = 'none',
+            axis.text.x = element_text(angle = 30),
             axis.text.y = element_blank()
           )
         )
