@@ -318,23 +318,6 @@ shp.box <-
   shp.buffer %>%
   map(~st_bbox(.x) %>% bbox_widen(crs = proj4.rp))
 
-# Calculate regional Similarity RMSE
-rmse.luca <-
-  suppressWarnings({
-    shp.buffer %>%
-    map_df(
-      ~shp.interp.luca %>%
-      st_intersection(.x) %>%
-      filter(!is.na(obs.sim)) %>%
-      st_set_geometry(NULL) %>%
-      group_by(segment) %>%
-      summarise(
-        rmse.sim = sqrt(sum((obs.sim - est.sim)^2)/n()),
-        n.obs.sim = n()
-      )
-    ) 
-  })
-
 # Crop UTIG plate boundaries to bounding boxes
 cat('\nCropping UTIG plate boundaries to segment bounding boxes')
 
@@ -391,6 +374,29 @@ walk2(shp.grid.crop, seg.names, ~{
   cat('\n', ..2, ':', length(..1))
 })
 cat('\n', rep('+', 40), sep='')
+
+# Calculate regional Similarity RMSE
+cat('\n\nCalculating Similarity RMSE')
+rmse.luca <-
+  tibble(
+    segment = seg.names,
+    rmse = map_dbl(seg.names, ~suppressWarnings(sim_rmse(.x, maxdist = 3.5e4, idp = 2)))
+  )
+#rmse.luca <-
+#  suppressWarnings({
+#    shp.buffer %>%
+#    map_df(
+#      ~shp.interp.luca %>%
+#      st_intersection(.x) %>%
+#      filter(!is.na(obs.sim)) %>%
+#      st_set_geometry(NULL) %>%
+#      group_by(segment) %>%
+#      summarise(
+#        rmse.sim = sqrt(sum((obs.sim - est.sim)^2)/n()),
+#        n.obs.sim = n()
+#      )
+#    ) 
+#  })
 
 # Summarize heat flow data
 cat('\n\nHeat flow summary:\n')

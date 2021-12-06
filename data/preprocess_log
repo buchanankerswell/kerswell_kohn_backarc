@@ -69,7 +69,7 @@ otherwise randomly keep either x or y
 
 Parsed 14119 duplicates
 
-Final ThermoGlobe dataset contains 52355 observations
+Final ThermoGlobe dataset contains 52363 observations
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Reading similarity interpolation from Lucazeau (2019) ...
@@ -89,15 +89,15 @@ Number of observations by segment:
  Alaska Aleutians : 289
  Andes : 1399
  Central America : 1443
- Kamchatka Marianas : 2266
+ Kamchatka Marianas : 2268
  Kyushu Ryukyu : 1894
- Lesser Antilles : 3010
- N Philippines : 570
- New Britain Solomon : 101
- S Philippines : 460
+ Lesser Antilles : 3011
+ N Philippines : 568
+ New Britain Solomon : 100
+ S Philippines : 459
  Scotia : 25
- Sumatra Banda Sea : 1415
- Tonga New Zealand : 354
+ Sumatra Banda Sea : 1414
+ Tonga New Zealand : 355
  Vanuatu : 137
 ++++++++++++++++++++++++++++++++++++++++
 
@@ -120,23 +120,25 @@ Number of Kriging estimates by segment:
  Vanuatu : 2495
 ++++++++++++++++++++++++++++++++++++++++
 
+Calculating Similarity RMSE
+
 Heat flow summary:
 # A tibble: 13 × 8
    segment                 n   min   max median   IQR  mean    sd
    <chr>               <int> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>
  1 Alaska Aleutians      289     6   196     66    27    71    28
- 2 Andes                1399     7   250    108   120   119    66
+ 2 Andes                1399     7   250    107   120   119    66
  3 Central America      1443     8   250     89   123   110    67
- 4 Kamchatka Marianas   2266     1   248     78    51    83    42
+ 4 Kamchatka Marianas   2268     1   248     78    51    83    42
  5 Kyushu Ryukyu        1894     3   250     76    42    84    42
- 6 Lesser Antilles      3010    13   242     41     8    46    18
- 7 N Philippines         570     3   231     71    26    75    33
- 8 New Britain Solomon   101     3   143     58    34    61    26
- 9 S Philippines         460     1   224     71    32    74    34
+ 6 Lesser Antilles      3011    13   242     41     8    46    18
+ 7 N Philippines         568     3   231     71    26    75    33
+ 8 New Britain Solomon   100     3   143     58    34    61    26
+ 9 S Philippines         459     1   224     71    32    74    33
 10 Scotia                 25    13   145     81    62    79    43
-11 Sumatra Banda Sea    1415     1   247     59    63    67    42
-12 Tonga New Zealand     354     5   218     49    41    59    37
-13 Vanuatu               137     1   223     61    62    80    52
+11 Sumatra Banda Sea    1414     1   247     59    63    67    42
+12 Tonga New Zealand     355     5   218     49    42    59    37
+13 Vanuatu               137     2   223     61    62    80    52
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Cleaning up environment ...

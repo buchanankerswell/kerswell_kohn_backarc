@@ -43,6 +43,66 @@ rm(package.list, sshhh)
 # which is what sf used before 1.0 release
 sf_use_s2(FALSE)
 
+# Calculate Similarity rmse by inverse distance weighting
+# interpolation of observations to nearby grid points
+sim_rmse <- function(seg.name, maxdist = 5e4, idp = 2, plot = F){
+  buf <- shp.buffer[[seg.name]]
+  grd <- shp.grid.crop[[seg.name]]
+  obs <- shp.hf.crop[[seg.name]]
+  sim <- st_intersection(shp.interp.luca, buf)
+  obs.itp <-
+    idw(
+      formula = hf~1,
+      locations = obs,
+      newdata = grd,
+      maxdist = maxdist,
+      idp = idp,
+      debug.level = 0
+    ) %>%
+    mutate(hf = var1.pred) %>%
+    select(hf, geometry)
+  idx <- !is.na(obs.itp$hf)
+  if(plot){
+    seg <- shp.segs[[seg.name]]
+    world <- shp.world %>% st_crop(buf)
+    ridge <- shp.ridge.crop[[seg.name]] %>% st_crop(buf)
+    trench <- shp.trench.crop[[seg.name]] %>% st_crop(buf)
+    transform <- shp.transform.crop[[seg.name]] %>% st_crop(buf)
+    p <-
+      ggplot() +
+        geom_sf(data = world, size = 0.1, fill = 'grey60') +
+        geom_sf(data = buf, fill = NA) +
+        geom_sf(data = ridge, size = 0.5, alpha = 0.8) +
+        geom_sf(data = trench, size = 0.5, alpha = 0.8) +
+        geom_sf(data = transform, size = 0.5, alpha = 0.8) +
+        geom_sf(data = seg, size = 2) +
+        geom_sf(data = obs.itp, aes(color = hf), size = 1, shape = 19) +
+        geom_sf(data = obs, color = 'white', shape = 19, size = 0.1) +
+        labs(color = bquote(mWm^-2), fill = bquote(mWm^-2)) +
+        scale_fill_viridis_c(
+          option = 'magma',
+          limits = c(0, 250),
+          na.value = 'transparent'
+        ) +
+        scale_color_viridis_c(
+          option = 'magma',
+          limits = c(0, 250),
+          na.value = 'transparent'
+        ) +
+        theme_map(font_size = 10) +
+        theme(
+          plot.tag = element_text(face = 'bold', size = 14),
+          axis.text = element_text(),
+          axis.text.x = element_text(angle = 30),
+          panel.grid = element_line(size = 0.1, color = 'white'),
+          panel.background = element_rect(fill = 'grey50', color = NA),
+          plot.margin = margin()
+        )
+    print(p)
+  }
+  return(sqrt(sum((sim[idx,]$est.sim - obs.itp[idx,]$hf)^2)/length(idx)))
+}
+
 # Draw a widened box from a st_bbox object
 bbox_widen <-
   function(
@@ -584,7 +644,8 @@ split_segment <-
 # Plot split segment
 plot_split_segment <- function(split.seg, running.avg = 5) {
   seg.name <- split.seg$interp[[1]]$segment[1]
-  world <- shp.world %>%
+  world <-
+    shp.world %>%
     st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
   ridge <-
     shp.ridge.crop[[seg.name]] %>%
