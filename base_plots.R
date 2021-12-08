@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 # Check files
-if(dir.exists('figs/base') & length(list.files('figs/base')) == 16) {
+if(dir.exists('figs/base') & length(list.files('figs/base')) == 29) {
   cat('\nBase plots already exist')
   cat('\nPassing ...\n')
   quit()
@@ -182,12 +182,12 @@ suppressWarnings(suppressMessages(
 ))
 
 # Individual Segments
-seg.names %>%
-walk(~{
+seg.names %>% walk(~{
   # Define map parts
   cnt <- shp.contours[[.x]] # Contour
   seg <- shp.segs[[.x]] # Segment
   buf <- shp.buffer[[.x]] # Buffer
+  grd <- shp.grid.crop[[.x]] # Interpolation grid
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
   world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
@@ -232,6 +232,7 @@ walk(~{
       geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
+      geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
@@ -314,6 +315,7 @@ walk(~{
       geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
+      geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3, show.legend = F) +
@@ -335,6 +337,62 @@ walk(~{
         panel.background = element_rect(fill = 'grey50', color = NA),
         plot.margin = margin()
       )
+  # Interpolation domain
+  pp4 <- 
+    ggplot() +
+      geom_sf(data = world, size = 0.1, fill = 'grey60') +
+      geom_sf(data = grd, size = 1, shape = 3, color = 'black', alpha = 0.5) +
+      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
+      geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
+      geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
+      annotate(
+        'label',
+        x = -Inf,
+        y = -Inf,
+        label = .x,
+        hjust = 0,
+        vjust = 0,
+        size = annt.txt.size,
+        fill = rgb(1, 1, 0.941),
+        label.padding = unit(0.15, 'lines'),
+        label.r = unit(0.05, 'lines')
+      ) +
+      v.scale.grey +
+      labs(color = bquote(mWm^-2)) +
+      coord_sf(expand = F) +
+      theme_map(font_size = base.txt.size) +
+      theme(
+        axis.text = element_text(),
+        axis.text.x = element_text(angle = 30),
+        legend.position = c(1, 1),
+        legend.justification = c(1, 1),
+        legend.direction = 'horizontal',
+        legend.box.background = element_rect(fill = rgb(1, 1, 0.941), color = NA),
+        legend.box.margin = margin(1, 8, 1, 2),
+        legend.key.height = unit(0.1, 'in'),
+        legend.key.width = unit(0.3, 'in'),
+        legend.title = element_text(vjust = 1),
+        panel.grid = element_line(size = 0.1, color = 'white'),
+        panel.background = element_rect(fill = 'grey50', color = NA),
+        plot.margin = margin()
+      )
+    cat('\nSaving plot to: figs/base/', str_replace_all(.x, ' ', ''), 'Interp.png', sep = '')
+    suppressWarnings(suppressMessages(
+      ggsave(
+        file = paste0('figs/base/', str_replace_all(.x, ' ', ''), 'Interp.png'),
+        plot = pp4,
+        device = 'png',
+        type = 'cairo',
+        width = wdth,
+        height = hght,
+        units = 'mm'
+      )
+    ))
   if(!(.x %in%
       c(
         'Alaska Aleutians',
@@ -349,7 +407,7 @@ walk(~{
       ))
   ) {
     # Composition
-    pp4 <-
+    pp5 <-
       (pp3 +
         theme(
           axis.text.x = element_text(angle = 30),
@@ -371,7 +429,7 @@ walk(~{
     suppressWarnings(suppressMessages(
       ggsave(
         file = paste0('figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'),
-        plot = pp4,
+        plot = pp5,
         device = 'png',
         type = 'cairo',
         width = wdth*2,
@@ -381,7 +439,7 @@ walk(~{
     ))
   } else {
     # Composition
-    pp4 <-
+    pp5 <-
       (pp3 +
         theme(
           axis.text.x = element_blank(),
@@ -402,7 +460,7 @@ walk(~{
     suppressWarnings(suppressMessages(
       ggsave(
         file = paste0('figs/base/', str_replace_all(.x, ' ', ''), 'Comp.png'),
-        plot = pp4,
+        plot = pp5,
         device = 'png',
         type = 'cairo',
         width = wdth,

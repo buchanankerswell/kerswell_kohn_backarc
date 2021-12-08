@@ -280,7 +280,7 @@ interp.luca <-
 	  col_types = c('ddddd')
   ) %>%
   rename(
-    lon = longiyude,
+    lon = longitude,
     lat = latitude,
     est.sim = HF_pred,
     sigma.sim = sHF_pred,
@@ -441,7 +441,8 @@ rm(
    dup,
    rid,
    buf.dist,
-   interp.luca
+   interp.luca,
+   single.pnt.idx
 )
 
 # Save
