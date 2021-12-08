@@ -741,6 +741,7 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
     st_set_geometry(NULL) %>%
     filter(distance.from.seg <= 500000) %>%
     select(est.sim, est.krige, split_fID, distance.from.seg) %>%
+    arrange(distance.from.seg) %>%
     mutate(
       Similarity = zoo::rollmean(est.sim, running.avg, fill = NA),
       Krige = zoo::rollmean(est.krige, running.avg, fill = NA)

@@ -292,7 +292,7 @@ shp.sectors <-
     seg.names = seg.names,
     buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
     seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
-    sector.exclude = list(2, c(1,8), 3, c(1,8), NULL, c(2,4), NULL, c(1,2), c(1,3), c(3,4), 8, 8, 8)
+    sector.exclude = list(2, c(1,8), 3, c(1,8), NULL, c(2,4), 5, c(1,2,7), c(1,3), c(3,4), 8, 8, 8)
   ) %>%
   pmap(~{
     suppressMessages({suppressWarnings({
@@ -312,7 +312,7 @@ walk(1:13, ~{
   suppressMessages({suppressWarnings({
     plot_split_segment(
       split.seg = shp.sectors[[.x]],
-      running.avg = 5
+      running.avg = 3
     ) -> p
     ggsave(
       file = paste0('figs/upperPlate/', str_replace_all(names(shp.sectors)[.x], ' ', ''), 'UpperPlate.png'),
