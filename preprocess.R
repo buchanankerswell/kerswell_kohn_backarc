@@ -380,7 +380,7 @@ cat('\n\nCalculating Similarity RMSE')
 rmse.luca <-
   tibble(
     segment = seg.names,
-    rmse = map_dbl(seg.names, ~suppressWarnings(sim_rmse(.x, maxdist = 3.5e4, idp = 2)))
+    rmse = map_dbl(seg.names, ~suppressWarnings(sim_rmse(.x, maxdist = 5.5e4, idp = 2)))
   )
 #rmse.luca <-
 #  suppressWarnings({

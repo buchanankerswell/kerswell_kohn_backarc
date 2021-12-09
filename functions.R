@@ -45,7 +45,7 @@ sf_use_s2(FALSE)
 
 # Calculate Similarity rmse by inverse distance weighting
 # interpolation of observations to nearby grid points
-sim_rmse <- function(seg.name, maxdist = 5e4, idp = 2, plot = F){
+sim_rmse <- function(seg.name, maxdist = 5.5e4, idp = 2, plot = F){
   buf <- shp.buffer[[seg.name]]
   grd <- shp.grid.crop[[seg.name]]
   obs <- shp.hf.crop[[seg.name]]
