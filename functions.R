@@ -726,7 +726,8 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
       alpha = 0.9
     ) +
     coord_cartesian(xlim = range(y.lim)) +
-    scale_fill_grey() +
+    scale_fill_manual(values = c('grey20', 'ivory')) +
+#    scale_fill_grey() +
     labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = NULL) +
     theme_classic(base_size = 10) +
     theme(
@@ -751,20 +752,23 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
     group_by(name) %>%
     ggplot() +
       geom_point(
-        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
-        size = 0.3,
-        shape = 3,
-        alpha = 0.3,
-        show.legend = F
-      ) +
-      geom_point(
         data = bind_rows(split.seg$pnts),
         aes(distance.from.seg/1e3, hf, fill = split_fID, group = split_fID),
         size = 1.5,
-        shape = 22
+        shape = 22,
+        alpha = 0.8
+      ) +
+      geom_point(
+        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        size = 0.3,
+        shape = 3,
+        alpha = 0.8,
+        show.legend = F
       ) +
       geom_smooth(
         aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        method = 'loess',
+        span = 0.95,
         size = 1,
         se = F,
         show.legend = F
@@ -774,7 +778,12 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
         y = bquote('Heat Flow'~(mWm^-2)),
         fill = 'Sector'
       ) +
-      guides(fill = guide_legend(nrow = 1, override.aes = list(color = NA, size = 5))) +
+      guides(
+        fill = guide_legend(
+          nrow = 1,
+          override.aes = list(color = NA, size = 5, alpha = 1)
+        )
+      ) +
       scale_fill_discrete_qualitative(palette = 'Dark 3') +
       coord_cartesian(ylim = range(y.lim)) +
       facet_wrap(~name) +

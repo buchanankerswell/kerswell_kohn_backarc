@@ -287,6 +287,7 @@ ggsave(
 )
 
 # Split segments into sectors
+cat('\nSplitting segments into sectors ...')
 shp.sectors <-
   tibble(
     seg.names = seg.names,
@@ -309,6 +310,7 @@ shp.sectors <-
 save(shp.sectors, file = 'data/sectors.RData')
 
 walk(1:13, ~{
+  cat('\nSaving plot to: figs/upperPlate/', str_replace_all(names(shp.sectors)[.x], ' ', ''), 'UpperPlate.png', sep = '')
   suppressMessages({suppressWarnings({
     plot_split_segment(
       split.seg = shp.sectors[[.x]],
