@@ -228,9 +228,9 @@ seg.names %>% walk(~{
   pp1 <- 
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
-      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -272,9 +272,9 @@ seg.names %>% walk(~{
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
       geom_sf(data = world.buf, size = 0.1, fill = 'grey60', alpha = 0.1) +
-      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       annotate(
@@ -311,9 +311,9 @@ seg.names %>% walk(~{
   pp3 <- 
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
-      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
@@ -342,14 +342,14 @@ seg.names %>% walk(~{
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = grd, size = 1, shape = 3, color = 'black', alpha = 0.5) +
-      geom_sf(data = ridge, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = trench, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
-      geom_sf(data = transform, size = 1, color = 'mediumspringgreen', alpha = 0.8) +
+      geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
+      geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
+      geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.5) +
       geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
-      geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
       annotate(
         'label',
         x = -Inf,

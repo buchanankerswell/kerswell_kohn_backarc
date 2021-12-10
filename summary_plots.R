@@ -111,7 +111,7 @@ walk(~{
 p2 <-
   vgrm.summary %>%
   drop_na() %>%
-  select(-c(n.obs.sim, rmse.sim)) %>%
+  select(-c(rmse)) %>%
   mutate('range' = range/1000) %>%
   filter(cost < (median(cost)+(5*IQR(cost))) & range < (median(range)+(5*IQR(range)))) %>%
   rename(
@@ -286,38 +286,73 @@ ggsave(
   height = 4
 )
 
-# Split segments into sectors
-cat('\nSplitting segments into sectors ...')
-shp.sectors <-
-  tibble(
-    seg.names = seg.names,
-    buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
-    seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
-    sector.exclude = list(2, c(1,8), 3, c(1,8), NULL, c(2,4), 5, c(1,2,7), c(1,3), c(3,4), 8, 8, 8)
-  ) %>%
-  pmap(~{
-    suppressMessages({suppressWarnings({
-      split_segment(
-        seg.name = ..1,
-        buf.dir = ..2,
-        seg.num = ..3,
-        sector.exclude = ..4
-      )
-    })})
-  }) %>%
-  set_names(seg.names)
+if(!file.exists('data/sectors.RData')){
+  # Split segments into sectors
+  cat('\nSplitting segments into sectors ...')
+  shp.sectors <-
+    tibble(
+      seg.names = seg.names,
+      buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
+      seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
+      sector.exclude = list(2, c(1,8), 3, c(1,8), NULL, c(2,4), 5, c(1,2,7), c(1,3), c(3,4), 8, 8, 8)
+    ) %>%
+    pmap(~{
+      suppressMessages({suppressWarnings({
+        split_segment(
+          seg.name = ..1,
+          buf.dir = ..2,
+          seg.num = ..3,
+          sector.exclude = ..4
+        )
+      })})
+    }) %>%
+    set_names(seg.names)
+  # Save
+  save(shp.sectors, file = paste0('data/sectors', cntr, '.RData'))
+} else {
+  load('data/sectors.RData')
+}
 
-save(shp.sectors, file = 'data/sectors.RData')
+borders <-
+  list(
+    # left right top bottom
+    c(-0.1, -0.1, 0.5, 0.5),
+    c(0.1, 1, -0.05, -0.1),
+    c(-0.1, 0, 0.1, -0.2),
+    c(0.4, -0.2, 0, -0.1),
+    c(0.1, -0.1, 0, 0),
+    c(0, 0, 0, 0),
+    c(-0.05, 0.1, -0.2, -0.2),
+    c(0, 0, 0, 0),
+    c(0.5, -0.1, -0.1, -0.1),
+    c(-0.1, -0.1, 0, 0),
+    c(0, 0, 0, 0),
+    c(0.2, 0.2, -0.1, -0.1),
+    c(0, 0, 0, 0)
+  )
 
-walk(1:13, ~{
-  cat('\nSaving plot to: figs/upperPlate/', str_replace_all(names(shp.sectors)[.x], ' ', ''), 'UpperPlate.png', sep = '')
+walk2(1:13, borders, ~{
+  cat(
+    '\nSaving plot to: figs/upperPlate/',
+    str_replace_all(names(shp.sectors)[.x], ' ', ''),
+    'UpperPlate.png',
+    sep = ''
+  )
   suppressMessages({suppressWarnings({
     plot_split_segment(
       split.seg = shp.sectors[[.x]],
-      running.avg = 3
+      running.avg = 3,
+      borders = .y
     ) -> p
     ggsave(
-      file = paste0('figs/upperPlate/', str_replace_all(names(shp.sectors)[.x], ' ', ''), 'UpperPlate.png'),
+      file =
+        paste0(
+          'figs/upperPlate/',
+          str_replace_all(names(shp.sectors)[.x], ' ', ''),
+          'UpperPlate',
+          cntr,
+          '.png'
+        ),
       plot = p,
       device = 'png',
       type = 'cairo',

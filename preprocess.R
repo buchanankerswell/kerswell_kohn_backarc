@@ -25,6 +25,12 @@ v.scale.grey <-
     limits = c(0, 250),
     na.value = 'grey50'
   )
+v.scale.trans <-
+  scale_color_viridis_c(
+    option = 'magma',
+    limits = c(0, 250),
+    na.value = 'transparent'
+  )
 
 # Projections
 # WGS84

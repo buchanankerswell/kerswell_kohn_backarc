@@ -590,6 +590,7 @@ split_segment <-
   pnts <- shp.hf.crop[[seg.name]]
   seg <- shp.segs[[seg.name]]
   buf <- st_buffer(seg, dist = buf.len, endCapStyle = 'ROUND')
+  volc <- shp.volc
   split.seg <- split_lines(seg, as.numeric(st_length(seg)/seg.num))
   split.buf <-
     map(1:seg.num, ~
@@ -603,6 +604,14 @@ split_segment <-
   pnts.buf <-
     map(1:seg.num, ~
       st_intersection(pnts, split.buf[[.x]]) %>%
+      mutate(
+        distance.from.seg = as.vector(st_distance(split.seg[.x,]$geometry, geometry)),
+        .before = geometry
+      )
+    )
+  volc.buf <-
+    map(1:seg.num, ~
+      st_intersection(volc, split.buf[[.x]]) %>%
       mutate(
         distance.from.seg = as.vector(st_distance(split.seg[.x,]$geometry, geometry)),
         .before = geometry
@@ -624,11 +633,13 @@ split_segment <-
   if(!is.null(sector.exclude)) {
     split.buf <- split.buf[-sector.exclude]
     pnts.buf <- pnts.buf[-sector.exclude]
+    volc.buf <- volc.buf[-sector.exclude]
     interp.buf <- interp.buf[-sector.exclude]
   }
   if(0 %in% map_dbl(pnts.buf, nrow)) {
     split.buf <- split.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
     pnts.buf <- pnts.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
+    volc.buf <- volc.buf[-sector.exclude]
     interp.buf <- interp.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
   }
   return(
@@ -636,54 +647,58 @@ split_segment <-
       'seg' = split.seg,
       'buf' = split.buf,
       'pnts' = pnts.buf,
+      'volc' = volc.buf,
       'interp' = interp.buf
     )
   )
 }
 
 # Plot split segment
-plot_split_segment <- function(split.seg, running.avg = 5) {
+plot_split_segment <-
+  function(
+    split.seg,
+    running.avg = 3,
+    borders =
+      c(
+        'left' = 0.1,
+        'right' = 0.1,
+        'top' = 0.1,
+        'bottom' = 0.1
+      )
+  ) {
   seg.name <- split.seg$interp[[1]]$segment[1]
-  world <-
-    shp.world %>%
-    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
-  ridge <-
-    shp.ridge.crop[[seg.name]] %>%
-    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
-  trench <-
-    shp.trench.crop[[seg.name]] %>%
-    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
-  transform <-
-    shp.transform.crop[[seg.name]] %>%
-    st_crop(st_buffer(st_combine(split.seg$seg), dist = 500000))
   seg.num <- as.numeric(unique(bind_rows(split.seg$pnts)$split_fID))
+  bx <- bbox_widen(st_bbox(st_buffer(st_combine(split.seg$seg), dist = 5e5)), borders = borders)
+  world <- shp.world %>% st_crop(bx)
+  ridge <- shp.ridge.crop[[seg.name]] %>% st_crop(bx)
+  trench <- shp.trench.crop[[seg.name]] %>% st_crop(bx)
+  transform <- shp.transform.crop[[seg.name]] %>% st_crop(bx)
+  volc <- split.seg$volc
   wdth <- range(st_bbox(bind_rows(split.seg$buf))[c('xmin', 'xmax')])/1e3
   y.lim <- 
     c(
       median(bind_rows(split.seg$interp)$est.sim)
-      - 3*IQR(bind_rows(split.seg$interp)$est.sim),
+      - 2*IQR(bind_rows(split.seg$interp)$est.sim),
       median(bind_rows(split.seg$interp)$est.sim)
-      + 3*IQR(bind_rows(split.seg$interp)$est.sim),
+      + 2*IQR(bind_rows(split.seg$interp)$est.sim),
       median(bind_rows(split.seg$interp)$est.krige)
-      - 3*IQR(bind_rows(split.seg$interp)$est.krige),
+      - 2*IQR(bind_rows(split.seg$interp)$est.krige),
       median(bind_rows(split.seg$interp)$est.krige)
-      + 3*IQR(bind_rows(split.seg$interp)$est.krige)
+      + 2*IQR(bind_rows(split.seg$interp)$est.krige)
     )
   if(range(y.lim)[1] < 0) {
     y.lim[y.lim <= 0] <- 0
   }
+  med.sim <- map_dbl(split.seg$interp, ~median(.x$est.sim))
+  range.med.sim <- range(med.sim)
+  med.krige <- map_dbl(split.seg$interp, ~median(.x$est.krige))
+  range.med.krige <- range(med.krige)
   p0 <-
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
       geom_sf(data = ridge, size = 0.5, alpha = 0.8) +
       geom_sf(data = trench, size = 0.5, alpha = 0.8) +
       geom_sf(data = transform, size = 0.5, alpha = 0.8) +
-      geom_sf(
-        data = bind_rows(split.seg$interp),
-        shape = 3,
-        size = 0.2,
-        color = 'ivory'
-      ) +
       geom_sf(data = split.seg$seg, size = 2) +
       geom_sf(
         data = bind_rows(split.seg$pnts),
@@ -691,6 +706,11 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
         shape = 22,
         size = 1,
         show.legend = F
+      ) +
+      geom_sf(
+        data = bind_rows(volc),
+        color = 'gold',
+        shape = 18
       ) +
       geom_sf(
         data = bind_rows(split.seg$buf),
@@ -716,18 +736,34 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
     pivot_longer(-split_fID) %>%
     group_by(name) %>%
     ggplot() +
-    geom_rug(
-      data = shp.hf.crop[[seg.name]],
-      aes(x = hf),
-      size = 0.5
+    annotate(
+      'rect',
+      xmin = range.med.krige[1],
+      xmax = range.med.krige[2],
+      ymin = -Inf,
+      ymax = Inf,
+      fill = 'grey20',
+      color = 'black',
+      alpha = 0.8
     ) +
-    geom_density_ridges(
+    annotate(
+      'rect',
+      xmin = range.med.sim[1],
+      xmax = range.med.sim[2],
+      ymin = -Inf,
+      ymax = Inf,
+      fill = 'ivory',
+      color = 'black',
+      alpha = 0.8
+    ) +
+    stat_density_ridges(
       aes(x = value, y = split_fID, fill = name, linetype = name),
-      alpha = 0.9
+      quantile_lines = T,
+      quantiles = 2,
+      rel_min_height = 0.03
     ) +
     coord_cartesian(xlim = range(y.lim)) +
     scale_fill_manual(values = c('grey20', 'ivory')) +
-#    scale_fill_grey() +
     labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = NULL) +
     theme_classic(base_size = 10) +
     theme(
@@ -751,6 +787,12 @@ plot_split_segment <- function(split.seg, running.avg = 5) {
     pivot_longer(-c(split_fID, distance.from.seg)) %>%
     group_by(name) %>%
     ggplot() +
+      geom_point(
+        data = bind_rows(volc),
+        aes(distance.from.seg/1e3, range(y.lim)[1]),
+        color = 'gold',
+        shape = 18
+      ) +
       geom_point(
         data = bind_rows(split.seg$pnts),
         aes(distance.from.seg/1e3, hf, fill = split_fID, group = split_fID),
