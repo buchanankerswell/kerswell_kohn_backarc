@@ -1,0 +1,993 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+R version 4.1.0 (2021-05-18)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS 12.0.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] nloptr_1.2.2.3      rnaturalearth_0.1.0 sf_1.0-4           
+ [4] rgeos_0.5-8         sp_1.4-6            gstat_2.0-8        
+ [7] cowplot_1.1.1       patchwork_1.1.1     ggsflabel_0.0.1    
+[10] ggridges_0.5.3      ggrepel_0.9.1       ggplot2_3.3.5      
+[13] magrittr_2.0.1      dplyr_1.0.7         tibble_3.1.6       
+[16] furrr_0.2.3         future_1.23.0       purrr_0.3.4        
+[19] readr_2.1.0         tidyr_1.1.4         stringr_1.4.0      
+[22] tictoc_1.0.1        colorspace_2.0-2   
+
+loaded via a namespace (and not attached):
+ [1] zoo_1.8-9          tidyselect_1.1.1   listenv_0.8.0      lattice_0.20-45   
+ [5] vctrs_0.3.8        generics_0.1.1     spacetime_1.2-5    utf8_1.2.2        
+ [9] rlang_0.4.12       e1071_1.7-9        pillar_1.6.4       glue_1.5.0        
+[13] withr_2.4.2        DBI_1.1.1          lifecycle_1.0.1    plyr_1.8.6        
+[17] munsell_0.5.0      gtable_0.3.0       codetools_0.2-18   tzdb_0.2.0        
+[21] class_7.3-19       parallel_4.1.0     fansi_0.5.0        xts_0.12.1        
+[25] Rcpp_1.0.7         KernSmooth_2.23-20 scales_1.1.1       classInt_0.4-3    
+[29] FNN_1.1.3          parallelly_1.29.0  hms_1.1.1          digest_0.6.28     
+[33] stringi_1.7.5      grid_4.1.0         cli_3.1.0          tools_4.1.0       
+[37] proxy_0.4-26       crayon_1.4.2       pkgconfig_2.0.3    ellipsis_0.3.2    
+[41] assertthat_0.2.1   R6_2.5.1           globals_0.14.0     units_0.7-2       
+[45] intervals_0.15.2   compiler_4.1.0    
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+nloptr trace ...
+++++++++++++++++++++++++++++++++++++++++
+# A tibble: 3,730 × 10
+     itr segment   v.mod vgrm.wt vgrm.rmse vgrm.cost cv.wt cv.rmse cv.cost  cost
+   <int> <chr>     <chr>   <dbl>     <dbl>     <dbl> <dbl>   <dbl>   <dbl> <dbl>
+ 1     1 Alaska A… Bes       0.5    0.0171   0.00756   0.5    26.9   1.14  1.15 
+ 2     2 Alaska A… Bes       0.5    0.0171   0.00756   0.5    26.9   1.14  1.15 
+ 3     3 Alaska A… Bes       0.5    0.0171   0.00756   0.5    26.9   1.14  1.15 
+ 4     4 Alaska A… Bes       0.5    0.0230   0.00821   0.5    27.3   1.69  1.70 
+ 5     5 Alaska A… Bes       0.5    0.0219   0.00830   0.5    27.4   1.73  1.74 
+ 6     6 Alaska A… Bes       0.5    0.0168   0.00726   0.5    26.9   1.14  1.15 
+ 7     7 Alaska A… Bes       0.5    0.0171   0.00756   0.5    26.9   1.20  1.20 
+ 8     8 Alaska A… Bes       0.5    0.0112   0.00617   0.5    26.7   0.977 0.983
+ 9     9 Alaska A… Bes       0.5    0.0169   0.00740   0.5    26.8   1.04  1.05 
+10    10 Alaska A… Bes       0.5    0.0171   0.00751   0.5    26.9   1.14  1.15 
+# … with 3,720 more rows
+++++++++++++++++++++++++++++++++++++++++
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Decoding optimized solutions ...
+Best solutions for each segment:
+
+++++++++++++++++++++++++++++++++++++++++
+Segment:          Alaska Aleutians 
+Variogram cutoff: 1 
+Number of lags:   15.00378 
+Lag shift:        1.556269 
+Max points:       10 
+Variogram model:  Lin 
+Cost:             0.6468134 
+
+Segment:          Andes 
+Variogram cutoff: 7.300199 
+Number of lags:   24.81222 
+Lag shift:        1.593756 
+Max points:       11.85779 
+Variogram model:  Exp 
+Cost:             0.3060136 
+
+Segment:          Central America 
+Variogram cutoff: 13.03395 
+Number of lags:   24.69574 
+Lag shift:        1.311088 
+Max points:       11.15069 
+Variogram model:  Cir 
+Cost:             0.2619484 
+
+Segment:          Kamchatka Marianas 
+Variogram cutoff: 1 
+Number of lags:   17.29216 
+Lag shift:        2.104119 
+Max points:       11.21061 
+Variogram model:  Sph 
+Cost:             0.4256873 
+
+Segment:          Kyushu Ryukyu 
+Variogram cutoff: 1 
+Number of lags:   20.50634 
+Lag shift:        1.54182 
+Max points:       31.92162 
+Variogram model:  Lin 
+Cost:             0.4836911 
+
+Segment:          Lesser Antilles 
+Variogram cutoff: 2.851471 
+Number of lags:   27.24549 
+Lag shift:        1.484222 
+Max points:       28.9857 
+Variogram model:  Sph 
+Cost:             0.3098117 
+
+Segment:          N Philippines 
+Variogram cutoff: 1.315425 
+Number of lags:   15.4103 
+Lag shift:        1.564817 
+Max points:       14.21113 
+Variogram model:  Lin 
+Cost:             0.5397044 
+
+Segment:          New Britain Solomon 
+Variogram cutoff: 13.05511 
+Number of lags:   22.61894 
+Lag shift:        1.596278 
+Max points:       10.00417 
+Variogram model:  Lin 
+Cost:             0.7901155 
+
+Segment:          S Philippines 
+Variogram cutoff: 13.0864 
+Number of lags:   23.51639 
+Lag shift:        1.493772 
+Max points:       10 
+Variogram model:  Bes 
+Cost:             0.4981603 
+
+Segment:          Scotia 
+Variogram cutoff: 1 
+Number of lags:   33.02377 
+Lag shift:        1.27385 
+Max points:       49.60002 
+Variogram model:  Sph 
+Cost:             0.2925149 
+
+Segment:          Sumatra Banda Sea 
+Variogram cutoff: 1 
+Number of lags:   23.91708 
+Lag shift:        1.557707 
+Max points:       32.96546 
+Variogram model:  Exp 
+Cost:             0.26777 
+
+Segment:          Tonga New Zealand 
+Variogram cutoff: 1.056568 
+Number of lags:   15.08807 
+Lag shift:        1.933078 
+Max points:       23.3949 
+Variogram model:  Cir 
+Cost:             0.5294413 
+
+Segment:          Vanuatu 
+Variogram cutoff: 1.398021 
+Number of lags:   15.3017 
+Lag shift:        1.556551 
+Max points:       10.09092 
+Variogram model:  Lin 
+Cost:             0.5201156 
+
+++++++++++++++++++++++++++++++++++++++++
+
+Variogram summary:
+# A tibble: 78 × 17
+   segment   v.mod cutoff.prop n.lags lag.start n.max  sill  range   itr vgrm.wt
+   <chr>     <chr>       <dbl>  <dbl>     <dbl> <dbl> <dbl>  <dbl> <int>   <dbl>
+ 1 Alaska A… Bes         10.4    20.8      1.54  10.9  651. 7.50e3    52     0.5
+ 2 Alaska A… Cir          1      15        1.56  10    824. 2.93e5    49     0.5
+ 3 Alaska A… Exp         11.4    20.9      1.59  10.2  624. 8.90e3    50     0.5
+ 4 Alaska A… Gau          6.28   23.5      1.56  30.7  707. 2.16e4    48     0.5
+ 5 Alaska A… Lin          1      15.0      1.56  10    824. 2.58e5    44     0.5
+ 6 Alaska A… Sph          7.22   15.5      1.57  10.1  750. 6.17e4    52     0.5
+ 7 Andes     Bes         13.5    24.0      1.54  12.0 2457. 5.05e3    47     0.5
+ 8 Andes     Cir         10.1    20.5      1.56  11.8 2476. 2.03e4    52     0.5
+ 9 Andes     Exp          7.30   24.8      1.59  11.9 2575. 1.24e4    52     0.5
+10 Andes     Gau          3.48   18.4      1.61  29.4 3327. 4.86e4    39     0.5
+# … with 68 more rows, and 7 more variables: vgrm.rmse <dbl>, vgrm.cost <dbl>,
+#   cv.wt <dbl>, cv.rmse <dbl>, cv.cost <dbl>, cost <dbl>, rmse <dbl>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Kriging segments ...
+
+Kriging: Alaska Aleutians 
+Observations: 290 
+Grid size: 5779 
+Max nearest points: 10.88392 
+Variogram params:
+  model    psill    range
+1   Bes 651.1386 7495.245
+
+Kriging: Alaska Aleutians 
+Observations: 290 
+Grid size: 5779 
+Max nearest points: 10 
+Variogram params:
+  model    psill    range
+1   Cir 824.2987 292775.3
+
+Kriging: Alaska Aleutians 
+Observations: 290 
+Grid size: 5779 
+Max nearest points: 10.16451 
+Variogram params:
+  model    psill    range
+1   Exp 623.7207 8897.998
+
+Kriging: Alaska Aleutians 
+Observations: 290 
+Grid size: 5779 
+Max nearest points: 30.71465 
+Variogram params:
+  model    psill    range
+1   Gau 707.4753 21561.32
+
+Kriging: Alaska Aleutians 
+Observations: 290 
+Grid size: 5779 
+Max nearest points: 10 
+Variogram params:
+  model    psill    range
+1   Lin 823.9387 258455.6
+
+Kriging: Alaska Aleutians 
+Observations: 290 
+Grid size: 5779 
+Max nearest points: 10.08701 
+Variogram params:
+  model    psill    range
+1   Sph 749.8657 61711.59
+
+Kriging: Andes 
+Observations: 1398 
+Grid size: 7519 
+Max nearest points: 11.9869 
+Variogram params:
+  model    psill   range
+1   Bes 2457.456 5047.95
+
+Kriging: Andes 
+Observations: 1398 
+Grid size: 7519 
+Max nearest points: 11.77594 
+Variogram params:
+  model    psill    range
+1   Cir 2476.158 20273.08
+
+Kriging: Andes 
+Observations: 1398 
+Grid size: 7519 
+Max nearest points: 11.85779 
+Variogram params:
+  model    psill    range
+1   Exp 2575.316 12409.19
+
+Kriging: Andes 
+Observations: 1398 
+Grid size: 7519 
+Max nearest points: 29.4255 
+Variogram params:
+  model    psill    range
+1   Gau 3326.529 48588.24
+
+Kriging: Andes 
+Observations: 1398 
+Grid size: 7519 
+Max nearest points: 19.5541 
+Variogram params:
+  model    psill    range
+1   Lin 2565.188 16592.29
+
+Kriging: Andes 
+Observations: 1398 
+Grid size: 7519 
+Max nearest points: 11.72058 
+Variogram params:
+  model    psill    range
+1   Sph 2499.285 22880.29
+
+Kriging: Central America 
+Observations: 1443 
+Grid size: 2635 
+Max nearest points: 17.10796 
+Variogram params:
+  model    psill    range
+1   Bes 1984.701 2870.258
+
+Kriging: Central America 
+Observations: 1443 
+Grid size: 2635 
+Max nearest points: 11.15069 
+Variogram params:
+  model    psill    range
+1   Cir 2038.032 9721.203
+
+Kriging: Central America 
+Observations: 1443 
+Grid size: 2635 
+Max nearest points: 11.81798 
+Variogram params:
+  model   psill    range
+1   Exp 2076.14 4818.039
+
+Kriging: Central America 
+Observations: 1443 
+Grid size: 2635 
+Max nearest points: 30.22123 
+Variogram params:
+  model    psill    range
+1   Gau 1998.199 5226.999
+
+Kriging: Central America 
+Observations: 1443 
+Grid size: 2635 
+Max nearest points: 17.04515 
+Variogram params:
+  model    psill    range
+1   Lin 2047.721 8079.158
+
+Kriging: Central America 
+Observations: 1443 
+Grid size: 2635 
+Max nearest points: 12.06435 
+Variogram params:
+  model   psill   range
+1   Sph 2212.32 11556.4
+
+Kriging: Kamchatka Marianas 
+Observations: 2269 
+Grid size: 7059 
+Max nearest points: 12.24841 
+Variogram params:
+  model    psill    range
+1   Bes 1725.045 4693.789
+
+Kriging: Kamchatka Marianas 
+Observations: 2269 
+Grid size: 7059 
+Max nearest points: 10.10147 
+Variogram params:
+  model    psill    range
+1   Cir 1792.193 250962.9
+
+Kriging: Kamchatka Marianas 
+Observations: 2269 
+Grid size: 7059 
+Max nearest points: 10.94778 
+Variogram params:
+  model    psill    range
+1   Exp 1726.011 6704.923
+
+Kriging: Kamchatka Marianas 
+Observations: 2269 
+Grid size: 7059 
+Max nearest points: 29.39275 
+Variogram params:
+  model    psill    range
+1   Gau 1691.991 10267.72
+
+Kriging: Kamchatka Marianas 
+Observations: 2269 
+Grid size: 7059 
+Max nearest points: 10.04899 
+Variogram params:
+  model    psill    range
+1   Lin 1796.272 10537.42
+
+Kriging: Kamchatka Marianas 
+Observations: 2269 
+Grid size: 7059 
+Max nearest points: 11.21061 
+Variogram params:
+  model    psill    range
+1   Sph 1799.357 814397.8
+
+Kriging: Kyushu Ryukyu 
+Observations: 1895 
+Grid size: 2768 
+Max nearest points: 12.61674 
+Variogram params:
+  model   psill    range
+1   Bes 2044.97 3605.524
+
+Kriging: Kyushu Ryukyu 
+Observations: 1895 
+Grid size: 2768 
+Max nearest points: 15.87227 
+Variogram params:
+  model    psill   range
+1   Cir 1881.864 73232.8
+
+Kriging: Kyushu Ryukyu 
+Observations: 1895 
+Grid size: 2768 
+Max nearest points: 10.88678 
+Variogram params:
+  model    psill    range
+1   Exp 2046.795 5760.242
+
+Kriging: Kyushu Ryukyu 
+Observations: 1895 
+Grid size: 2768 
+Max nearest points: 30.54885 
+Variogram params:
+  model    psill    range
+1   Gau 2046.269 6487.574
+
+Kriging: Kyushu Ryukyu 
+Observations: 1895 
+Grid size: 2768 
+Max nearest points: 31.92162 
+Variogram params:
+  model    psill    range
+1   Lin 1873.495 119333.4
+
+Kriging: Kyushu Ryukyu 
+Observations: 1895 
+Grid size: 2768 
+Max nearest points: 12.8262 
+Variogram params:
+  model    psill    range
+1   Sph 1888.128 17488.65
+
+Kriging: Lesser Antilles 
+Observations: 3010 
+Grid size: 2226 
+Max nearest points: 29.82763 
+Variogram params:
+  model    psill    range
+1   Bes 304.9234 13356.11
+
+Kriging: Lesser Antilles 
+Observations: 3010 
+Grid size: 2226 
+Max nearest points: 29.57047 
+Variogram params:
+  model    psill    range
+1   Cir 915.8766 142945.1
+
+Kriging: Lesser Antilles 
+Observations: 3010 
+Grid size: 2226 
+Max nearest points: 28.97874 
+Variogram params:
+  model    psill    range
+1   Exp 3423.972 409431.8
+
+Kriging: Lesser Antilles 
+Observations: 3010 
+Grid size: 2226 
+Max nearest points: 30.48049 
+Variogram params:
+  model    psill    range
+1   Gau 207.9853 13112.43
+
+Kriging: Lesser Antilles 
+Observations: 3010 
+Grid size: 2226 
+Max nearest points: 29.20842 
+Variogram params:
+  model    psill    range
+1   Lin 616.1358 75212.66
+
+Kriging: Lesser Antilles 
+Observations: 3010 
+Grid size: 2226 
+Max nearest points: 28.9857 
+Variogram params:
+  model    psill    range
+1   Sph 781.9916 140930.3
+
+Kriging: N Philippines 
+Observations: 568 
+Grid size: 1835 
+Max nearest points: 14.68251 
+Variogram params:
+  model   psill    range
+1   Bes 1445.97 23537.09
+
+Kriging: N Philippines 
+Observations: 568 
+Grid size: 1835 
+Max nearest points: 10.24312 
+Variogram params:
+  model    psill    range
+1   Cir 1003.671 391531.7
+
+Kriging: N Philippines 
+Observations: 568 
+Grid size: 1835 
+Max nearest points: 10.00465 
+Variogram params:
+  model    psill    range
+1   Exp 1265.338 11245.25
+
+Kriging: N Philippines 
+Observations: 568 
+Grid size: 1835 
+Max nearest points: 29.10932 
+Variogram params:
+  model    psill   range
+1   Gau 1121.075 8389.09
+
+Kriging: N Philippines 
+Observations: 568 
+Grid size: 1835 
+Max nearest points: 14.21113 
+Variogram params:
+  model   psill    range
+1   Lin 1206.49 65629.31
+
+Kriging: N Philippines 
+Observations: 568 
+Grid size: 1835 
+Max nearest points: 10.54473 
+Variogram params:
+  model    psill    range
+1   Sph 1145.647 19410.21
+
+Kriging: New Britain Solomon 
+Observations: 101 
+Grid size: 2011 
+Max nearest points: 10.03006 
+Variogram params:
+  model    psill    range
+1   Bes 494.4864 5788.986
+
+Kriging: New Britain Solomon 
+Observations: 101 
+Grid size: 2011 
+Max nearest points: 10.09338 
+Variogram params:
+  model    psill    range
+1   Cir 507.5361 19866.68
+
+Kriging: New Britain Solomon 
+Observations: 101 
+Grid size: 2011 
+Max nearest points: 10.42119 
+Variogram params:
+  model    psill    range
+1   Exp 572.8053 17183.83
+
+Kriging: New Britain Solomon 
+Observations: 101 
+Grid size: 2011 
+Max nearest points: 10.14676 
+Variogram params:
+  model    psill    range
+1   Gau 520.5319 8520.539
+
+Kriging: New Britain Solomon 
+Observations: 101 
+Grid size: 2011 
+Max nearest points: 10.00417 
+Variogram params:
+  model    psill    range
+1   Lin 806.3116 65141.45
+
+Kriging: New Britain Solomon 
+Observations: 101 
+Grid size: 2011 
+Max nearest points: 10 
+Variogram params:
+  model    psill    range
+1   Sph 513.0162 25492.15
+
+Kriging: S Philippines 
+Observations: 460 
+Grid size: 3168 
+Max nearest points: 10 
+Variogram params:
+  model    psill    range
+1   Bes 848.6408 4969.734
+
+Kriging: S Philippines 
+Observations: 460 
+Grid size: 3168 
+Max nearest points: 10.51174 
+Variogram params:
+  model    psill    range
+1   Cir 852.0848 16670.37
+
+Kriging: S Philippines 
+Observations: 460 
+Grid size: 3168 
+Max nearest points: 10.06367 
+Variogram params:
+  model    psill    range
+1   Exp 880.1943 9569.249
+
+Kriging: S Philippines 
+Observations: 460 
+Grid size: 3168 
+Max nearest points: 29.55153 
+Variogram params:
+  model    psill    range
+1   Gau 852.0029 8486.555
+
+Kriging: S Philippines 
+Observations: 460 
+Grid size: 3168 
+Max nearest points: 10 
+Variogram params:
+  model    psill    range
+1   Lin 833.0647 11441.33
+
+Kriging: S Philippines 
+Observations: 460 
+Grid size: 3168 
+Max nearest points: 10.43342 
+Variogram params:
+  model   psill   range
+1   Sph 850.054 19339.7
+
+Kriging: Scotia 
+Observations: 25 
+Grid size: 2705 
+Max nearest points: 29.39001 
+Variogram params:
+  model    psill    range
+1   Bes 150.6706 49140.87
+
+Kriging: Scotia 
+Observations: 25 
+Grid size: 2705 
+Max nearest points: 24.99107 
+Variogram params:
+  model   psill    range
+1   Cir 455.612 6121.921
+
+Kriging: Scotia 
+Observations: 25 
+Grid size: 2705 
+Max nearest points: 24.47284 
+Variogram params:
+  model    psill    range
+1   Exp 746.9299 11984.23
+
+Kriging: Scotia 
+Observations: 25 
+Grid size: 2705 
+Max nearest points: 28.9524 
+Variogram params:
+  model    psill    range
+1   Gau 446.9411 3717.437
+
+Kriging: Scotia 
+Observations: 25 
+Grid size: 2705 
+Max nearest points: 25.20253 
+Variogram params:
+  model   psill   range
+1   Lin 455.612 5063.44
+
+Kriging: Scotia 
+Observations: 25 
+Grid size: 2705 
+Max nearest points: 49.60002 
+Variogram params:
+  model    psill    range
+1   Sph 1914.974 314777.6
+
+Kriging: Sumatra Banda Sea 
+Observations: 1418 
+Grid size: 5926 
+Max nearest points: 30.11418 
+Variogram params:
+  model    psill   range
+1   Bes 1396.998 65163.3
+
+Kriging: Sumatra Banda Sea 
+Observations: 1418 
+Grid size: 5926 
+Max nearest points: 29.5982 
+Variogram params:
+  model    psill    range
+1   Cir 1687.136 269127.5
+
+Kriging: Sumatra Banda Sea 
+Observations: 1418 
+Grid size: 5926 
+Max nearest points: 32.96546 
+Variogram params:
+  model    psill    range
+1   Exp 2276.191 342143.3
+
+Kriging: Sumatra Banda Sea 
+Observations: 1418 
+Grid size: 5926 
+Max nearest points: 30.11639 
+Variogram params:
+  model    psill   range
+1   Gau 1559.064 82337.7
+
+Kriging: Sumatra Banda Sea 
+Observations: 1418 
+Grid size: 5926 
+Max nearest points: 25.15782 
+Variogram params:
+  model    psill  range
+1   Lin 1852.801 273512
+
+Kriging: Sumatra Banda Sea 
+Observations: 1418 
+Grid size: 5926 
+Max nearest points: 41.5277 
+Variogram params:
+  model    psill    range
+1   Sph 1859.705 382774.7
+
+Kriging: Tonga New Zealand 
+Observations: 354 
+Grid size: 4091 
+Max nearest points: 27.48792 
+Variogram params:
+  model    psill    range
+1   Bes 1221.738 76080.13
+
+Kriging: Tonga New Zealand 
+Observations: 354 
+Grid size: 4091 
+Max nearest points: 23.3949 
+Variogram params:
+  model    psill  range
+1   Cir 1318.111 343036
+
+Kriging: Tonga New Zealand 
+Observations: 354 
+Grid size: 4091 
+Max nearest points: 28.14213 
+Variogram params:
+  model    psill    range
+1   Exp 1310.921 147605.7
+
+Kriging: Tonga New Zealand 
+Observations: 354 
+Grid size: 4091 
+Max nearest points: 30.56186 
+Variogram params:
+  model    psill    range
+1   Gau 870.5626 16362.73
+
+Kriging: Tonga New Zealand 
+Observations: 354 
+Grid size: 4091 
+Max nearest points: 26.94979 
+Variogram params:
+  model    psill    range
+1   Lin 1174.037 192759.7
+
+Kriging: Tonga New Zealand 
+Observations: 354 
+Grid size: 4091 
+Max nearest points: 26.75285 
+Variogram params:
+  model    psill    range
+1   Sph 1158.772 256813.3
+
+Kriging: Vanuatu 
+Observations: 137 
+Grid size: 2495 
+Max nearest points: 10.19385 
+Variogram params:
+  model    psill    range
+1   Bes 3016.387 103977.9
+
+Kriging: Vanuatu 
+Observations: 137 
+Grid size: 2495 
+Max nearest points: 10.00249 
+Variogram params:
+  model    psill    range
+1   Cir 2911.185 312139.2
+
+Kriging: Vanuatu 
+Observations: 137 
+Grid size: 2495 
+Max nearest points: 10.09134 
+Variogram params:
+  model    psill    range
+1   Exp 3075.482 181459.6
+
+Kriging: Vanuatu 
+Observations: 137 
+Grid size: 2495 
+Max nearest points: 10.54299 
+Variogram params:
+  model   psill    range
+1   Gau 2793.16 125099.5
+
+Kriging: Vanuatu 
+Observations: 137 
+Grid size: 2495 
+Max nearest points: 10.09092 
+Variogram params:
+  model    psill    range
+1   Lin 3032.887 286464.1
+
+Kriging: Vanuatu 
+Observations: 137 
+Grid size: 2495 
+Max nearest points: 10.56585 
+Variogram params:
+  model    psill  range
+1   Sph 2928.603 370945
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Computing differences ...
+
+Segment: Alaska Aleutians
+Model  : Bes
+Segment: Alaska Aleutians
+Model  : Cir
+Segment: Alaska Aleutians
+Model  : Exp
+Segment: Alaska Aleutians
+Model  : Gau
+Segment: Alaska Aleutians
+Model  : Lin
+Segment: Alaska Aleutians
+Model  : Sph
+Segment: Andes
+Model  : Bes
+Segment: Andes
+Model  : Cir
+Segment: Andes
+Model  : Exp
+Segment: Andes
+Model  : Gau
+Segment: Andes
+Model  : Lin
+Segment: Andes
+Model  : Sph
+Segment: Central America
+Model  : Bes
+Segment: Central America
+Model  : Cir
+Segment: Central America
+Model  : Exp
+Segment: Central America
+Model  : Gau
+Segment: Central America
+Model  : Lin
+Segment: Central America
+Model  : Sph
+Segment: Kamchatka Marianas
+Model  : Bes
+Segment: Kamchatka Marianas
+Model  : Cir
+Segment: Kamchatka Marianas
+Model  : Exp
+Segment: Kamchatka Marianas
+Model  : Gau
+Segment: Kamchatka Marianas
+Model  : Lin
+Segment: Kamchatka Marianas
+Model  : Sph
+Segment: Kyushu Ryukyu
+Model  : Bes
+Segment: Kyushu Ryukyu
+Model  : Cir
+Segment: Kyushu Ryukyu
+Model  : Exp
+Segment: Kyushu Ryukyu
+Model  : Gau
+Segment: Kyushu Ryukyu
+Model  : Lin
+Segment: Kyushu Ryukyu
+Model  : Sph
+Segment: Lesser Antilles
+Model  : Bes
+Segment: Lesser Antilles
+Model  : Cir
+Segment: Lesser Antilles
+Model  : Exp
+Segment: Lesser Antilles
+Model  : Gau
+Segment: Lesser Antilles
+Model  : Lin
+Segment: Lesser Antilles
+Model  : Sph
+Segment: N Philippines
+Model  : Bes
+Segment: N Philippines
+Model  : Cir
+Segment: N Philippines
+Model  : Exp
+Segment: N Philippines
+Model  : Gau
+Segment: N Philippines
+Model  : Lin
+Segment: N Philippines
+Model  : Sph
+Segment: New Britain Solomon
+Model  : Bes
+Segment: New Britain Solomon
+Model  : Cir
+Segment: New Britain Solomon
+Model  : Exp
+Segment: New Britain Solomon
+Model  : Gau
+Segment: New Britain Solomon
+Model  : Lin
+Segment: New Britain Solomon
+Model  : Sph
+Segment: S Philippines
+Model  : Bes
+Segment: S Philippines
+Model  : Cir
+Segment: S Philippines
+Model  : Exp
+Segment: S Philippines
+Model  : Gau
+Segment: S Philippines
+Model  : Lin
+Segment: S Philippines
+Model  : Sph
+Segment: Scotia
+Model  : Bes
+Segment: Scotia
+Model  : Cir
+Segment: Scotia
+Model  : Exp
+Segment: Scotia
+Model  : Gau
+Segment: Scotia
+Model  : Lin
+Segment: Scotia
+Model  : Sph
+Segment: Sumatra Banda Sea
+Model  : Bes
+Segment: Sumatra Banda Sea
+Model  : Cir
+Segment: Sumatra Banda Sea
+Model  : Exp
+Segment: Sumatra Banda Sea
+Model  : Gau
+Segment: Sumatra Banda Sea
+Model  : Lin
+Segment: Sumatra Banda Sea
+Model  : Sph
+Segment: Tonga New Zealand
+Model  : Bes
+Segment: Tonga New Zealand
+Model  : Cir
+Segment: Tonga New Zealand
+Model  : Exp
+Segment: Tonga New Zealand
+Model  : Gau
+Segment: Tonga New Zealand
+Model  : Lin
+Segment: Tonga New Zealand
+Model  : Sph
+Segment: Vanuatu
+Model  : Bes
+Segment: Vanuatu
+Model  : Cir
+Segment: Vanuatu
+Model  : Exp
+Segment: Vanuatu
+Model  : Gau
+Segment: Vanuatu
+Model  : Lin
+Segment: Vanuatu
+Model  : Sph
+Heat flow difference summary:
+# A tibble: 78 × 10
+   segment          v.mod  cost     n      min     max median   IQR  mean  sigma
+   <chr>            <chr> <dbl> <int>    <dbl>   <dbl>  <dbl> <dbl> <dbl>  <dbl>
+ 1 Alaska Aleutians Bes   0.832  5779  -6.3 e1  1.29e2      2    19     3 1.7 e1
+ 2 Alaska Aleutians Cir   0.662  5779  -1.28e2  1.27e2      2    21     1 2   e1
+ 3 Alaska Aleutians Exp   0.874  5779  -6.4 e1  1.3 e2      3    19     3 1.7 e1
+ 4 Alaska Aleutians Gau   0.508  5779  -1.74e3  4.63e3      0    21     1 8.7 e1
+ 5 Alaska Aleutians Lin   0.647  5779  -1.41e2  1.26e2      2    21     1 2.2 e1
+ 6 Alaska Aleutians Sph   0.781  5779  -6.6 e1  1.19e2      2    18     2 1.7 e1
+ 7 Andes            Bes   0.319  7519  -1.19e2  1.46e2     -1    48    -2 3.5 e1
+ 8 Andes            Cir   0.308  7519  -1.2 e2  1.46e2     -1    48    -2 3.5 e1
+ 9 Andes            Exp   0.306  7519  -1.18e2  1.45e2     -2    47    -2 3.5 e1
+10 Andes            Gau   0.511  7519  -5.83e8  9.81e8      4  1340  -258 1.60e7
+# … with 68 more rows
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Saving to: data/opt1.RData
+Done!
