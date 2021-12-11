@@ -88,7 +88,7 @@ pwalk(~{
       geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf(data = volc, size = pnt.size*0.7, color = 'gold', shape = 18) +
       geom_sf_label(
         data = fts,
         aes(label = label),
@@ -150,7 +150,7 @@ pwalk(~{
       geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
       geom_sf(data = buf, size = 0.3, fill = NA) +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf(data = volc, size = pnt.size*0.7, color = 'gold', shape = 18) +
       annotate(
         'label',
         x = Inf,
@@ -354,7 +354,7 @@ walk(unique(solns$segment), ~{
         geom_sf(data = transform, size = 0.66, color = 'black', alpha = 0.8) +
         geom_sf(data = buf, size = 0.3, fill = NA) +
         geom_sf(data = seg, size = 1, color = 'white') +
-        geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+        geom_sf(data = volc, size = pnt.size*0.7, color = 'gold', shape = 18) +
         annotate(
           'label',
           x = Inf,

@@ -234,7 +234,7 @@ seg.names %>% walk(~{
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf(data = volc, size = pnt.size*0.6, color = 'gold', shape = 18) +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
       annotate(
         'label',
@@ -317,7 +317,7 @@ seg.names %>% walk(~{
       geom_sf(data = buf, size = 0.3, fill = 'ivory', alpha = 0.1) +
       geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf(data = volc, size = pnt.size*0.6, color = 'gold', shape = 18) +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3, show.legend = F) +
       v.scale.grey +
       labs(color = bquote(mWm^-2)) +
@@ -349,7 +349,7 @@ seg.names %>% walk(~{
       geom_sf(data = buf, size = 0.3, fill = NA, color = 'black') +
       geom_sf(data = seg, size = 1.5, color = 'white') +
       geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.5) +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+      geom_sf(data = volc, size = pnt.size*0.6, color = 'gold', shape = 18) +
       annotate(
         'label',
         x = -Inf,
