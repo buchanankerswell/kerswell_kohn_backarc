@@ -736,35 +736,33 @@ plot_split_segment <-
     pivot_longer(-split_fID) %>%
     group_by(name) %>%
     ggplot() +
-    annotate(
-      'rect',
-      xmin = range.med.krige[1],
-      xmax = range.med.krige[2],
-      ymin = -Inf,
-      ymax = Inf,
-      fill = 'grey20',
-      color = 'black',
-      alpha = 0.8
-    ) +
-    annotate(
-      'rect',
-      xmin = range.med.sim[1],
-      xmax = range.med.sim[2],
-      ymin = -Inf,
-      ymax = Inf,
-      fill = 'ivory',
-      color = 'black',
-      alpha = 0.8
-    ) +
-    stat_density_ridges(
-      aes(x = value, y = split_fID, fill = name, linetype = name),
-      quantile_lines = T,
-      quantiles = 2,
-      rel_min_height = 0.03
+#    annotate(
+#      'rect',
+#      xmin = range.med.krige[1],
+#      xmax = range.med.krige[2],
+#      ymin = -Inf,
+#      ymax = Inf,
+#      fill = 'grey20',
+#      color = NA,
+#      alpha = 0.3
+#    ) +
+#    annotate(
+#      'rect',
+#      xmin = range.med.sim[1],
+#      xmax = range.med.sim[2],
+#      ymin = -Inf,
+#      ymax = Inf,
+#      fill = 'ivory',
+#      color = NA,
+#      alpha = 0.3
+#    ) +
+    geom_boxplot(
+      aes(x = value, y = split_fID, fill = name),
+      outlier.shape = NA
     ) +
     coord_cartesian(xlim = range(y.lim)) +
-    scale_fill_manual(values = c('grey20', 'ivory')) +
-    labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', linetype = NULL, fill = NULL) +
+    scale_fill_manual(values = c('grey30', 'ivory')) +
+    labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', fill = NULL) +
     theme_classic(base_size = 10) +
     theme(
       legend.box.margin = margin(),
@@ -809,10 +807,12 @@ plot_split_segment <-
       ) +
       geom_smooth(
         aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        fill = 'ivory',
+        alpha = 0.1,
         method = 'loess',
         span = 0.95,
         size = 1,
-        se = F,
+        se = T,
         show.legend = F
       ) +
       labs(

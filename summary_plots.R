@@ -98,7 +98,7 @@ walk(~{
   wrap_plots(nrow=3, ncol=2) +
   plot_annotation(title = paste(.x, 'variogram models'))
   ggsave(
-    paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms', cntr, '.png'),
+    paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms.png'),
     plot = p,
     device = 'png',
     type = 'cairo',
@@ -155,10 +155,10 @@ p2 <-
       plot.margin = margin()
     )
 # Save
-cat('\nSaving plot to: figs/summary/vgrmSummary', cntr, '.png', sep = '')
+cat('\nSaving plot to: figs/summary/vgrmSummary.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = paste0('figs/summary/vgrmSummary', cntr, '.png'),
+    file = paste0('figs/summary/vgrmSummary.png'),
     plot = p2,
     device = 'png',
     type = 'cairo',
@@ -206,10 +206,10 @@ p3 <-
       plot.margin = margin()
     )
 # Save plot
-cat('\nSaving plot to: figs/summary/interpDiffSummary', cntr, '.png', sep = '')
+cat('\nSaving plot to: figs/summary/interpDiffSummary.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = paste0('figs/summary/interpDiffSummary', cntr, '.png'),
+    file = paste0('figs/summary/interpDiffSummary.png'),
     plot = p3,
     device = 'png',
     type = 'cairo',
@@ -251,10 +251,10 @@ p3b <-
       plot.margin = margin()
     )
 # Save plot
-cat('\nSaving plot to: figs/summary/interpSigmaDiffSummary', cntr, '.png', sep = '')
+cat('\nSaving plot to: figs/summary/interpSigmaDiffSummary.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = paste0('figs/summary/interpSigmaDiffSummary', cntr, '.png'),
+    file = paste0('figs/summary/interpSigmaDiffSummary.png'),
     plot = p3b,
     device = 'png',
     type = 'cairo',
@@ -278,7 +278,7 @@ p4 <-
     )
 ggsave(
   file =
-  paste0('figs/summary/optTrace', cntr, '.png'),
+  paste0('figs/summary/optTrace.png'),
   plot = p4,
   device = 'png',
   type = 'cairo',
@@ -308,7 +308,7 @@ if(!file.exists('data/sectors.RData')){
     }) %>%
     set_names(seg.names)
   # Save
-  save(shp.sectors, file = paste0('data/sectors', cntr, '.RData'))
+  save(shp.sectors, file = paste0('data/sectors.RData'))
 } else {
   load('data/sectors.RData')
 }
@@ -349,9 +349,7 @@ walk2(1:13, borders, ~{
         paste0(
           'figs/upperPlate/',
           str_replace_all(names(shp.sectors)[.x], ' ', ''),
-          'UpperPlate',
-          cntr,
-          '.png'
+          'UpperPlate.png'
         ),
       plot = p,
       device = 'png',
@@ -361,5 +359,20 @@ walk2(1:13, borders, ~{
     )
   })})
 })
+
+#sectors.df <-
+#  tibble(
+#    segment = unlist(map(shp.sectors, ~map_chr(.x$interp, ~.x$segment[1])), use.names = F),
+#    sector = unlist(map(shp.sectors, ~1:length(.x$interp)), use.names = F),
+#    min.sim = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~min(.x$est.sim))), use.names = F),
+#    med.sim = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~median(.x$est.sim))), use.names = F),
+#    max.sim = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~max(.x$est.sim))), use.names = F),
+#    iqr.sim = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~IQR(.x$est.sim))), use.names = F),
+#    min.krg = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~min(.x$est.krige))), use.names = F),
+#    med.krg = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~median(.x$est.krige))), use.names = F),
+#    max.krg = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~max(.x$est.krige))), use.names = F),
+#    iqr.krg = unlist(map(shp.sectors, ~map_dbl(.x$interp, ~IQR(.x$est.krige))), use.names = F),
+#    med.dif = med.sim - med.krg
+#  )
 
 cat('\nDone!\n')

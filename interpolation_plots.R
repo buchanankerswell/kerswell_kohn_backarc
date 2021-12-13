@@ -197,9 +197,7 @@ pwalk(~{
   cat(
     '\nSaving plot to: figs/diff/',
     str_replace_all(..1, ' ', ''),
-    'DiffComp',
-    cntr,
-    '.png',
+    'DiffComp.png',
     sep = ''
   )
   if(!(.x %in%
@@ -407,9 +405,7 @@ walk(unique(solns$segment), ~{
   cat(
     '\nSaving plot to: figs/diff/',
     str_replace_all(.x, ' ', ''),
-    'ModelComparison',
-    cntr,
-    '.png',
+    'ModelComparison.png',
     sep = ''
   )
   if(!(.x %in%
@@ -473,7 +469,7 @@ walk(unique(solns$segment), ~{
     suppressWarnings(suppressMessages(
       ggsave(
         file =
-          paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'ModelComparison', cntr, '.png'),
+          paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'ModelComparison.png'),
         plot = p,
         device = 'png',
         type = 'cairo',
@@ -529,7 +525,7 @@ walk(unique(solns$segment), ~{
     suppressWarnings(suppressMessages(
       ggsave(
         file =
-          paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'ModelComparison', cntr, '.png'),
+          paste0('figs/diff/', str_replace_all(.x, ' ', ''), 'ModelComparison.png'),
         plot = p,
         device = 'png',
         type = 'cairo',
