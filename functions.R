@@ -716,21 +716,28 @@ plot_split_segment <-
     filter(split_fID %in% seg.num) %>%
     ggplot() +
       geom_boxplot(
-        aes(x = value, y = factor(split_fID, levels = seg.num[order(seg.num)]), fill = name),
+        aes(
+          x = value,
+          y = factor(split_fID, levels = seg.num[order(seg.num)]),
+          fill = name
+        ),
         outlier.shape = NA,
         size = 0.2
       ) +
       geom_boxplot(
         data = bind_rows(split.seg$pnts),
-        aes(x = hf, y = factor(split_fID, levels = seg.num[order(seg.num)]), fill = 'ThermoGlobe'),
+        aes(
+          x = hf,
+          y = factor(split_fID, levels = seg.num[order(seg.num)]),
+          fill = 'ThermoGlobe'
+        ),
         outlier.shape = NA,
         size = 0.2,
-        alpha = 0.8,
         width = 0.25
       ) +
       guides(fill = guide_legend(nrow = 1, label.position = 'top')) +
       coord_cartesian(xlim = c(0,150)) +
-      scale_fill_manual(values = c('grey30', 'ivory', 'firebrick')) +
+      scale_fill_manual(values = c('ivory', 'peru', 'grey20')) +
       labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', fill = NULL) +
       theme_classic(base_size = 10) +
       theme(
