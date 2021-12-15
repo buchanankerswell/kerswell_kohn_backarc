@@ -636,12 +636,6 @@ split_segment <-
     volc.buf <- volc.buf[-sector.exclude]
     interp.buf <- interp.buf[-sector.exclude]
   }
-  if(0 %in% map_dbl(pnts.buf, nrow)) {
-    split.buf <- split.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
-    pnts.buf <- pnts.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
-    volc.buf <- volc.buf[-sector.exclude]
-    interp.buf <- interp.buf[!(map_dbl(pnts.buf, nrow) %in% 0)]
-  }
   return(
     list(
       'seg' = split.seg,
@@ -675,24 +669,6 @@ plot_split_segment <-
   transform <- shp.transform.crop[[seg.name]] %>% st_crop(bx)
   volc <- split.seg$volc
   wdth <- range(st_bbox(bind_rows(split.seg$buf))[c('xmin', 'xmax')])/1e3
-  y.lim <- 
-    c(
-      median(bind_rows(split.seg$interp)$est.sim)
-      - 2*IQR(bind_rows(split.seg$interp)$est.sim),
-      median(bind_rows(split.seg$interp)$est.sim)
-      + 2*IQR(bind_rows(split.seg$interp)$est.sim),
-      median(bind_rows(split.seg$interp)$est.krige)
-      - 2*IQR(bind_rows(split.seg$interp)$est.krige),
-      median(bind_rows(split.seg$interp)$est.krige)
-      + 2*IQR(bind_rows(split.seg$interp)$est.krige)
-    )
-  if(range(y.lim)[1] < 0) {
-    y.lim[y.lim <= 0] <- 0
-  }
-  med.sim <- map_dbl(split.seg$interp, ~median(.x$est.sim))
-  range.med.sim <- range(med.sim)
-  med.krige <- map_dbl(split.seg$interp, ~median(.x$est.krige))
-  range.med.krige <- range(med.krige)
   p0 <-
     ggplot() +
       geom_sf(data = world, size = 0.1, fill = 'grey60') +
@@ -702,7 +678,7 @@ plot_split_segment <-
       geom_sf(data = split.seg$seg, size = 2) +
       geom_sf(
         data = bind_rows(split.seg$pnts),
-        aes(fill = split_fID, group = split_fID),
+        aes(fill = factor(split_fID, levels = seg.num[order(seg.num)]), group = factor(split_fID, levels = seg.num[order(seg.num)])),
         shape = 22,
         size = 1,
         show.legend = F
@@ -714,11 +690,13 @@ plot_split_segment <-
       ) +
       geom_sf(
         data = bind_rows(split.seg$buf),
-        aes(color = split_fID),
+        aes(color = factor(split_fID, levels = seg.num[order(seg.num)])),
         size = 1,
         fill = NA,
         show.legend = F
       ) +
+      scale_color_discrete_qualitative('Dark 3') +
+      scale_fill_discrete_qualitative('Dark 3') +
       theme_map(font_size = 10) +
       theme(
         plot.tag = element_text(face = 'bold', size = 14),
@@ -735,42 +713,33 @@ plot_split_segment <-
     rename(Similarity = est.sim, Krige = est.krige) %>%
     pivot_longer(-split_fID) %>%
     group_by(name) %>%
+    filter(split_fID %in% seg.num) %>%
     ggplot() +
-#    annotate(
-#      'rect',
-#      xmin = range.med.krige[1],
-#      xmax = range.med.krige[2],
-#      ymin = -Inf,
-#      ymax = Inf,
-#      fill = 'grey20',
-#      color = NA,
-#      alpha = 0.3
-#    ) +
-#    annotate(
-#      'rect',
-#      xmin = range.med.sim[1],
-#      xmax = range.med.sim[2],
-#      ymin = -Inf,
-#      ymax = Inf,
-#      fill = 'ivory',
-#      color = NA,
-#      alpha = 0.3
-#    ) +
-    geom_boxplot(
-      aes(x = value, y = split_fID, fill = name),
-      outlier.shape = NA
-    ) +
-    coord_cartesian(xlim = range(y.lim)) +
-    scale_fill_manual(values = c('grey30', 'ivory')) +
-    labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', fill = NULL) +
-    theme_classic(base_size = 10) +
-    theme(
-      legend.box.margin = margin(),
-      legend.background = element_rect(fill = NA, color = NA),
-      legend.key.size = unit(0.8, 'lines'),
-      panel.background = element_rect(fill = 'grey50'),
-      axis.title.x = element_text(vjust = 5)
-    )
+      geom_boxplot(
+        aes(x = value, y = factor(split_fID, levels = seg.num[order(seg.num)]), fill = name),
+        outlier.shape = NA,
+        size = 0.2
+      ) +
+      geom_boxplot(
+        data = bind_rows(split.seg$pnts),
+        aes(x = hf, y = factor(split_fID, levels = seg.num[order(seg.num)]), fill = 'ThermoGlobe'),
+        outlier.shape = NA,
+        size = 0.2,
+        alpha = 0.8,
+        width = 0.25
+      ) +
+      guides(fill = guide_legend(nrow = 1, label.position = 'top')) +
+      coord_cartesian(xlim = c(0,150)) +
+      scale_fill_manual(values = c('grey30', 'ivory', 'firebrick')) +
+      labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', fill = NULL) +
+      theme_classic(base_size = 10) +
+      theme(
+        legend.box.margin = margin(),
+        legend.background = element_rect(fill = NA, color = NA),
+        legend.key.size = unit(1.8, 'lines'),
+        panel.background = element_rect(fill = 'grey50'),
+        axis.title.x = element_text(vjust = 5)
+      )
   p2 <-
     bind_rows(split.seg$interp) %>%
     st_set_geometry(NULL) %>%
@@ -787,26 +756,26 @@ plot_split_segment <-
     ggplot() +
       geom_point(
         data = bind_rows(volc),
-        aes(distance.from.seg/1e3, range(y.lim)[1]),
+        aes(distance.from.seg/1e3, 0),
         color = 'gold',
         shape = 18
       ) +
       geom_point(
         data = bind_rows(split.seg$pnts),
-        aes(distance.from.seg/1e3, hf, fill = split_fID, group = split_fID),
+        aes(distance.from.seg/1e3, hf, fill = factor(split_fID, levels = seg.num[order(seg.num)]), group = factor(split_fID, levels = seg.num[order(seg.num)])),
         size = 1.5,
         shape = 22,
         alpha = 0.8
       ) +
       geom_point(
-        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        aes(distance.from.seg/1e3, value, color = factor(split_fID, levels = seg.num[order(seg.num)]), group = factor(split_fID, levels = seg.num[order(seg.num)])),
         size = 0.3,
         shape = 3,
         alpha = 0.8,
         show.legend = F
       ) +
       geom_smooth(
-        aes(distance.from.seg/1e3, value, color = split_fID, group = split_fID),
+        aes(distance.from.seg/1e3, value, color = factor(split_fID, levels = seg.num[order(seg.num)]), group = factor(split_fID, levels = seg.num[order(seg.num)])),
         fill = 'ivory',
         alpha = 0.1,
         method = 'loess',
@@ -823,20 +792,22 @@ plot_split_segment <-
       guides(
         fill = guide_legend(
           nrow = 1,
-          override.aes = list(color = NA, size = 5, alpha = 1)
+          title.position = 'top',
+          label.position = 'bottom',
+          override.aes = list(color = NA, size = 6, alpha = 1)
         )
       ) +
-      scale_fill_discrete_qualitative(palette = 'Dark 3') +
-      coord_cartesian(ylim = range(y.lim)) +
+      scale_fill_discrete_qualitative('Dark 3') +
+      coord_cartesian(ylim = c(0,150)) +
       facet_wrap(~name) +
       theme_classic(base_size = 10) +
       theme(
         panel.background = element_rect(fill = 'grey50'),
-        legend.key.size = unit(0.8, 'lines'),
         legend.position = c(1, 0),
         legend.justification = c(1, 0),
         legend.dir = 'horizontal',
-        legend.background = element_rect(fill = NA)
+        legend.background = element_rect(fill = NA),
+        legend.spacing.x = unit(0, 'mm')
       )
   pp1 <- p0 + p1 + plot_layout(widths = 1)
   p <-
@@ -847,7 +818,7 @@ plot_split_segment <-
       caption = seg.name
     ) &
     theme(
-      plot.margin = margin(2, 2, 2, 2),
+      plot.margin = margin(0, 0, 0, 0),
       plot.tag = element_text(face = 'bold', vjust = 1),
       plot.title = element_text(hjust = 0.5, vjust = 0),
       legend.position = 'bottom'

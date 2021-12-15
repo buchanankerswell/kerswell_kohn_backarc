@@ -293,8 +293,8 @@ if(!file.exists('data/sectors.RData')){
     tibble(
       seg.names = seg.names,
       buf.dir = c('r', 'l', 'r', 'r', 'l', 'l', 'r', 'r', 'r', 'r', 'r', 'r', 'r'),
-      seg.num = c(8, 8, 8, 8, 8, 8, 6, 8, 8, 4, 8, 8, 8),
-      sector.exclude = list(2, c(1,8), 3, c(1,8), NULL, c(2,4), 5, c(1,2,7), c(1,3), c(3,4), 8, 8, 8)
+      seg.num = c(14, 14, 8, 14, 8, 8, 6, 8, 8, 8, 14, 12, 8),
+      sector.exclude = list(c(3,4,10), c(1,2,3,14), 3, c(1,2,14), NULL, c(2,4), 5, c(1,2,7), c(1,3), c(1,4,5,6,7,8), c(2,13,14), 12, 8)
     ) %>%
     pmap(~{
       suppressMessages({suppressWarnings({
