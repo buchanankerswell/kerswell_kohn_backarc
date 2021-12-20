@@ -739,13 +739,14 @@ plot_split_segment <-
       coord_cartesian(xlim = c(0,150)) +
       scale_fill_manual(values = c('ivory', 'peru', 'grey20')) +
       labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', fill = NULL) +
-      theme_classic(base_size = 10) +
+      theme_classic(base_size = 12) +
       theme(
         legend.box.margin = margin(),
         legend.background = element_rect(fill = NA, color = NA),
         legend.key.size = unit(1.8, 'lines'),
+        legend.title = element_text(face = 'bold', size = 14),
         panel.background = element_rect(fill = 'grey50'),
-        axis.title.x = element_text(vjust = 5)
+        axis.title.x = element_text(margin = margin(t = -8))
       )
   p2 <-
     bind_rows(split.seg$interp) %>%
@@ -807,7 +808,7 @@ plot_split_segment <-
       scale_fill_discrete_qualitative('Dark 3') +
       coord_cartesian(ylim = c(0,150)) +
       facet_wrap(~name) +
-      theme_classic(base_size = 10) +
+      theme_classic(base_size = 12) +
       theme(
         panel.background = element_rect(fill = 'grey50'),
         legend.position = c(1, 0),
@@ -828,7 +829,8 @@ plot_split_segment <-
       plot.margin = margin(0, 0, 0, 0),
       plot.tag = element_text(face = 'bold', vjust = 1),
       plot.title = element_text(hjust = 0.5, vjust = 0),
-      legend.position = 'bottom'
+      legend.position = 'bottom',
+      legend.justification = 'left'
     )
   p
 }
