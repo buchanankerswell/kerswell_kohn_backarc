@@ -722,22 +722,11 @@ plot_split_segment <-
           fill = name
         ),
         outlier.shape = NA,
-        size = 0.2
-      ) +
-      geom_boxplot(
-        data = bind_rows(split.seg$pnts),
-        aes(
-          x = hf,
-          y = factor(split_fID, levels = seg.num[order(seg.num)]),
-          fill = 'ThermoGlobe'
-        ),
-        outlier.shape = NA,
-        size = 0.2,
-        width = 0.25
+        size = 0.3
       ) +
       guides(fill = guide_legend(nrow = 1, label.position = 'top')) +
       coord_cartesian(xlim = c(0,150)) +
-      scale_fill_manual(values = c('ivory', 'peru', 'grey20')) +
+      scale_fill_manual(values = c('ivory', 'peru')) +
       labs(x = bquote('Heat Flow'~(mWm^-2)), y = 'Sector', fill = NULL) +
       theme_classic(base_size = 12) +
       theme(
