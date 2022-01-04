@@ -45,11 +45,20 @@ sf_use_s2(FALSE)
 
 # Calculate Similarity rmse by inverse distance weighting
 # interpolation of observations to nearby grid points
-sim_rmse <- function(seg.name, maxdist = 5.5e4, idp = 2, plot = F){
+itp_rmse <- function(seg.name, itp = NULL, type = 'sim', maxdist = 5.5e4, idp = 0, plot = F){
+  if(is.null(itp)) {
+    stop('need interpolation sf object')
+  }
   buf <- shp.buffer[[seg.name]]
   grd <- shp.grid.crop[[seg.name]]
   obs <- shp.hf.crop[[seg.name]]
-  sim <- st_intersection(shp.interp.luca, buf)
+  if(type == 'sim') {
+    itp <- st_intersection(itp, buf)
+  } else if(type == 'krg') {
+    itp <- itp
+  } else {
+    stop('invalid type!')
+  }
   obs.itp <-
     idw(
       formula = hf~1,
@@ -100,7 +109,14 @@ sim_rmse <- function(seg.name, maxdist = 5.5e4, idp = 2, plot = F){
         )
     print(p)
   }
-  return(sqrt(sum((sim[idx,]$est.sim - obs.itp[idx,]$hf)^2)/length(idx)))
+  # Return RMSE
+  if(type == 'sim') {
+    return(sqrt(sum((itp[idx,]$est.sim - obs.itp[idx,]$hf)^2)/length(idx)))
+  } else if(type == 'krg') {
+    return(sqrt(sum((itp[idx,]$est.krige - obs.itp[idx,]$hf)^2)/length(idx)))
+  } else {
+    stop('interpolation type not recognized... choose "sim" or "krg"')
+  }
 }
 
 # Draw a widened box from a st_bbox object

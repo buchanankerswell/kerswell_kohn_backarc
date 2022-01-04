@@ -576,6 +576,10 @@ print(interp.diff.summary)
 # Drop krige column since it is a duplicate of diff column
 solns <- select(solns, -shp.interp.krige)
 
+# Calculate direct RMSE for Kriging predictions (to compare with cross-validation RMSE)
+vgrm.summary$dir.rmse <-
+  map2_dbl(solns$segment, solns$shp.interp.diff, ~itp_rmse(.x, .y, 'krg'))
+
 cat('\n', rep('~', 60), sep='')
 cat('\nSaving to: data/opt', cntr, '.RData', sep = '')
 save(
