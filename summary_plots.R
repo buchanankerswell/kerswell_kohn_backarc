@@ -41,21 +41,27 @@ p1 <-
   ) %>%
   group_by(segment) %>%
   ggplot() +
-    stat_density_ridges(
-      aes(x=hf, y=segment, group=segment, fill=factor(stat(quantile))),
-      size = 0.3,
-      scale = 3.5,
-      geom='density_ridges_gradient',
-      calc_ecdf=T,
-      quantiles=4,
-      quantile_lines=T,
-      bandwidth = 10
+    geom_boxplot(
+      aes(x=hf, y=segment, group=segment),
+      fill = 'ivory',
+      outlier.shape = NA,
+      size = 0.3
     ) +
+#    stat_density_ridges(
+#      aes(x=hf, y=segment, group=segment, fill=factor(stat(quantile))),
+#      size = 0.3,
+#      scale = 3.5,
+#      geom='density_ridges_gradient',
+#      calc_ecdf=T,
+#      quantiles=4,
+#      quantile_lines=T,
+#      bandwidth = 10
+#    ) +
     labs(
       x = bquote('Heat flow'~(mWm^-2)),
       y = NULL
     ) +
-    scale_fill_viridis_d() +
+#    scale_fill_viridis_d() +
     scale_y_discrete(
       limits = rev(levels(as.factor(seg.names)))
     ) +
@@ -181,23 +187,29 @@ p3 <-
     .id = 'segment'
   ) %>%
   ggplot() +
-    stat_density_ridges(
-      aes(x=est.diff, y=segment, group=segment, fill=factor(stat(quantile))),
-      size = 0.3,
-      scale = 2.5,
-      geom = 'density_ridges_gradient',
-      calc_ecdf = T,
-      quantiles = 4,
-      quantile_lines = T,
-      bandwidth = 5,
-      rel_min_height = 0.01
+    geom_boxplot(
+      aes(x=est.diff, y=segment, group=segment),
+      fill = 'ivory',
+      outlier.shape = NA,
+      size = 0.3
     ) +
+#    stat_density_ridges(
+#      aes(x=est.diff, y=segment, group=segment, fill=factor(stat(quantile))),
+#      size = 0.3,
+#      scale = 2.5,
+#      geom = 'density_ridges_gradient',
+#      calc_ecdf = T,
+#      quantiles = 4,
+#      quantile_lines = T,
+#      bandwidth = 5,
+#      rel_min_height = 0.01
+#    ) +
     labs(
       x = bquote('Interpolation estimate difference'~(mWm^-2)),
       y = NULL
     ) +
     coord_cartesian(xlim = c(-75, 75)) +
-    scale_fill_viridis_d() +
+#    scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic(base_size = 12) +
     theme(
@@ -226,23 +238,29 @@ p3b <-
     .id = 'segment'
   ) %>%
   ggplot() +
-    stat_density_ridges(
-      aes(x=sigma.diff, y=segment, group=segment, fill=factor(stat(quantile))),
-      size = 0.3,
-      scale = 2.5,
-      geom = 'density_ridges_gradient',
-      calc_ecdf = T,
-      quantiles = 4,
-      quantile_lines = T,
-      bandwidth = 5,
-      rel_min_height = 0.01
+    geom_boxplot(
+      aes(x=sigma.diff, y=segment, group=segment),
+      fill = 'ivory',
+      outlier.shape = NA,
+      size = 0.3
     ) +
+#    stat_density_ridges(
+#      aes(x=sigma.diff, y=segment, group=segment, fill=factor(stat(quantile))),
+#      size = 0.3,
+#      scale = 2.5,
+#      geom = 'density_ridges_gradient',
+#      calc_ecdf = T,
+#      quantiles = 4,
+#      quantile_lines = T,
+#      bandwidth = 5,
+#      rel_min_height = 0.01
+#    ) +
     labs(
       x = bquote('Interpolation'~sigma~'difference'~(mWm^-2)),
       y = NULL
     ) +
     coord_cartesian(xlim = c(-75, 75)) +
-    scale_fill_viridis_d() +
+#    scale_fill_viridis_d() +
     scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
     theme_classic(base_size = 12) +
     theme(
