@@ -43,9 +43,8 @@ rm(package.list, sshhh)
 # which is what sf used before 1.0 release
 sf_use_s2(FALSE)
 
-# Calculate Similarity rmse by inverse distance weighting
-# interpolation of observations to nearby grid points
-itp_rmse <- function(seg.name, itp = NULL, type = 'sim', maxdist = 5.5e4, idp = 0, plot = F){
+# Calculate Similarity rmse
+itp_rmse <- function(seg.name, itp = NULL, type = 'sim'){
   if(is.null(itp)) {
     stop('need interpolation sf object')
   }
@@ -53,69 +52,17 @@ itp_rmse <- function(seg.name, itp = NULL, type = 'sim', maxdist = 5.5e4, idp = 
   grd <- shp.grid.crop[[seg.name]]
   obs <- shp.hf.crop[[seg.name]]
   if(type == 'sim') {
-    itp <- st_intersection(itp, buf)
+    itp <- suppressWarnings(st_intersection(itp, buf))
+    # Find nearest Similarity estimate for each observation
+    nearest.est.sim <- itp$est.sim[st_nearest_feature(obs, grd)]
+    return(sqrt(mean((nearest.est.sim - obs$hf)^2)))
   } else if(type == 'krg') {
     itp <- itp
+    # Find nearest Kriging estimate for each observation
+    nearest.est.krige <- itp$est.krige[st_nearest_feature(obs, grd)]
+    return(sqrt(mean((nearest.est.krige - obs$hf)^2)))
   } else {
     stop('invalid type!')
-  }
-  obs.itp <-
-    idw(
-      formula = hf~1,
-      locations = obs,
-      newdata = grd,
-      maxdist = maxdist,
-      idp = idp,
-      debug.level = 0
-    ) %>%
-    mutate(hf = var1.pred) %>%
-    select(hf, geometry)
-  idx <- !is.na(obs.itp$hf)
-  if(plot){
-    seg <- shp.segs[[seg.name]]
-    world <- shp.world %>% st_crop(buf)
-    ridge <- shp.ridge.crop[[seg.name]] %>% st_crop(buf)
-    trench <- shp.trench.crop[[seg.name]] %>% st_crop(buf)
-    transform <- shp.transform.crop[[seg.name]] %>% st_crop(buf)
-    p <-
-      ggplot() +
-        geom_sf(data = world, size = 0.1, fill = 'grey60') +
-        geom_sf(data = buf, fill = NA) +
-        geom_sf(data = ridge, size = 0.5, alpha = 0.8) +
-        geom_sf(data = trench, size = 0.5, alpha = 0.8) +
-        geom_sf(data = transform, size = 0.5, alpha = 0.8) +
-        geom_sf(data = seg, size = 2) +
-        geom_sf(data = obs.itp, aes(color = hf), size = 1, shape = 19) +
-        geom_sf(data = obs, color = 'white', shape = 19, size = 0.1) +
-        labs(color = bquote(mWm^-2), fill = bquote(mWm^-2)) +
-        scale_fill_viridis_c(
-          option = 'magma',
-          limits = c(0, 250),
-          na.value = 'transparent'
-        ) +
-        scale_color_viridis_c(
-          option = 'magma',
-          limits = c(0, 250),
-          na.value = 'transparent'
-        ) +
-        theme_map(font_size = 10) +
-        theme(
-          plot.tag = element_text(face = 'bold', size = 14),
-          axis.text = element_text(),
-          axis.text.x = element_text(angle = 30),
-          panel.grid = element_line(size = 0.1, color = 'white'),
-          panel.background = element_rect(fill = 'grey50', color = NA),
-          plot.margin = margin()
-        )
-    print(p)
-  }
-  # Return RMSE
-  if(type == 'sim') {
-    return(sqrt(sum((itp[idx,]$est.sim - obs.itp[idx,]$hf)^2)/length(idx)))
-  } else if(type == 'krg') {
-    return(sqrt(sum((itp[idx,]$est.krige - obs.itp[idx,]$hf)^2)/length(idx)))
-  } else {
-    stop('interpolation type not recognized... choose "sim" or "krg"')
   }
 }
 

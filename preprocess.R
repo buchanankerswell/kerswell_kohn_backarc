@@ -391,22 +391,6 @@ rmse.luca <-
         itp_rmse(.x, shp.interp.luca, 'sim')
       ))
   )
-#rmse.luca <-
-#  suppressWarnings({
-#    shp.buffer %>%
-#    map_df(
-#      ~shp.interp.luca %>%
-#      st_intersection(.x) %>%
-#      filter(!is.na(obs.sim)) %>%
-#      st_set_geometry(NULL) %>%
-#      group_by(segment) %>%
-#      summarise(
-#        rmse.sim = sqrt(sum((obs.sim - est.sim)^2)/n()),
-#        n.obs.sim = n()
-#      )
-#    ) 
-#  })
-
 # Summarize heat flow data
 cat('\n\nHeat flow summary:\n')
 hf.summary <-
