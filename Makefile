@@ -1,5 +1,7 @@
-R = packages.R preprocess.R krige.R base_plots.R interpolation_plots.R summary_plots.R
-DATA = data/sa2006 data/tglobe data/hf.RData data/sectors.RData data/preprocess_log data/opt*.RData data/nloptr
+R = R/packages.R R/preprocess.R R/krige.R R/base_plots.R R/interpolation_plots.R R/summary_plots.R
+DATA = data/sa2006 data/tglobe data/utig
+DATAPURGE = data/hf.RData data/sectors.RData data/preprocess_log
+DATACLEAN = data/opt*.RData data/nloptr
 FIGS = figs/*
 
 all: data/opt20.RData $(R) $(DATA)
@@ -8,11 +10,11 @@ data/opt20.RData:
 	@./run.sh
 
 purge:
-	@rm -rf $(FIGS)
+	@rm -rf $(FIGS) $(DATAPURGE)
 
 clean: purge
 
 superclean: purge
-	@rm -rf $(DATA)
+	@rm -rf $(DATACLEAN)
 
-.PHONY: all clean
+.PHONY: all clean purge superclean data/opt20.RData

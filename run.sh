@@ -4,12 +4,12 @@ set -e
 
 # Check for R dependencies
 echo 'Checking for required R packages'
-./packages.R
+R/packages.R
 
 # Get opt files from data/opt*.RData
 fnum=$(find data -name 'opt*' -print | wc -l)
 if [[ ! $fnum -gt 0 ]]; then
-  echo 'No opt files found'
+  echo '\nNo opt files found'
   echo 'Run kriging?'
   read 'p?yes/no: '
   while true; do
@@ -22,7 +22,6 @@ if [[ ! $fnum -gt 0 ]]; then
       while [[ -z ${itr} ]]; do
         read 'itr?Number: '
       done
-
       unset alg
       echo '\nPlease choose optimization algorithm:'
       echo 'for more info on algorithms see:'
@@ -36,7 +35,6 @@ if [[ ! $fnum -gt 0 ]]; then
       while [[ -z ${alg} ]]; do
         read 'alg?Choice: '
       done
-
       unset iwt
       unset vwt
       echo '\nPlease enter weights for computing cost function'
@@ -49,7 +47,6 @@ if [[ ! $fnum -gt 0 ]]; then
       while [[ -z ${vwt} ]]; do
         read 'vwt?Variogram weight [0-1]: '
       done
-
       unset ncores
       echo '\nPlease enter number of cores for parallel computing [0 for default]'
       echo 'Available cores on this machine:'
@@ -58,7 +55,6 @@ if [[ ! $fnum -gt 0 ]]; then
       while [[ -z ${ncores} ]]; do
         read 'ncores?Cores: '
       done
-
       unset nfold
       echo '\nPlease enter number of folds for computing k-fold cross-validation'
       echo 'Note: computation cost is high!'
@@ -70,13 +66,11 @@ if [[ ! $fnum -gt 0 ]]; then
       while [[ -z ${nfold} ]]; do
         read 'nfold?Number of folds [0=default]: '
       done
-
       if [[ ! -f data/hf.RData ]]; then
-        ./preprocess.R
+        R/preprocess.R
       fi
-
-      ./krige.R $itr $alg $iwt $vwt $ncores $nfold
-
+      R/krige.R $itr $alg $iwt $vwt $ncores $nfold
+      echo 'Kriging successfull!'
       break
     elif [[ $p == 'no' ]]; then
       echo okay bye
@@ -85,18 +79,17 @@ if [[ ! $fnum -gt 0 ]]; then
       read 'p?yes/no: '
     fi
   done
-  echo 'Kriging successfull'
-  echo 'Visualize results?'
+  echo '\nVisualize results?'
   read 'p?yes/no: '
   fname=$(ls -1q data/opt*.RData | tail -n 1)
   while true; do
     if [[ $p == 'yes' ]]; then
       if [[ ! -f data/hf.RData ]]; then
-        ./preprocess.R
+        R/preprocess.R
       fi
-      ./base_plots.R
-      ./interpolation_plots.R $fname
-      ./summary_plots.R $fname
+      R/base_plots.R
+      R/interpolation_plots.R $fname
+      R/summary_plots.R $fname
       echo 'Finished!'
       exit 0
     elif [[ $p == 'no' ]]; then
@@ -109,7 +102,7 @@ if [[ ! $fnum -gt 0 ]]; then
 else
   echo 'Found previous kriging results:'
   ls -1q data/opt*.RData | xargs -n 1
-  echo 'Run another round of kriging?'
+  echo '\nRun another round of kriging?'
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
@@ -121,7 +114,6 @@ else
       while [[ -z ${itr} ]]; do
         read 'itr?Number: '
       done
-
       unset alg
       echo '\nPlease choose optimization algorithm:'
       echo 'for more info on algorithms see:'
@@ -135,7 +127,6 @@ else
       while [[ -z ${alg} ]]; do
         read 'alg?Choice: '
       done
-
       unset iwt
       unset vwt
       echo '\nPlease enter weights for computing cost function'
@@ -148,7 +139,6 @@ else
       while [[ -z ${vwt} ]]; do
         read 'vwt?Variogram weight [0-1]: '
       done
-
       unset ncores
       echo '\nPlease enter number of cores for parallel computing [0 for default]'
       echo 'Available cores on this machine:'
@@ -157,7 +147,6 @@ else
       while [[ -z ${ncores} ]]; do
         read 'ncores?Cores: '
       done
-
       unset nfold
       echo '\nPlease enter number of folds for computing k-fold cross-validation'
       echo 'Note: computation cost is high!'
@@ -169,13 +158,11 @@ else
       while [[ -z ${nfold} ]]; do
         read 'nfold?Number of folds [0=default]: '
       done
-
       if [[ ! -f data/hf.RData ]]; then
-        ./preprocess.R
+        R/preprocess.R
       fi
-
-      ./krige.R $itr $alg $iwt $vwt $ncores $nfold
-
+      R/krige.R $itr $alg $iwt $vwt $ncores $nfold
+      echo 'Kriging successfull!'
       break
     elif [[ $p == 'no' ]]; then
       break
@@ -183,7 +170,7 @@ else
       read 'p?yes/no: '
     fi
   done
-  echo 'Visualize results?'
+  echo '\nVisualize results?'
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
@@ -197,11 +184,11 @@ else
         fi
       done
       if [[ ! -f data/hf.RData ]]; then
-        ./preprocess.R
+        R/preprocess.R
       fi
-      ./base_plots.R
-      ./interpolation_plots.R $fname
-      ./summary_plots.R $fname
+      R/base_plots.R
+      R/interpolation_plots.R $fname
+      R/summary_plots.R $fname
       echo 'Finished!'
       exit 0
     elif [[ $p == 'no' ]]; then
