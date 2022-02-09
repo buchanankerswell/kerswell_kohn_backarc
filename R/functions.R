@@ -660,7 +660,7 @@ plot_split_segment <-
         fill = factor(split_fID, levels = seg.num[order(seg.num)]),
         group = factor(split_fID, levels = seg.num[order(seg.num)])
       ),
-      size = 0.5,
+      size = 0.7,
       shape = 22,
       show.legend = F
     ) +
@@ -890,28 +890,30 @@ plot_vgrm <-
   if(is.null(experimental.vgrm)) stop('\nMissing experimental variogram!')
   p <- 
     ggplot() +
-    labs(x = 'kilometer', y = 'semivariance') +
+    labs(x = 'kilometer x 100', y = 'semivariance') +
     coord_cartesian(ylim = ylim, xlim = xlim) +
-    theme_dark(base_size = 12)
+    theme_dark(base_size = 12) +
+    theme(
+      plot.margin = margin(1, 1, 1, 1)
+    )
   plt <- tryCatch(
     {
       p +
-      geom_line(
-        data = variogramLine(fitted.vgrm, maxdist = max(experimental.vgrm$dist)),
-        aes(x = dist/1000, y = gamma),
-        color = lineCol,
-        size = 1.1
-      ) +
       geom_point(
         data = experimental.vgrm,
-        aes(x = dist/1000, y = gamma),
-        shape = 19
+        aes(x = dist/1e5, y = gamma),
+        shape = 20
+      ) +
+      geom_line(
+        data = variogramLine(fitted.vgrm, maxdist = max(experimental.vgrm$dist)),
+        aes(x = dist/1e5, y = gamma),
+        color = lineCol
       ) +
       annotate(
         'label',
         x = -Inf,
         y = Inf,
-        label = paste('Model:', v.mod, '\nCost:', round(cost, 4)),
+        label = paste('model:', v.mod, '\ncost:', round(cost, 4)),
         label.padding = unit(0.1, 'lines'),
         label.r = unit(0, 'lines'),
         alpha = 0.8,
@@ -929,8 +931,8 @@ plot_vgrm <-
       exp.plt <- p +
       geom_point(
         data = experimental.vgrm,
-        aes(x = dist/1000, y = gamma),
-        shape = 19
+        aes(x = dist/1e5, y = gamma),
+        shape = 20
       )
       return(exp.plt)
     }

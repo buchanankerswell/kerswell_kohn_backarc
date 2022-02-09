@@ -1,4 +1,8 @@
 #!/bin/zsh
+
+# Clock time
+SECONDS=0
+
 # Exit if any command fails
 set -e
 
@@ -74,6 +78,9 @@ if [[ ! $fnum -gt 0 ]]; then
       break
     elif [[ $p == 'no' ]]; then
       echo okay bye
+      # Print clock time
+      t=$SECONDS
+      printf '\nTime taken: %d days, %d minutes, %d seconds\n' "$(( t/86400 ))" "$(( t/60 - 1440*(t/86400) ))" "$(( t ))"
       exit 0
     else
       read 'p?yes/no: '
@@ -91,9 +98,15 @@ if [[ ! $fnum -gt 0 ]]; then
       R/interpolation_plots.R $fname
       R/summary_plots.R $fname
       echo 'Finished!'
+      # Print clock time
+      t=$SECONDS
+      printf '\nTime taken: %d days, %d minutes, %d seconds\n' "$(( t/86400 ))" "$(( t/60 - 1440*(t/86400) ))" "$(( t ))"
       exit 0
     elif [[ $p == 'no' ]]; then
       echo 'okay bye'
+      # Print clock time
+      t=$SECONDS
+      printf '\nTime taken: %d days, %d minutes, %d seconds\n' "$(( t/86400 ))" "$(( t/60 - 1440*(t/86400) ))" "$(( t ))"
       exit 0
     else
       read 'p?yes/no: '
@@ -190,9 +203,15 @@ else
       R/interpolation_plots.R $fname
       R/summary_plots.R $fname
       echo 'Finished!'
+      # Print clock time
+      t=$SECONDS
+      printf '\nTime taken: %d days, %d minutes, %d seconds\n' "$(( t/86400 ))" "$(( t/60 - 1440*(t/86400) ))" "$(( t ))"
       exit 0
     elif [[ $p == 'no' ]]; then
       echo 'okay bye'
+      # Print clock time
+      t=$SECONDS
+      printf '\nTime taken: %d days, %d minutes, %d seconds\n' "$(( t/86400 ))" "$(( t/60 - 1440*(t/86400) ))" "$(( t ))"
       exit 0
     else
       read 'p?yes/no: '

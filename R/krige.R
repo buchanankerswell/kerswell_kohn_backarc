@@ -134,14 +134,14 @@ bounds <-
     cutoff.prop = c(1, 10),
     n.lags = c(15, 50),
     lag.start = c(1, 10),
-    n.max = c(10, 50)
+    n.max = c(5, 50)
   )
 init.vals <-
   tibble(
     cutoff.prop = 3,
-    n.lags = 30,
-    lag.start = 3,
-    n.max = 25,
+    n.lags = 20,
+    lag.start = 1,
+    n.max = 8,
     algorithm = alg,
     maxeval = max.eval
   )
@@ -175,7 +175,7 @@ cat(
   '\nVariogram weight: ', vwt,
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '\n~~~~~                         ~~~~~~',
-  '\n~~~~~  Random Initial values  ~~~~~~',
+  '\n~~~~~      Initial values     ~~~~~~',
   '\n~~~~~                         ~~~~~~',
   '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
   '\nLag cutoff      :', init.vals$cutoff.prop,
@@ -282,7 +282,7 @@ cat('\n', rep('~', 60), '\n', sep='')
 opt.grd <-
   tibble(expand.grid(
     segment = seg.names,
-    v.mod = c('Sph', 'Exp', 'Cir', 'Bes'),
+    v.mod = c('Sph', 'Exp', 'Lin', 'Bes'),
     stringsAsFactors = F
   )) %>%
   arrange(segment, v.mod) %>%

@@ -77,63 +77,61 @@ pwalk(~{
   # Similarity interpolation
   pp1 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey70', color = 'black') +
-      geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, color = 'grey80', fill = 'grey70', alpha = 0.1) +
-      geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
-      geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
-      geom_sf_label(
-        data = fts,
-        aes(label = label),
-        size = annt.txt.size,
-        fill = rgb(1, 1, 1, 0.5),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      annotate(
-        'label',
-        label = 'a',
-        x = -Inf,
-        y = Inf,
-        size = 5,
-        hjust = 0,
-        vjust = 1,
-        fill = rgb(1, 1, 1, 0.5),
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0, 'in')
-      ) +
-      scale_color_viridis_c(
-        option = 'magma',
-        limits = c(0, 250),
-        breaks = c(0, 125, 250),
-        na.value = 'transparent'
-      ) +
-      labs(color = bquote(mWm^-2)) +
-      coord_sf(expand = F) +
-      theme_map(font_size = base.txt.size) +
-      theme(
-        legend.position = c(1, 1),
-        legend.justification = c(1, 1),
-        legend.direction = 'horizontal',
-        legend.box.background = element_rect(color = NA, fill = rgb(1, 1, 1, 0.5)),
-        legend.text = element_text(color = 'black'),
-        legend.key.height = unit(0.125, 'in'),
-        legend.key.width = unit(0.15, 'in'),
-        legend.title = element_text(vjust = 1, color = 'black', size = 10)
-      )
-      if(
-         .x %in% c('Alaska Aleutians', 'Kamchatka Marianas', 'Tonga New Zealand', 'Vanuatu')
-       ) {
-        pp1 <-
-          pp1 +
-          scale_x_continuous(
-            breaks = c(130, 140, 150, 160, 170, 180, -170, -160, -150, -140, -130)
-          )
-      }
+    geom_sf(data = world, size = 0.1, fill = 'grey70', color = 'black') +
+    geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
+    geom_sf(data = world.buf, size = 0.1, color = 'grey80', fill = 'grey70', alpha = 0.1) +
+    geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
+    geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
+    geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
+    geom_sf(data = buf, size = 0.3, fill = NA) +
+    geom_sf(data = seg, size = 1.5, color = 'white') +
+    geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+    geom_sf_label(
+      data = fts,
+      aes(label = label),
+      size = annt.txt.size,
+      fill = rgb(1, 1, 1, 0.5),
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0.05, 'lines')
+    ) +
+    annotate(
+      'label',
+      label = 'a',
+      x = -Inf,
+      y = Inf,
+      size = 5,
+      hjust = 0,
+      vjust = 1,
+      fill = rgb(1, 1, 1, 0.5),
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0, 'in')
+    ) +
+    scale_color_viridis_c(
+      option = 'magma',
+      limits = c(0, 250),
+      breaks = c(0, 125, 250),
+      na.value = 'transparent'
+    ) +
+    labs(color = bquote(mWm^-2)) +
+    coord_sf(expand = F) +
+    theme_map(font_size = base.txt.size) +
+    theme(
+      legend.position = c(1, 1),
+      legend.justification = c(1, 1),
+      legend.direction = 'horizontal',
+      legend.box.background = element_rect(color = NA, fill = rgb(1, 1, 1, 0.5)),
+      legend.text = element_text(color = 'black'),
+      legend.key.height = unit(0.125, 'in'),
+      legend.key.width = unit(0.15, 'in'),
+      legend.title = element_text(vjust = 1, color = 'black', size = 10)
+    )
+  if(
+     .x %in% c('Alaska Aleutians', 'Kamchatka Marianas', 'Tonga New Zealand', 'Vanuatu')
+   ) {
+    pp1 <-
+      pp1 +
+      scale_x_continuous(breaks = c(130, 140, 150, 160, 170, 180, -170, -160, -150, -140, -130))
+  }
   # Krige interpolation
   pp2 <- 
     ggplot() +
@@ -150,7 +148,7 @@ pwalk(~{
         'label',
         x = -Inf,
         y = -Inf,
-        label = paste('variogram:', v.mod),
+        label = paste('model:', v.mod),
         hjust = 0,
         vjust = 0,
         fill = rgb(1, 1, 1, 0.5),
@@ -332,7 +330,7 @@ walk(unique(solns$segment), ~{
           'label',
           x = -Inf,
           y = -Inf,
-          label = paste('variogram:', v.mod),
+          label = paste('model:', v.mod),
           hjust = 0,
           vjust = 0,
           size = annt.txt.size,

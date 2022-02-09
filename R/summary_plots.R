@@ -26,7 +26,7 @@ dir.create('figs/summary', showWarnings = F)
 dir.create('figs/vgrms', showWarnings = F)
 dir.create('figs/upperPlate', showWarnings = F)
 cat('\nSaving plots to: figs/summary/')
-cat('\nSaving plots to: figs/vgrms/')
+cat('\nSaving plots to: figs/vgrms/\n')
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
@@ -92,7 +92,7 @@ walk(~{
         v.mod = ..2,
         lineCol = 'white',
         ylim = ylim,
-        xlim = xlim/1000
+        xlim = xlim/1e5
       )
     })
   pp <-
@@ -135,17 +135,22 @@ walk(~{
 # Summarise variogram models
 p2 <-
   vgrm.summary %>%
+  mutate(
+    n.lags = n.lags,
+    n.max = n.max,
+    sill = log10(sill),
+    range = log10(range/1000)
+  ) %>%
   drop_na() %>%
   select(-c(rmse, dir.rmse)) %>%
-  mutate('range' = range/1000) %>%
   filter(cost < (median(cost)+(5*IQR(cost))) & range < (median(range)+(5*IQR(range)))) %>%
   rename(
     'lag cutoff' = cutoff.prop,
     'number of lags' = n.lags,
     'lag shift' = lag.start,
     'max local pairs' = n.max,
-    'range' = range,
-    'sill' = sill,
+    'log10 range' = range,
+    'log10 sill' = sill,
   ) %>%
   pivot_longer(-c(
     v.mod,
@@ -159,9 +164,11 @@ p2 <-
     cv.rmse,
     cv.cost
   )) %>%
-  ggplot(aes(x = cost*100, y = value, shape = v.mod)) +
+  ggplot(aes(x = cost*100, y = value, shape = v.mod, group = name)) +
   geom_point(size = 2) +
   facet_wrap(~name, ncol = 2, scales = 'free_y') +
+  scale_color_discrete_qualitative('Dark 3') +
+  scale_shape_manual(values = 15:18) +
   guides(
     shape =
       guide_legend(
@@ -178,6 +185,16 @@ p2 <-
     strip.text = element_text(color = 'black', size = 12, margin = margin(1, 0, 1.5, 0)),
     legend.box.margin = margin(-10, 0, 0, 0),
     plot.margin = margin(1, 1, 1, 1)
+  )
+p2 <-
+  p2 +
+  geom_smooth(
+    formula = y~x,
+    method = 'lm',
+    size = 0.5,
+    color = 'grey90',
+    fill = 'ivory',
+    fullrange = T
   )
 # Save
 cat('\nSaving plot to: figs/summary/vgrmSummary.png', sep = '')
@@ -290,7 +307,7 @@ ggsave(
 
 if(!file.exists('data/sectors.RData')){
   # Split segments into sectors
-  cat('\nSplitting segments into sectors ...')
+  cat('\n\nSplitting segments into sectors ...')
   shp.sectors <-
     tibble(
       seg.names = seg.names,
@@ -319,7 +336,6 @@ if(!file.exists('data/sectors.RData')){
   load('data/sectors.RData')
 }
 
-source('R/functions.R')
 borders <-
   list(
     # left right top bottom
@@ -367,4 +383,4 @@ walk2(1:13, borders, ~{
   })})
 })
 
-cat('\nDone!\n')
+cat('\n\nDone!\n\n')

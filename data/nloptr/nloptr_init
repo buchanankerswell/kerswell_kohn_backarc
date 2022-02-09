@@ -1,0 +1,19 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~     nloptr settings     ~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Algorithm       :  NLOPT_LN_COBYLA 
+Max evaluations :  50 
+k-fold CV       :  Leave-one-out 
+Interp weight   :  0.5 
+Variogram weight:  0.5 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~  Random Initial values  ~~~~~~ 
+~~~~~                         ~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Lag cutoff      : 3 
+Number of lags  : 20 
+Lag shift       : 1 
+Max local pairs : 8
