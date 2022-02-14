@@ -57,8 +57,8 @@ suppressWarnings(suppressMessages(
     plot = p1,
     device = 'png',
     type = 'cairo',
-    width = 4.5,
-    height = 3
+    width = 6.5,
+    height = 4.34
   )
 ))
 
@@ -127,12 +127,22 @@ walk(~{
     plot = pp,
     device = 'png',
     type = 'cairo',
-    width = 4.5,
+    width = 6,
     height = 3
   )
 })
 
 # Summarise variogram models
+init.vals <-
+  tibble(
+    'lag cutoff' = 3,
+    'number of lags' = 20,
+    'lag shift' = 1,
+    'max local pairs' = 8,
+    'log10 range' = NA,
+    'log10 sill' = NA
+  ) %>%
+  pivot_longer(everything())
 p2 <-
   vgrm.summary %>%
   mutate(
@@ -164,8 +174,8 @@ p2 <-
     cv.rmse,
     cv.cost
   )) %>%
-  ggplot(aes(x = cost*100, y = value, shape = v.mod, group = name)) +
-  geom_point(size = 2) +
+  ggplot() +
+  geom_point(aes(x = cost*100, y = value, shape = v.mod, group = name), size = 2) +
   facet_wrap(~name, ncol = 2, scales = 'free_y') +
   scale_color_discrete_qualitative('Dark 3') +
   scale_shape_manual(values = 15:18) +
@@ -188,11 +198,26 @@ p2 <-
   )
 p2 <-
   p2 +
+  geom_text(
+    data = init.vals,
+    aes(x = -Inf, y = value, group = name, label = 'inital value'),
+    color = 'white',
+    size = 3,
+    hjust = -0.1,
+    vjust = -0.1
+  ) +
+  geom_hline(
+    data = init.vals,
+    aes(yintercept = value, group = name),
+    color = 'grey90',
+    size = 0.8
+  ) +
   geom_smooth(
+    aes(x = cost*100, y = value, group = name),
     formula = y~x,
     method = 'lm',
     size = 0.5,
-    color = 'grey90',
+    color = 'black',
     fill = 'ivory',
     fullrange = T
   )
@@ -204,8 +229,8 @@ suppressWarnings(suppressMessages(
     plot = p2,
     device = 'png',
     type = 'cairo',
-    width = 4.5,
-    height = 4.5
+    width = 6.5,
+    height = 6.5
   )
 ))
 
@@ -242,8 +267,8 @@ suppressWarnings(suppressMessages(
     plot = p3,
     device = 'png',
     type = 'cairo',
-    width = 4.5,
-    height = 3
+    width = 6.5,
+    height = 4.34
   )
 ))
 
@@ -275,8 +300,8 @@ suppressWarnings(suppressMessages(
     plot = p3b,
     device = 'png',
     type = 'cairo',
-    width = 4.5,
-    height = 3
+    width = 6,
+    height = 4
   )
 ))
 
@@ -301,8 +326,8 @@ ggsave(
   plot = p4,
   device = 'png',
   type = 'cairo',
-  width = 4.5,
-  height = 3.5
+  width = 6,
+  height = 4.67
 )
 
 if(!file.exists('data/sectors.RData')){

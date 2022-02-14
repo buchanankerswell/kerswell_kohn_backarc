@@ -635,7 +635,7 @@ plot_split_segment <-
       min.sim = min(est.sim),
       max.sim = max(est.sim)
     )
-
+  pnt.size <- 1.2
   p0 <-
     ggplot() +
     geom_sf(data = bx, color = NA, fill = NA) +
@@ -660,7 +660,7 @@ plot_split_segment <-
         fill = factor(split_fID, levels = seg.num[order(seg.num)]),
         group = factor(split_fID, levels = seg.num[order(seg.num)])
       ),
-      size = 0.7,
+      size = pnt.size,
       shape = 22,
       show.legend = F
     ) +
@@ -668,7 +668,7 @@ plot_split_segment <-
       data = bind_rows(volc),
       color = 'gold',
       shape = 18,
-      size = 0.8
+      size = pnt.size * 0.8
     ) +
     annotate(
       'label',
@@ -734,8 +734,8 @@ plot_split_segment <-
         fill = name
       ),
       color = 'black',
-      outlier.size = 0.1,
-      outlier.color = 'grey30',
+      outlier.size = pnt.size * 0.5,
+      outlier.color = 'grey20',
       size = 0.5
     ) +
     annotate(
@@ -773,6 +773,11 @@ plot_split_segment <-
       legend.title = element_text(margin = margin(0, 0, -5, 0)),
       legend.key.height = unit(0.31, 'in')
     )
+  labl <-
+    tibble(
+      name = c('Kriging', 'Similarity'),
+      lbl = c('c', 'd')
+    )
   p2 <-
     bind_rows(split.seg$interp) %>%
     st_set_geometry(NULL) %>%
@@ -791,6 +796,7 @@ plot_split_segment <-
       data = bind_rows(volc),
       aes(distance.from.seg/1e3, min(rng$min.krige, rng$min.sim)),
       color = 'gold',
+      size = pnt.size * 0.8,
       shape = 18
     ) +
     geom_point(
@@ -801,9 +807,9 @@ plot_split_segment <-
         fill = factor(split_fID, levels = seg.num[order(seg.num)]),
         group = factor(split_fID, levels = seg.num[order(seg.num)])
       ),
-      size = 0.8,
+      size = pnt.size,
       shape = 22,
-      alpha = 0.3
+      alpha = 0.1
     ) +
     geom_smooth(
       aes(
@@ -820,9 +826,9 @@ plot_split_segment <-
       se = T,
       show.legend = F
     ) +
-    annotate(
-      'label',
-      label = 'c',
+    geom_label(
+      data = labl,
+      aes(label = lbl),
       x = -Inf,
       y = Inf,
       size = 5,
@@ -902,12 +908,13 @@ plot_vgrm <-
       geom_point(
         data = experimental.vgrm,
         aes(x = dist/1e5, y = gamma),
-        shape = 20
+        shape = 16
       ) +
       geom_line(
         data = variogramLine(fitted.vgrm, maxdist = max(experimental.vgrm$dist)),
         aes(x = dist/1e5, y = gamma),
-        color = lineCol
+        color = lineCol,
+        size = 1.2
       ) +
       annotate(
         'label',
@@ -918,7 +925,7 @@ plot_vgrm <-
         label.r = unit(0, 'lines'),
         alpha = 0.8,
         fill = 'grey80',
-        size = 3,
+        size = 4,
         vjust = 1,
         hjust = 0
       )
@@ -932,7 +939,7 @@ plot_vgrm <-
       geom_point(
         data = experimental.vgrm,
         aes(x = dist/1e5, y = gamma),
-        shape = 20
+        shape = 16
       )
       return(exp.plt)
     }

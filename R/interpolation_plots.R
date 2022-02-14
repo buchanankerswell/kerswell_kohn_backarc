@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+
 args <- commandArgs(trailingOnly=TRUE)
 
 # Test if there is at least one argument: if not, return an error
@@ -58,19 +59,19 @@ pwalk(~{
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
   aspect <- wdth/hght
   if(aspect <= 0.4) {
-    const <- 152.4/hght
+    const <- 165.1/hght
     p.wdth <- wdth * const * 2
     p.hght <- hght * const
-  } else if(aspect > 0.4 & aspect <= 1) {
-    const <- 76.2/wdth
+  } else if(aspect > 0.4 & aspect <= 0.95) {
+    const <- 82.55/wdth
     p.wdth <- wdth * const * 2
     p.hght <- hght * const
   } else if(aspect >= 2) {
-    const <- 152.4/wdth
+    const <- 165.1/wdth
     p.wdth <- wdth * const
     p.hght <- hght * const * 2
   } else {
-    const <- 76.2/hght
+    const <- 82.55/hght
     p.wdth <- wdth * const
     p.hght <- hght * const * 2
   }
@@ -194,7 +195,7 @@ pwalk(~{
     'DiffComp.png',
     sep = ''
   )
-  if(aspect <= 1) {
+  if(aspect <= 0.95) {
     # Composition
     p <-
       (pp1 +
@@ -276,19 +277,19 @@ walk(unique(solns$segment), ~{
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
   aspect <- wdth/hght
   if(aspect <= 0.4) {
-    const <- 152.4/hght
+    const <- 165.1/hght
     p.wdth <- wdth * const * 4
     p.hght <- hght * const
-  } else if(aspect > 0.4 & aspect <= 1) {
-    const <- 76.2/wdth
+  } else if(aspect > 0.4 & aspect <= 0.95) {
+    const <- 82.55/wdth
     p.wdth <- wdth * const * 2
     p.hght <- hght * const * 2
   } else if(aspect >= 2) {
-    const <- 152.4/wdth
+    const <- 165.1/wdth
     p.wdth <- wdth * const
     p.hght <- hght * const * 4
   } else {
-    const <- 76.2/hght
+    const <- 82.55/hght
     p.wdth <- wdth * const * 2
     p.hght <- hght * const * 2
   }

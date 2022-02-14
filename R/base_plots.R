@@ -44,7 +44,7 @@ p1 <-
   coord_sf(expand = F) +
   theme_map(font_size = 12) +
   theme(
-    axis.text = element_text(angle = 30, vjust = 1, hjust = 1),
+    axis.text = element_text(),
     legend.position = c(1, 1),
     legend.justification = c(1, 1),
     legend.direction = 'horizontal',
@@ -109,7 +109,7 @@ p2 <-
   coord_sf(expand = F) +
   theme_map(font_size = 12) +
   theme(
-    axis.text = element_text(angle = 30, vjust = 1, hjust = 1),
+    axis.text = element_text(),
     legend.position = c(1, 1),
     legend.justification = c(1, 1),
     legend.direction = 'horizontal',
@@ -165,8 +165,8 @@ suppressWarnings(suppressMessages(
     plot = p3,
     device = 'png',
     type = 'cairo',
-    width = 6,
-    height = 6
+    width = 6.5,
+    height = 6.5
   )
 ))
 
@@ -186,6 +186,7 @@ seg.names %>% walk(~{
   ridge <- shp.ridge.crop[[.x]]
   trench <- shp.trench.crop[[.x]]
   transform <- shp.transform.crop[[.x]]
+  fts <- shp.fts[shp.fts$segment == .x,]
   grats.x <-
     as_tibble(st_coordinates(shp.grid.crop[[.x]])) %>%
     group_by(Y) %>%
@@ -213,19 +214,19 @@ seg.names %>% walk(~{
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
   aspect <- wdth/hght
   if(aspect <= 0.4) {
-    const <- 152.4/hght
+    const <- 165.1/hght
     p.wdth <- wdth * const * 2
     p.hght <- hght * const
-  } else if(aspect > 0.4 & aspect <= 1) {
-    const <- 76.2/wdth
+  } else if(aspect > 0.4 & aspect <= 0.95) {
+    const <- 82.55/wdth
     p.wdth <- wdth * const * 2
     p.hght <- hght * const
   } else if(aspect >= 2) {
-    const <- 152.4/wdth
+    const <- 165.1/wdth
     p.wdth <- wdth * const
     p.hght <- hght * const * 2
   } else {
-    const <- 76.2/hght
+    const <- 82.55/hght
     p.wdth <- wdth * const
     p.hght <- hght * const * 2
   }
@@ -241,6 +242,14 @@ seg.names %>% walk(~{
     geom_sf(data = seg, size = 1.5, color = 'white') +
     geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
     geom_sf(data = volc, size = pnt.size*0.3, color = 'gold', shape = 18) +
+    geom_sf_label(
+      data = fts,
+      aes(label = label),
+      size = annt.txt.size,
+      fill = rgb(1, 1, 1, 0.5),
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0.05, 'lines')
+    ) +
     annotate(
       'label',
       label = 'a',
@@ -338,7 +347,7 @@ seg.names %>% walk(~{
       pp2 +
       scale_x_continuous(breaks = c(130, 140, 150, 160, 170, 180, -170, -160, -150, -140, -130))
   }
-  if(aspect <= 1) {
+  if(aspect <= 0.95) {
     # Composition
     p <-
       (pp1 +
