@@ -3,7 +3,7 @@
 # Load packages and functions
 source('R/functions.R')
 load('data/hf.RData')
-dir.create('~/Desktop/goutorbe2011_param', showWarnings = F)
+dir.create('figs/goutorbe2011_param', showWarnings = F)
 # Encoding function for categorical variables
 encode_ordinal <- function(x, order = unique(x)) {
   x <- as.numeric(factor(x, levels = order, exclude = NULL))
@@ -133,7 +133,7 @@ p2 <-
         inside = T,
         title.position = 'top',
         title.vjust = 1,
-        barwidth = unit(3, 'in')
+        barwidth = unit(2, 'in')
       )
   ) +
   geom_sf(
@@ -183,7 +183,7 @@ p2 <-
   )
 p <- p1 / p2
 ggsave(
-  '~/Desktop/goutorbe2011_param/global_dens.png', plot = p, type = 'cairo',
+  'figs/goutorbe2011_param/global_dens.png', plot = p, type = 'cairo',
   width = 6, height = 9, dpi = 330
 )
 
@@ -222,7 +222,7 @@ plts1 <-
               inside = T,
               title.position = 'top',
               title.vjust = 1,
-              barwidth = unit(3, 'in')
+              barwidth = unit(2, 'in')
             )
         ) +
         labs(color = .y) +
@@ -245,8 +245,7 @@ plts1 <-
           panel.grid = element_line(size = 0.1, color = 'white'),
           panel.background = element_rect(fill = 'grey50', color = NA),
           plot.margin = margin(1, 1, 1, 1)
-        ) +
-        ggtitle(.x)
+        )
     } else {
       p <- NULL
     }
@@ -305,7 +304,7 @@ plts2 <-
               inside = T,
               title.position = 'top',
               title.vjust = 1,
-              barwidth = unit(3, 'in')
+              barwidth = unit(2, 'in')
             )
         ) +
         labs(color = .y) +
@@ -318,8 +317,7 @@ plts2 <-
           legend.position = 'bottom',
           legend.justification = 'left',
           legend.box.margin = margin(t = -10)
-        ) +
-        ggtitle(.x)
+        )
     } else {
       p <- NULL
     }
@@ -340,9 +338,9 @@ plts3 <-
             type = as.integer(type),
             colocated.count = as_tibble(table(Y))$n,
             diff.count = full.count - colocated.count,
-            'potential undersampling (targets)' =
+            'undersampling' =
               ifelse(diff.count > 0, full.count-colocated.count, NA),
-            'potential oversampling (bias)' =
+            'oversampling' =
               ifelse(diff.count < 0, full.count-colocated.count, NA)
           ) %>%
           rename(
@@ -378,8 +376,8 @@ plts3 <-
           scale_fill_manual(
             values =
               c(
-                'potential oversampling (bias)' = 'firebrick',
-                'potential undersampling (targets)' = 'navy',
+                'oversampling' = 'firebrick',
+                'undersampling' = 'navy',
                 'full grid (Goutorbe et al., 2011)' = 'grey80',
                 'colocated w/ hf observations' = 'grey20'
               ),
@@ -397,8 +395,7 @@ plts3 <-
             plot.margin = margin(1, 1, 1, 1),
             legend.box.margin = margin(),
             legend.margin = margin()
-          ) +
-          ggtitle(.x)
+          )
       } else {
         X <- g.full[[.x]][!is.na(g.full[[.x]])]
         Y <- g.colocated[[.x]][!is.na(g.colocated[[.x]])]
@@ -409,15 +406,17 @@ plts3 <-
                 X,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
+                na.rm = T,
+                n = 1000
               )$x,
             dns =
               density(
                 X,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
-              )$y
+                na.rm = T,
+                n = 1000
+              )$y / length(X)
           )
         dns.colocated <-
           tibble(
@@ -426,15 +425,17 @@ plts3 <-
                 X,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
+                na.rm = T,
+                n = 1000
               )$x,
             dns =
               density(
                 Y,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
-              )$y
+                na.rm = T,
+                n = 1000
+              )$y / length(X)
           )
         dns.diff <-
           tibble(
@@ -443,32 +444,35 @@ plts3 <-
                 X,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
+                na.rm = T,
+                n = 1000
               )$x,
             dns =
-              density(
+              (density(
                 X,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
-              )$y -
-              density(
+                na.rm = T,
+                n = 1000
+              )$y / length(X)) -
+              (density(
                 Y,
                 from = range(c(X, Y), na.rm = T)[1],
                 to = range(c(X, Y), na.rm = T)[2],
-                na.rm = T
-              )$y
+                na.rm = T,
+                n = 1000
+              )$y / length(X))
           )
         p <-
           ggplot() +
           geom_ribbon(
             data = filter(dns.diff, dns <= 0),
-            aes(x, ymin = dns, ymax = 0, fill = 'potential oversampling (bias)'),
+            aes(x, ymin = dns, ymax = 0, fill = 'oversampling'),
             size = 0.1
           ) +
           geom_ribbon(
             data = filter(dns.diff, dns >= 0),
-            aes(x, ymin = 0, ymax = dns, fill = 'potential undersampling (targets)'),
+            aes(x, ymin = 0, ymax = dns, fill = 'undersampling'),
             size = 0.1
           ) +
           geom_path(
@@ -506,8 +510,8 @@ plts3 <-
           ) +
           scale_fill_manual(
             values = c(
-              'potential oversampling (bias)' = 'firebrick',
-              'potential undersampling (targets)' = 'navy'
+              'oversampling' = 'firebrick',
+              'undersampling' = 'navy'
             ),
             guide =
               guide_legend(
@@ -522,9 +526,9 @@ plts3 <-
           theme(
             plot.margin = margin(1, 1, 1, 1),
             legend.box.margin = margin(),
+            legend.box = 'vertical',
             legend.margin = margin()
-          ) +
-          ggtitle(.x)
+          )
       }
     } else {
       p <- NULL
@@ -536,10 +540,8 @@ plts3 <-
 pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
   if(!(..4 %in% c('geometry', 'segment'))) {
     p <-
-      (
-        ..1 /
-        (..2 + theme(plot.title = element_blank()))
-      ) |
+      (..1 /
+      (..2 + theme(plot.title = element_blank()))) |
       (..3 + theme(plot.title = element_blank())) +
       plot_layout(guides = 'collect') &
       theme(
@@ -549,8 +551,8 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
         plot.margin = margin(1, 1, 1, 1)
       )
     ggsave(
-      paste0('~/Desktop/goutorbe2011_param/', str_replace_all(..4, ' ', '_'), '.png'),
-      plot = p, type = 'cairo', width = 8, height = 5
+      paste0('figs/goutorbe2011_param/', str_replace_all(..4, ' ', '_'), '.png'),
+      plot = p, type = 'cairo', width = 6.5, height = 4
     )
   }
 })
