@@ -18,15 +18,18 @@ proj4.rp <-
   '+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
 # Read goutorbe2011 data
 g <- read_csv('data/goutorbe2011.csv', show_col_types = F)
+names(g) <- str_to_lower(names(g))
 # Tidy data
 g.full <-
   g %>%
   mutate(
-    `Age ocean (999 on continents)` =
-      ifelse(`Age ocean (999 on continents)` > 900, NA, `Age ocean (999 on continents)`)
+    `age ocean (999 on continents)` =
+      ifelse(`age ocean (999 on continents)` > 900, NA, `age ocean (999 on continents)`),
+    `distance to young rift` =
+      ifelse(`distance to young rift` < 0, abs(`distance to young rift`), `distance to young rift`)
   ) %>%
-  rename(`Age ocean` = `Age ocean (999 on continents)`)
-g.colocated <- g.full %>% filter(!is.na(`Observed heat flow`))
+  rename(`age ocean` = `age ocean (999 on continents)`)
+g.colocated <- g.full %>% filter(!is.na(`observed heat flow`))
 # Make into sf object
 shp.g.full <-
   st_as_sf(g.full, coords = c(1,2), crs = proj4.wgs) %>%
@@ -99,7 +102,6 @@ p1 <-
     label.padding = unit(0.02, 'in'),
     label.r = unit(0, 'in')
   ) +
-  ggtitle('Global coverage of heat flow observations') +
   coord_sf(expand = F) +
   theme_map(font_size = 12) +
   theme(
@@ -133,7 +135,7 @@ p2 <-
         inside = T,
         title.position = 'top',
         title.vjust = 1,
-        barwidth = unit(2, 'in')
+        barwidth = unit(2.5, 'in')
       )
   ) +
   geom_sf(
@@ -191,6 +193,7 @@ ggsave(
 plts1 <-
   map2(names(shp.g.full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
+      cat('\nPlotting colocated grids for ', .x, sep = '')
       shp.g.colocated <- shp.g.colocated[!is.na(shp.g.colocated[[.x]]),]
       if(!is.numeric(shp.g.colocated[[.x]])) {
         shp.g.colocated[[.x]] <- encode_ordinal(shp.g.colocated[[.x]])
@@ -222,7 +225,7 @@ plts1 <-
               inside = T,
               title.position = 'top',
               title.vjust = 1,
-              barwidth = unit(2, 'in')
+              barwidth = unit(2.5, 'in')
             )
         ) +
         labs(color = .y) +
@@ -256,6 +259,7 @@ plts1 <-
 plts2 <-
   map2(names(shp.g.full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
+      cat('\nPlotting full grids for ', .x, sep = '')
       shp.g.full <- shp.g.full[!is.na(shp.g.full[[.x]]),]
       if(!is.numeric(shp.g.full[[.x]])) {
         shp.g.full[[.x]] <- encode_ordinal(shp.g.full[[.x]])
@@ -304,7 +308,7 @@ plts2 <-
               inside = T,
               title.position = 'top',
               title.vjust = 1,
-              barwidth = unit(2, 'in')
+              barwidth = unit(2.5, 'in')
             )
         ) +
         labs(color = .y) +
@@ -328,6 +332,7 @@ plts2 <-
 plts3 <-
   map2(names(shp.g.full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
+      cat('\nPlotting densities for ', .x, sep = '')
       if(!is.numeric(shp.g.full[[.x]]) | .x %in% c('Up mantle velocity structure (class)')) {
         X <- encode_ordinal(g.full[[.x]][!is.na(g.full[[.x]])])
         Y <- encode_ordinal(g.colocated[[.x]][!is.na(g.colocated[[.x]])])
@@ -336,7 +341,8 @@ plts3 <-
           rename(type = X, full.count = n) %>%
           mutate(
             type = as.integer(type),
-            colocated.count = as_tibble(table(Y))$n,
+            full.count = full.count/length(X),
+            colocated.count = as_tibble(table(Y))$n/length(X),
             diff.count = full.count - colocated.count,
             'undersampling' =
               ifelse(diff.count > 0, full.count-colocated.count, NA),
@@ -539,6 +545,7 @@ plts3 <-
 # Save composite plots
 pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
   if(!(..4 %in% c('geometry', 'segment'))) {
+    cat('\nComposing plots for ', ..4, sep = '')
     p <-
       (..1 /
       (..2 + theme(plot.title = element_blank()))) |
@@ -550,9 +557,12 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
         legend.box.margin = margin(t = -10),
         plot.margin = margin(1, 1, 1, 1)
       )
-    ggsave(
-      paste0('figs/goutorbe2011_param/', str_replace_all(..4, ' ', '_'), '.png'),
-      plot = p, type = 'cairo', width = 6.5, height = 4
+      suppressWarnings(
+        ggsave(
+        paste0('figs/goutorbe2011_param/', str_replace_all(..4, ' ', '_'), '.png'),
+        plot = p, type = 'cairo', width = 6.5, height = 4
+      )
     )
   }
 })
+cat('\n\nDone!\n\n')
