@@ -678,8 +678,7 @@ plot_split_segment <-
       size = 5,
       hjust = 0,
       vjust = 1,
-      color = 'grey40',
-      fill = 'white',
+      fill = 'grey90',
       label.padding = unit(0.02, 'in'),
       label.r = unit(0, 'in')
     ) +
@@ -746,8 +745,7 @@ plot_split_segment <-
       size = 5,
       hjust = 0,
       vjust = 1,
-      color = 'grey40',
-      fill = 'white',
+      fill = 'grey90',
       label.padding = unit(0.02, 'in'),
       label.r = unit(0, 'in')
     ) +
@@ -834,8 +832,7 @@ plot_split_segment <-
       size = 5,
       hjust = 0,
       vjust = 1,
-      color = 'grey40',
-      fill = 'white',
+      fill = 'grey90',
       label.padding = unit(0.02, 'in'),
       label.r = unit(0, 'in')
     ) +
@@ -924,7 +921,7 @@ plot_vgrm <-
         label.padding = unit(0.1, 'lines'),
         label.r = unit(0, 'lines'),
         alpha = 0.8,
-        fill = 'grey80',
+        fill = 'grey90',
         size = 4,
         vjust = 1,
         hjust = 0

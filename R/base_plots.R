@@ -29,7 +29,7 @@ p1 <-
     size = 4,
     hjust = 0,
     vjust = 0,
-    fill = rgb(1, 1, 1, 0.5),
+    fill = 'grey90',
     label.padding = unit(0.15, 'lines'),
     label.r = unit(0, 'lines')
   ) +
@@ -48,7 +48,7 @@ p1 <-
     legend.position = c(1, 1),
     legend.justification = c(1, 1),
     legend.direction = 'horizontal',
-    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.5), color = NA),
+    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
     legend.box.margin = margin(0, 8, 0, 0),
     legend.margin = margin(),
     legend.key.height = unit(0.125, 'in'),
@@ -81,7 +81,7 @@ p2 <-
     segment.color = 'white',
     segment.curvature = -1e-20,
     arrow = arrow(length = unit(0.015, 'npc')),
-    fill = rgb(1, 1, 1, 0.5),
+    fill = rgb(1, 1, 1, 0.8),
     label.padding = unit(0.15, 'lines'),
     label.r = unit(0, 'lines'),
     force = 6,
@@ -95,7 +95,7 @@ p2 <-
     hjust = 0,
     vjust = 0,
     size = 4,
-    fill = rgb(1, 1, 1, 0.5),
+    fill = 'grey90',
     label.padding = unit(0.15, 'lines'),
     label.r = unit(0, 'lines')
   ) +
@@ -113,7 +113,7 @@ p2 <-
     legend.position = c(1, 1),
     legend.justification = c(1, 1),
     legend.direction = 'horizontal',
-    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.5), color = NA),
+    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
     legend.box.margin = margin(0, 8, 0, 0),
     legend.margin = margin(),
     legend.key.height = unit(0.125, 'in'),
@@ -135,7 +135,7 @@ p3 <-
       size = 5,
       hjust = 0,
       vjust = 1,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = 'grey90',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0, 'in')
     ) +
@@ -150,7 +150,7 @@ p3 <-
       size = 5,
       hjust = 0,
       vjust = 1,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = 'grey90',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0, 'in')
     ) +
@@ -246,7 +246,7 @@ seg.names %>% walk(~{
       data = fts,
       aes(label = label),
       size = annt.txt.size,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = rgb(1, 1, 1, 0.8),
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
     ) +
@@ -258,7 +258,7 @@ seg.names %>% walk(~{
       size = 5,
       hjust = 0,
       vjust = 1,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = 'grey90',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0, 'in')
     ) +
@@ -277,7 +277,7 @@ seg.names %>% walk(~{
       legend.position = c(1, 1),
       legend.justification = c(1, 1),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.5), color = NA),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
       legend.box.margin = margin(1, 8, 1, 2),
       legend.key.height = unit(0.125, 'in'),
       legend.key.width = unit(0.15, 'in'),
@@ -312,7 +312,7 @@ seg.names %>% walk(~{
       size = 5,
       hjust = 0,
       vjust = 1,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = 'grey90',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0, 'in')
     ) +
@@ -331,7 +331,7 @@ seg.names %>% walk(~{
       legend.position = c(1, 1),
       legend.justification = c(1, 1),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.5), color = NA),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
       legend.box.margin = margin(0, 8, 0, 0),
       legend.key.height = unit(0.125, 'in'),
       legend.key.width = unit(0.15, 'in'),

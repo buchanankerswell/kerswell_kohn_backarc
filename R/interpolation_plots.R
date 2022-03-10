@@ -91,7 +91,7 @@ pwalk(~{
       data = fts,
       aes(label = label),
       size = annt.txt.size,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = rgb(1, 1, 1, 0.8),
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
     ) +
@@ -103,7 +103,7 @@ pwalk(~{
       size = 5,
       hjust = 0,
       vjust = 1,
-      fill = rgb(1, 1, 1, 0.5),
+      fill = 'grey90',
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0, 'in')
     ) +
@@ -120,7 +120,7 @@ pwalk(~{
       legend.position = c(1, 1),
       legend.justification = c(1, 1),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(color = NA, fill = rgb(1, 1, 1, 0.5)),
+      legend.box.background = element_rect(color = NA, fill = rgb(1, 1, 1, 0.8)),
       legend.text = element_text(color = 'black'),
       legend.key.height = unit(0.125, 'in'),
       legend.key.width = unit(0.15, 'in'),
@@ -152,7 +152,7 @@ pwalk(~{
         label = paste('model:', v.mod),
         hjust = 0,
         vjust = 0,
-        fill = rgb(1, 1, 1, 0.5),
+        fill = 'grey90',
         size = annt.txt.size,
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0.05, 'lines')
@@ -165,7 +165,7 @@ pwalk(~{
         size = 5,
         hjust = 0,
         vjust = 1,
-        fill = rgb(1, 1, 1, 0.5),
+        fill = 'grey90',
         label.padding = unit(0.15, 'lines'),
         label.r = unit(0, 'in')
       ) +
@@ -335,7 +335,7 @@ walk(unique(solns$segment), ~{
           hjust = 0,
           vjust = 0,
           size = annt.txt.size,
-          fill = rgb(1, 1, 1, 0.5),
+          fill = 'grey90',
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
@@ -353,7 +353,7 @@ walk(unique(solns$segment), ~{
           legend.position = c(1, 1),
           legend.justification = c(1, 1),
           legend.direction = 'horizontal',
-          legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.5), color = NA),
+          legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
           legend.box.margin = margin(1, 8, 1, 2),
           legend.key.height = unit(0.125, 'in'),
           legend.key.width = unit(0.15, 'in'),

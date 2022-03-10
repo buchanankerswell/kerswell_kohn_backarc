@@ -4,11 +4,13 @@
 source('R/functions.R')
 load('data/hf.RData')
 dir.create('figs/goutorbe2011_param', showWarnings = F)
+
 # Encoding function for categorical variables
 encode_ordinal <- function(x, order = unique(x)) {
   x <- as.numeric(factor(x, levels = order, exclude = NULL))
   x
 }
+
 # Map projections
 # WGS84
 proj4.wgs <-
@@ -16,9 +18,11 @@ proj4.wgs <-
 # Robinson Pacific centered
 proj4.rp <-
   '+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+
 # Read goutorbe2011 data
 g <- read_csv('data/goutorbe2011.csv', show_col_types = F)
 names(g) <- str_to_lower(names(g))
+
 # Tidy data
 g.full <-
   g %>%
@@ -26,10 +30,15 @@ g.full <-
     `age ocean (999 on continents)` =
       ifelse(`age ocean (999 on continents)` > 900, NA, `age ocean (999 on continents)`),
     `distance to young rift` =
-      ifelse(`distance to young rift` < 0, abs(`distance to young rift`), `distance to young rift`)
+      ifelse(
+        `distance to young rift` < 0,
+        abs(`distance to young rift`),
+        `distance to young rift`
+      )
   ) %>%
   rename(`age ocean` = `age ocean (999 on continents)`)
 g.colocated <- g.full %>% filter(!is.na(`observed heat flow`))
+
 # Make into sf object
 shp.g.full <-
   st_as_sf(g.full, coords = c(1,2), crs = proj4.wgs) %>%
@@ -37,6 +46,7 @@ shp.g.full <-
 shp.g.colocated <-
   st_as_sf(g.colocated, coords = c(1,2), crs = proj4.wgs) %>%
   st_transform(proj4.rp)
+
 # Compute global point density
 dns <-
   MASS::kde2d(
@@ -56,12 +66,13 @@ dns.colocated <-
     dens = as.vector(dns$z),
     cnt = nrow(shp.g.colocated) / sum(dens) * dens
   )
+
 # Units for goutorbe2011 dataset
 unts <- c(
   'microwatts per cubic meter', 'microwatts per cubic meter', 'kilometer',
   'kilometer', 'grams per cubic centimeter', 'meter', 'mega annum', 'kilometer',
   'kilometer/kilometer', 'kilometer', 'mega annum', 'mega annum', '', '', '',
-  'kilometer', 'kilometer', 'kilometer', 'kilometer', 'kilometer',
+  'kilometer', 'kilometer', 'kilometer', 'kilometers from young rift', 'kilometer',
   'milliwatts per square meter', 'milliwatts per square meter',
   'milliwatts per square meter', 'milliwatts per square meter',
   'milliwatts per square meter', ''
@@ -97,8 +108,7 @@ p1 <-
     size = 5,
     hjust = 0,
     vjust = 1,
-    color = 'grey40',
-    fill = 'white',
+    fill = 'grey90',
     label.padding = unit(0.02, 'in'),
     label.r = unit(0, 'in')
   ) +
@@ -166,8 +176,7 @@ p2 <-
     size = 5,
     hjust = 0,
     vjust = 1,
-    color = 'grey40',
-    fill = 'white',
+    fill = 'grey90',
     label.padding = unit(0.02, 'in'),
     label.r = unit(0, 'in')
   ) +
@@ -237,8 +246,7 @@ plts1 <-
           size = 5,
           hjust = 0,
           vjust = 1,
-          color = 'grey40',
-          fill = 'white',
+          fill = 'grey90',
           label.padding = unit(0.02, 'in'),
           label.r = unit(0, 'in')
         ) +
@@ -294,8 +302,7 @@ plts2 <-
           size = 5,
           hjust = 0,
           vjust = 1,
-          color = 'grey40',
-          fill = 'white',
+          fill = 'grey90',
           label.padding = unit(0.02, 'in'),
           label.r = unit(0, 'in')
         ) +
@@ -373,8 +380,7 @@ plts3 <-
             size = 5,
             hjust = 0,
             vjust = 1,
-            color = 'grey40',
-            fill = 'white',
+            fill = 'grey90',
             label.padding = unit(0.02, 'in'),
             label.r = unit(0, 'in')
           ) +
@@ -499,8 +505,7 @@ plts3 <-
             size = 5,
             hjust = 0,
             vjust = 1,
-            color = 'grey40',
-            fill = 'white',
+            fill = 'grey90',
             label.padding = unit(0.02, 'in'),
             label.r = unit(0, 'in')
           ) +
