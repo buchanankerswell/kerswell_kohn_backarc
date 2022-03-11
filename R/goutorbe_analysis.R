@@ -37,34 +37,34 @@ g.full <-
       )
   ) %>%
   rename(`age ocean` = `age ocean (999 on continents)`)
-g.colocated <- g.full %>% filter(!is.na(`observed heat flow`))
+g.collocated <- g.full %>% filter(!is.na(`observed heat flow`))
 
 # Make into sf object
 shp.g.full <-
   st_as_sf(g.full, coords = c(1,2), crs = proj4.wgs) %>%
   st_transform(proj4.rp)
-shp.g.colocated <-
-  st_as_sf(g.colocated, coords = c(1,2), crs = proj4.wgs) %>%
+shp.g.collocated <-
+  st_as_sf(g.collocated, coords = c(1,2), crs = proj4.wgs) %>%
   st_transform(proj4.rp)
 
 # Compute global point density
 dns <-
   MASS::kde2d(
-  map_dbl(shp.g.colocated$geometry, ~.x[1]),
-  map_dbl(shp.g.colocated$geometry, ~.x[2]),
+  map_dbl(shp.g.collocated$geometry, ~.x[1]),
+  map_dbl(shp.g.collocated$geometry, ~.x[2]),
     n = 100,
     lims = c(
       c(st_bbox(shp.world)$xmin, st_bbox(shp.world)$xmax),
       c(st_bbox(shp.world)$ymin, st_bbox(shp.world)$ymax)
     )
   )
-dns.colocated <-
+dns.collocated <-
   expand.grid(dns$x, dns$y) %>%
   as_tibble() %>%
   rename(x = Var1, y = Var2) %>%
   mutate(
     dens = as.vector(dns$z),
-    cnt = nrow(shp.g.colocated) / sum(dens) * dens
+    cnt = nrow(shp.g.collocated) / sum(dens) * dens
   )
 
 # Units for goutorbe2011 dataset
@@ -72,7 +72,7 @@ unts <- c(
   'microwatts per cubic meter', 'microwatts per cubic meter', 'kilometer',
   'kilometer', 'grams per cubic centimeter', 'meter', 'mega annum', 'kilometer',
   'kilometer/kilometer', 'kilometer', 'mega annum', 'mega annum', '', '', '',
-  'kilometer', 'kilometer', 'kilometer', 'kilometers from young rift', 'kilometer',
+  'kilometers from ridge', 'kilometer', 'kilometer', 'kilometers from young rift', 'kilometer',
   'milliwatts per square meter', 'milliwatts per square meter',
   'milliwatts per square meter', 'milliwatts per square meter',
   'milliwatts per square meter', ''
@@ -92,7 +92,7 @@ p1 <-
     size = 0.3, fill = NA, color = rgb(1, 1, 1, 0.5)
   ) +
   geom_sf(
-    data = shp.g.colocated,
+    data = shp.g.collocated,
     shape = 15,
     size = 0.3
   ) +
@@ -127,11 +127,11 @@ p1 <-
 p2 <-
   ggplot() +
   geom_contour_fill(
-    data = dns.colocated,
+    data = dns.collocated,
     aes(x, y, z = cnt)
   ) +
   geom_contour2(
-    data = dns.colocated,
+    data = dns.collocated,
     aes(x, y, z = cnt),
     size = 0.3,
     color = rgb(1, 1, 1, 0.1)
@@ -198,14 +198,14 @@ ggsave(
   width = 6, height = 9, dpi = 330
 )
 
-# Plot colocated maps
+# Plot collocated maps
 plts1 <-
   map2(names(shp.g.full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
-      cat('\nPlotting colocated grids for ', .x, sep = '')
-      shp.g.colocated <- shp.g.colocated[!is.na(shp.g.colocated[[.x]]),]
-      if(!is.numeric(shp.g.colocated[[.x]])) {
-        shp.g.colocated[[.x]] <- encode_ordinal(shp.g.colocated[[.x]])
+      cat('\nPlotting collocated grids for ', .x, sep = '')
+      shp.g.collocated <- shp.g.collocated[!is.na(shp.g.collocated[[.x]]),]
+      if(!is.numeric(shp.g.collocated[[.x]])) {
+        shp.g.collocated[[.x]] <- encode_ordinal(shp.g.collocated[[.x]])
       }
       p <-
         ggplot() +
@@ -214,7 +214,7 @@ plts1 <-
         geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
         geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
         geom_sf(
-          data = shp.g.colocated[.x],
+          data = shp.g.collocated[.x],
           aes(color = get(.x)),
           shape = 15,
           size = 0.3,
@@ -234,7 +234,7 @@ plts1 <-
               inside = T,
               title.position = 'top',
               title.vjust = 1,
-              barwidth = unit(2.5, 'in')
+              barwidth = unit(3, 'in')
             )
         ) +
         labs(color = .y) +
@@ -315,7 +315,7 @@ plts2 <-
               inside = T,
               title.position = 'top',
               title.vjust = 1,
-              barwidth = unit(2.5, 'in')
+              barwidth = unit(3, 'in')
             )
         ) +
         labs(color = .y) +
@@ -342,23 +342,23 @@ plts3 <-
       cat('\nPlotting densities for ', .x, sep = '')
       if(!is.numeric(shp.g.full[[.x]]) | .x %in% c('Up mantle velocity structure (class)')) {
         X <- encode_ordinal(g.full[[.x]][!is.na(g.full[[.x]])])
-        Y <- encode_ordinal(g.colocated[[.x]][!is.na(g.colocated[[.x]])])
+        Y <- encode_ordinal(g.collocated[[.x]][!is.na(g.collocated[[.x]])])
         d <-
           as_tibble(table(X)) %>%
           rename(type = X, full.count = n) %>%
           mutate(
             type = as.integer(type),
             full.count = full.count/length(X),
-            colocated.count = as_tibble(table(Y))$n/length(X),
-            diff.count = full.count - colocated.count,
+            collocated.count = as_tibble(table(Y))$n/length(X),
+            diff.count = full.count - collocated.count,
             'undersampling' =
-              ifelse(diff.count > 0, full.count-colocated.count, NA),
+              ifelse(diff.count > 0, full.count-collocated.count, NA),
             'oversampling' =
-              ifelse(diff.count < 0, full.count-colocated.count, NA)
+              ifelse(diff.count < 0, full.count-collocated.count, NA)
           ) %>%
           rename(
-            'full grid (Goutorbe et al., 2011)' = full.count,
-            'colocated w/ hf observations' = colocated.count
+            'global' = full.count,
+            'hf obs' = collocated.count
           ) %>%
           select(-diff.count)
         p <-
@@ -390,15 +390,15 @@ plts3 <-
               c(
                 'oversampling' = 'firebrick',
                 'undersampling' = 'navy',
-                'full grid (Goutorbe et al., 2011)' = 'grey80',
-                'colocated w/ hf observations' = 'grey20'
+                'global' = 'grey80',
+                'hf obs' = 'grey20'
               ),
             guide =
               guide_legend(
                 override.aes = list(size = 2),
                 title.position = 'top',
                 title.vjust = 1,
-                nrow = 2
+                nrow = 1
               )
           ) +
           labs(x = .y, y = 'frequency', color = NULL, fill = NULL) +
@@ -410,7 +410,7 @@ plts3 <-
           )
       } else {
         X <- g.full[[.x]][!is.na(g.full[[.x]])]
-        Y <- g.colocated[[.x]][!is.na(g.colocated[[.x]])]
+        Y <- g.collocated[[.x]][!is.na(g.collocated[[.x]])]
         dns.full <-
           tibble(
             x =
@@ -430,7 +430,7 @@ plts3 <-
                 n = 1000
               )$y / length(X)
           )
-        dns.colocated <-
+        dns.collocated <-
           tibble(
             x =
               density(
@@ -489,12 +489,12 @@ plts3 <-
           ) +
           geom_path(
             data = dns.full,
-            aes(x, dns, color = 'full grid (Goutorbe et al., 2011)'),
+            aes(x, dns, color = 'global'),
             size = 1
           ) +
           geom_path(
-            data = dns.colocated,
-            aes(x, dns, color = 'colocated w/ hf observations'),
+            data = dns.collocated,
+            aes(x, dns, color = 'hf obs'),
             size = 1
           ) +
           annotate(
@@ -516,7 +516,7 @@ plts3 <-
                 override.aes = list(size = 2),
                 title.position = 'top',
                 title.vjust = 1,
-                nrow = 2
+                nrow = 1
               )
           ) +
           scale_fill_manual(
@@ -529,7 +529,7 @@ plts3 <-
                 override.aes = list(size = 2),
                 title.position = 'top',
                 title.vjust = 1,
-                nrow = 2
+                nrow = 1
               )
           ) +
           labs(x = .y, y = 'density', color = NULL, fill = NULL) +
@@ -555,7 +555,7 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
       (..1 /
       (..2 + theme(plot.title = element_blank()))) |
       (..3 + theme(plot.title = element_blank())) +
-      plot_layout(guides = 'collect') &
+      plot_layout(guides = 'collect', widths = 1) &
       theme(
         legend.position = 'bottom',
         legend.justification = 'left',
@@ -565,9 +565,10 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
       suppressWarnings(
         ggsave(
         paste0('figs/goutorbe2011_param/', str_replace_all(..4, ' ', '_'), '.png'),
-        plot = p, type = 'cairo', width = 6.5, height = 4
+        plot = p, type = 'cairo', width = 8, height = 4.9
       )
     )
   }
 })
+
 cat('\n\nDone!\n\n')
