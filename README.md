@@ -1,10 +1,10 @@
-# Material for Kerswell & Kohn (2021, G3)
+# Material for Kerswell & Kohn (2022, G3)
 
 ![](figs/diff/CentralAmericaDiffComp.png)
 
 This repository stores all materials for the manuscript
 
-***Comparison of heat flow interpolations near subduction zones*** (2021, G3)
+***Comparison of heat flow interpolations near subduction zones*** (2022, G3)
 
 Included:
 
