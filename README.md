@@ -1,8 +1,8 @@
-# Kerswell & Kohn (2023, G3)
+# Kerswell & Kohn (2023; G3)
 
-![](figs/diff/CentralAmericaDiffComp.png)
+![](draft/assets/image/repo-banner.png)
 
-This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2023, G3).
+This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2023; G3).
 
 This repository includes:
 
