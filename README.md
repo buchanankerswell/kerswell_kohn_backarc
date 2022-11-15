@@ -2,15 +2,16 @@
 
 ![](figs/diff/CentralAmericaDiffComp.png)
 
-This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations near Subduction Zones* (Kerswell & Kohn 2023, G3)
+This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2023, G3).
 
 This repository includes:
 
 - All datasets required to compile the study
 - R scripts to reproduce all results and figures
 - A Makefile to compile the study
+- The complete manuscript written in Rmarkdown
 
-*This repository is self-contained but requires the following software (all open-source).*
+This repository is self-contained but requires the following software (all open-source).
 
 ## Prerequisite software
 
