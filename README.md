@@ -1,18 +1,16 @@
-# Material for Kerswell & Kohn (2022, G3)
+# Kerswell & Kohn (2023, G3)
 
 ![](figs/diff/CentralAmericaDiffComp.png)
 
-This repository stores all materials for the manuscript
+This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations near Subduction Zones* (Kerswell & Kohn 2023, G3)
 
-***Comparison of heat flow interpolations near subduction zones*** (2022, G3)
+This repository includes:
 
-Included:
-
-- Datasets
+- All datasets required to compile the study
 - R scripts to reproduce all results and figures
 - A Makefile to compile the study
 
-*This repository is self-contained but requires the software below*
+*This repository is self-contained but requires the following software (all open-source).*
 
 ## Prerequisite software
 
@@ -30,14 +28,12 @@ Geographic operations require the geographic libraries [gdal](https://gdal.org),
 
 Or follow instructions from [Hombrew's webpage](https://brew.sh).
 
-Once Homebrew is installed
+Once Homebrew is installed, the following will install the latest gdal, geos, and proj libraries together:
 
 ```
 brew install pkg-config
 brew install gdal
 ```
-
-will install the latest gdal, geos, and proj libraries together.
 
 ### sf
 
