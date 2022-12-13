@@ -1,15 +1,22 @@
 #!/usr/bin/env Rscript
 
 # Capture output
-sink(file = 'data/preprocess_log', type = 'output', split = T)
+sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
 
-cat(rep('~', 60), '\n', sep='')
-sessionInfo()
-cat('\n', rep('~', 60), '\n', sep='')
+# Create directories
+dir.create('figs', showWarnings = F)
+dir.create('figs/goutorbe2011_global_density', showWarnings = F)
+dir.create('figs/base', showWarnings = F)
+dir.create('figs/diff', showWarnings = F)
+dir.create('figs/vgrms', showWarnings = F)
+dir.create('figs/summary', showWarnings = F)
+dir.create('figs/upper-plate', showWarnings = F)
+dir.create('draft/assets/figs', showWarnings = F)
+dir.create('draft/assets/r', showWarnings = F)
 
 # Load packages and functions
-cat('Loading packages and functions ...\n\n')
-
+cat(rep('~', 80), sep = '')
+cat('\nLoading packages and functions ...')
 source('R/functions.R')
 
 # Color scales
@@ -35,16 +42,15 @@ v.scale.trans <-
 # Projections
 # WGS84
 proj4.wgs <-
-  '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs'
+  '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
 
 # Robinson Pacific centered
 proj4.rp <-
   '+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
 
 # Print Projections
-cat('\n', rep('~', 60), '\n', sep='')
 cat(
-  'Defining coordinate reference system ...\n',
+  'Defining coordinate reference system ...',
   '\nWGS:\n',
   proj4.wgs,
   '\nRobinson Pacific Centered:\n',
@@ -74,7 +80,6 @@ shp.fts <-
   st_transform(proj4.rp)
 
 # Country Boundaries
-
 # Create sliver around twenty-five degree long to
 # cut country boundaries so they don't project
 # as straight lines across the globe
@@ -106,13 +111,12 @@ suppressWarnings({
   })
 })
 
-cat('\n\n', rep('~', 60), '\n', sep='')
-cat('Reading UTIG plate boundary data ...\n')
+cat('\nReading UTIG plate boundary data ...')
 # Plate boundaries from UTIG
 # http://www-udc.ig.utexas.edu/external/plates/data.htm
-shp.ridge <- st_read('data/utig/ridge.gmt', crs = proj4.wgs, quiet = T)
-shp.trench <- st_read('data/utig/trench.gmt', crs = proj4.wgs, quiet = T)
-shp.transform <- st_read('data/utig/transform.gmt', crs = proj4.wgs, quiet = T)
+shp.ridge <- st_read('data/utig_plate_boundaries/ridge.gmt', crs = proj4.wgs, quiet = T)
+shp.trench <- st_read('data/utig_plate_boundaries/trench.gmt', crs = proj4.wgs, quiet = T)
+shp.transform <- st_read('data/utig_plate_boundaries/transform.gmt', crs = proj4.wgs, quiet = T)
 
 # Filter out linestrings with single points
 single.pnt.idx <-
@@ -147,19 +151,18 @@ suppressWarnings({
 })
 
 # Read Syracuse et al (2006) volcanoes
-cat('\n\n', rep('~', 60), '\n', sep='')
-cat('Reading Syracuse and Abers (2006) data ...\n')
+cat('\nReading Syracuse and Abers (2006) data ...')
 
 volc <-
   read_table(
-    'data/sa2006/volcanoes.txt',
+    'data/syracuse_abers_2006_arc_segments/volcanoes.txt',
     col_type = c('ddddddddddddccf'),
     na = 'NULL'
   )
 
 volc.no.spread <-
   read_table(
-    'data/sa2006/volcanoes_nospread.txt',
+    'data/syracuse_abers_2006_arc_segments/volcanoes_nospread.txt',
     col_type = c('ddddddddddddccf'),
     na = 'NULL'
   )
@@ -173,11 +176,11 @@ shp.volc <-
   st_set_crs(proj4.wgs) %>%
   st_transform(proj4.rp)
 
-cat('\nFound', nrow(volc), 'volcanoes\n')
+cat('\nFound', nrow(volc), 'volcanoes')
 
 # Read syracuse et al 2006 Segments
 files <-
-  list.files('data/sa2006/gmts', full.names = TRUE)
+  list.files('data/syracuse_abers_2006_arc_segments/gmts', full.names = TRUE)
 
 seg.names <-
   files %>%
@@ -185,7 +188,7 @@ seg.names <-
   str_replace_all('_', ' ') %>%
   str_to_title()
 
-cat('\nFound segments:', seg.names, sep = '\n')
+cat('\nFound', length(seg.names), 'segments')
 
 # Read contours and project to robinson pacific centered
 shp.contours <-
@@ -199,19 +202,18 @@ shp.segs <-
   map(~.x[1,])
 
 # Read ThermoGlobe database from Lucazeau (2019)
-cat('\n', rep('~', 60), sep='')
-cat('\nReading ThermoGlobe data from Lucazeau (2019) ...\n')
+cat('\nReading ThermoGlobe data from Lucazeau (2019) ...')
 
 # Read ThermoGlobe data from Lucazeau (2019)
 hf <- 
-  read_csv('data/tglobe/tglobe.csv', col_type = cols()) %>%
+  read_csv('data/jennings_2021_thermoglobe_heat_flow/tglobe.csv', col_type = cols()) %>%
   select(longitude, latitude, `heat-flow (mW/m2)`, code6) %>%
   rename(hf = `heat-flow (mW/m2)`)
 
 cat(
   '\nRemoving', nrow(hf[is.na(hf$hf),]), 'NA heat flow values',
   '\nRemoving', nrow(hf[hf$code6 == 'D',]), 'poor quality data (code6 = D)',
-  '\nRemoving', nrow(hf[is.na(hf$latitude) | is.na(hf$longitude),]), 'obs without coords\n'
+  '\nRemoving', nrow(hf[is.na(hf$latitude) | is.na(hf$longitude),]), 'obs without coords'
 )
 
 # Transform to sf object
@@ -237,13 +239,13 @@ shp.hf.filtered <-
 dup <- sp::zerodist(sf::as_Spatial(shp.hf.filtered))
 n.dup <- nrow(dup)
 
-cat('\nParsing', nrow(dup), 'duplicate measurements:\n')
-cat('\n', rep('+', 40), sep='')
+cat('\n', rep('-', 40), sep = '')
+cat('\nParsing', nrow(dup), 'duplicate measurements:')
 cat(
   '\nIf x is better quality than y, keep x',
   '\notherwise randomly keep either x or y'
 )
-cat('\n', rep('+', 40), sep='')
+cat('\n', rep('-', 40), sep = '')
 
 # For duplicate measurements, select the best quality data point,
 # if the quality is the same, randomly select one measurement
@@ -265,7 +267,7 @@ for(i in 1:nrow(dup)) {
   }
 }
 
-cat('\n\nParsed', length(rid), 'duplicates')
+cat('\nParsed', length(rid), 'duplicates')
 
 shp.hf.filtered <-
   shp.hf.filtered %>%
@@ -273,15 +275,14 @@ shp.hf.filtered <-
   select(hf, geometry) %>%
   rename(hf = hf)
 
-cat('\n\nFinal ThermoGlobe dataset contains', nrow(shp.hf.filtered), 'observations')
+cat('\nFinal ThermoGlobe dataset contains', nrow(shp.hf.filtered), 'observations')
 
 # Read Lucazeau (2019) interpolation
-cat('\n\n', rep('~', 60), sep='')
 cat('\nReading similarity interpolation from Lucazeau (2019) ...')
 
 interp.luca <-
   read_delim(
-    'data/tglobe/HFgrid14.csv',
+    'data/jennings_2021_thermoglobe_heat_flow/HFgrid14.csv',
 	  delim = ';',
 	  col_types = c('ddddd')
   ) %>%
@@ -301,15 +302,14 @@ shp.interp.luca <-
   st_transform(proj4.rp)
 
 # Extract 0.5˚ x 0.5˚ grid from Lucazeau (2019)
-cat('\n\nExtracting similarity interpolation grid locations')
+cat('\nExtracting similarity interpolation grid locations')
 
 shp.grid <- st_geometry(shp.interp.luca)
 
 cat('\nTotal similarity grid size:', length(shp.grid))
 
 # Defining interpolation domain
-cat('\n\n', rep('~', 60), sep='')
-cat('\nDefining interpolation domain ...\n')
+cat('\nDefining interpolation domain ...')
 
 # Draw 1000 km buffer around segment boundaries
 buf.dist <- 1e6
@@ -352,12 +352,12 @@ shp.hf.crop <-
     map(~shp.hf.filtered %>% st_intersection(.x) %>% select(-segment))
   })
 
+cat('\n', rep('-', 40), sep = '')
 cat('\nNumber of observations by segment:')
-cat('\n\n', rep('+', 40), sep='')
 walk2(shp.hf.crop, seg.names, ~{
   cat('\n', ..2, ':', nrow(..1))
 })
-cat('\n', rep('+', 40), sep='')
+cat('\n', rep('-', 40), sep = '')
 
 # Filtered and cropped hf tibble by segment
 hf.crop <-
@@ -368,21 +368,21 @@ hf.crop <-
   )
 
 # Cropped grids from Lucazeau (2019) to bounding boxes
-cat('\n\nCropping interpolation grids to buffers')
+cat('\nCropping interpolation grids to buffers')
 
 shp.grid.crop <-
   shp.buffer %>%
   map(~shp.grid %>% st_intersection(.x))
 
+cat('\n', rep('-', 40), sep = '')
 cat('\nNumber of Kriging estimates by segment:')
-cat('\n\n', rep('+', 40), sep='')
 walk2(shp.grid.crop, seg.names, ~{
   cat('\n', ..2, ':', length(..1))
 })
-cat('\n', rep('+', 40), sep='')
+cat('\n', rep('-', 40), sep = '')
 
 # Calculate regional Similarity RMSE
-cat('\n\nCalculating Similarity RMSE')
+cat('\nCalculating Similarity RMSE')
 rmse.luca <-
   tibble(
     segment = seg.names,
@@ -392,7 +392,7 @@ rmse.luca <-
       ))
   )
 # Summarize heat flow data
-cat('\n\nHeat flow summary:\n')
+cat('\nHeat flow summary:\n')
 hf.summary <-
   shp.hf.crop %>%
   map_df(
@@ -413,8 +413,7 @@ hf.summary <-
 print(hf.summary)
 
 # Clean up environment
-cat('\n', rep('~', 60), sep='')
-cat('\nCleaning up environment ...')
+cat('Cleaning up environment ...')
 
 rm(list = lsf.str())
 
@@ -442,5 +441,5 @@ rm(
 cat('\nSaving data to: data/hf.RData')
 save.image('data/hf.RData')
 
-cat('\nDone!\n')
+cat('\npreprocess.R complete!\n')
 sink()
