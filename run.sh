@@ -31,7 +31,7 @@ if [[ ! $fnum -gt 0 ]]; then
       unset itr
       echo '\nMax iterations for optimization search?'
       echo 'Note: computation cost is high!'
-      echo 'Recommended < 50 iterations'
+      echo 'Recommended <= 30 iterations'
       read 'itr?Number: '
       while [[ -z ${itr} ]]; do
         read 'itr?Number: '
@@ -80,7 +80,7 @@ if [[ ! $fnum -gt 0 ]]; then
       while [[ -z ${ncores} ]]; do
         read 'ncores?Cores: '
       done
-      R/krige.R $itr $alg $iwt $vwt $ncores $nfold
+      R/krige.R $itr $alg $iwt $vwt $nfold $ncores
       cp data/opt.RData draft/assets/r/
       echo 'Kriging successfull!'
       break
@@ -99,11 +99,11 @@ if [[ ! $fnum -gt 0 ]]; then
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
-      R/base-plots.r
-      R/interpolation-plots.r data/opt.rdata
-      R/summary-plots.r data/opt.rdata
+      R/base-plots.R
+      R/interpolation-plots.R
+      R/summary-plots.R
       R/goutorbe-analysis.R
-      cp data/sectors.rdata draft/assets/r/
+      cp data/sectors.RData draft/assets/r/
       echo 'finished!'
       # print clock time
       t=$SECONDS
@@ -127,11 +127,11 @@ elif [[ $fnum -gt 0 ]]; then
   read 'p?yes/no: '
   while true; do
     if [[ $p == 'yes' ]]; then
-      R/base-plots.r
-      R/interpolation-plots.r data/opt.rdata
-      R/summary-plots.r data/opt.rdata
+      R/base-plots.R
+      R/interpolation-plots.R
+      R/summary-plots.R
       R/goutorbe-analysis.R
-      cp data/sectors.rdata draft/assets/r/
+      cp data/sectors.RData draft/assets/r/
       echo 'finished!'
       # print clock time
       t=$SECONDS

@@ -3,28 +3,13 @@
 # Capture output
 sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
 
-# Test if there is at least one argument: if not, return an error
-args <- commandArgs(trailingOnly=TRUE)
-if (length(args) == 0) {
-  stop('Provide the optimization data file as the first arugment <opt*>.R', call.=FALSE)
-} else if (length(args) == 1) {
-  if(!file.exists(args[1])) {
-    stop('That <opt*.R> file does not exist in data/', call.=FALSE)
-  } else {
-    cntr <- as.numeric(regmatches(args[1], regexec('[0-9]', args[1])))
-    if(is.na(cntr)){
-      cntr <- NULL
-    }
-  }
-}
-
 # Load functions and libraries
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
 
 source('R/functions.R')
 load('data/hf.Rdata')
-load(paste0('data/opt', cntr, '.RData'))
+load('data/opt.RData')
 cat('\nSaving plots to: figs/diff/')
 
 # Visualize

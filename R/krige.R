@@ -72,21 +72,7 @@ if(length(args) == 0) {
     cat('\nInterpolation and variogram weights must add to one!')
     cat('\nDefaulting to', iwt, 'and', vwt)
   }
-  n.cores <- suppressWarnings(as.numeric(args[5]))
-  if(is.na(n.cores)) {
-    n.cores <- future::availableCores() - 2
-    cat('\nPassed non-numeric argument for number of cores!')
-    cat('\nDefaulting to', n.cores)
-  } else if(n.cores > future::availableCores()) {
-    n.cores <- future::availableCores() - 2
-    cat('\nToo many cores!')
-    cat('\nDefaulting to', n.cores)
-  } else if(n.cores < 0) {
-    n.cores <- future::availableCores() - 2
-    cat('\nCannot run negative cores!')
-    cat('\nDefaulting to', n.cores)
-  }
-  n.fold <- suppressWarnings(as.numeric(args[6]))
+  n.fold <- suppressWarnings(as.numeric(args[5]))
   if(is.na(n.fold)) {
     n.fold <- NULL
     cat('\nPassed non-numeric argument for k-fold!')
@@ -100,6 +86,20 @@ if(length(args) == 0) {
       n.fold <- NULL
       cat('\nDefaulting to leave-one-out cross-validation')
     }
+  }
+  n.cores <- suppressWarnings(as.numeric(args[6]))
+  if(is.na(n.cores)) {
+    n.cores <- future::availableCores() - 2
+    cat('\nPassed non-numeric argument for number of cores!')
+    cat('\nDefaulting to', n.cores)
+  } else if(n.cores > future::availableCores()) {
+    n.cores <- future::availableCores() - 2
+    cat('\nToo many cores!')
+    cat('\nDefaulting to', n.cores)
+  } else if(n.cores < 0) {
+    n.cores <- future::availableCores() - 2
+    cat('\nCannot run negative cores!')
+    cat('\nDefaulting to', n.cores)
   }
 }
 

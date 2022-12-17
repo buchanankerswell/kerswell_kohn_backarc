@@ -450,7 +450,7 @@ cost_function <-
     cat('\nVariogram model:', model.vgrm)
     cat('\n')
     print(fitted.vgrm)
-    cat('\n', rep('+', 30), '\n', sep='')
+    cat('\n', rep('-', 40), '\n', sep='')
   }
   return(vgrm.cost + interp.cost)
 }
