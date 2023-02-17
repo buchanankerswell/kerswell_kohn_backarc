@@ -30,6 +30,7 @@ package.list <- c(
   'gstat',
   'rgeos',
   'sf',
+  'stars',
   'rnaturalearth',
   'nloptr'
 )

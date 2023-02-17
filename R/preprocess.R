@@ -150,6 +150,32 @@ suppressWarnings({
   })
 })
 
+# Seafloor age from Earthbyte (Steton et al. 2020)
+# https://www.earthbyte.org/category/resources/data-models/seafloor-age/
+cat('\nReading seafloor age data (Steton et al., 2020) ...')
+suppressWarnings({
+  suppressMessages({
+    shp.seafloor.age <-
+      read_stars('data/seafloor-age-seton-2020-1-GTS2012-6m.nc', quiet = T)
+    names(shp.seafloor.age)[1] <- 'age'
+    shp.seafloor.age$age <- round(shp.seafloor.age$age)
+    shp.seafloor.age <-
+      shp.seafloor.age %>%
+      st_set_crs(proj4.wgs) %>%
+      st_contour(
+        breaks =
+          seq(
+            min(shp.seafloor.age$age, na.rm = T),
+            max(shp.seafloor.age$age, na.rm = T),
+            10
+          )
+      ) %>%
+      st_make_valid() %>%
+      st_difference(shp.sliver) %>%
+      st_transform(proj4.rp)
+  })
+})
+
 # Read Syracuse et al (2006) volcanoes
 cat('\nReading Syracuse and Abers (2006) data ...')
 
