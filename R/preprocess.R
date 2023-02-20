@@ -167,12 +167,14 @@ suppressWarnings({
           seq(
             min(shp.seafloor.age$age, na.rm = T),
             max(shp.seafloor.age$age, na.rm = T),
-            10
+            5
           )
       ) %>%
       st_make_valid() %>%
       st_difference(shp.sliver) %>%
-      st_transform(proj4.rp)
+      st_transform(proj4.rp) %>%
+      st_make_valid() %>%
+      slice_head(n = -1)
   })
 })
 

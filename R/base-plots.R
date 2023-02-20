@@ -24,16 +24,22 @@ p1 <-
   geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
   geom_sf(data = bind_rows(shp.hf.crop), aes(color = hf), size = 0.3, shape = 20) +
   geom_sf(data = bind_rows(shp.segs), size = 0.8, color = 'white') +
-  scale_fill_discrete_sequential('oslo', rev = F, guide = 'none') +
+  scale_fill_discrete_sequential(
+    'oslo',
+    rev = F,
+    name = 'age (Ma)',
+    labels = function(x) {if (length(x) == 2) x else ''},
+    guide = guide_colorsteps(title.vjust = 1, show.limits = T)
+  ) +
   scale_color_viridis_c(
     option = 'magma',
     limits = c(0, 250),
     breaks = c(0, 125, 250),
-    na.value = 'transparent'
+    na.value = 'transparent',
+    guide = 'none'
   ) +
   scale_x_continuous(breaks = seq(-180, 180, 60)) +
   labs(color = bquote(mWm^-2)) +
-  guides(color = guide_colorbar(title.position = 'top', title.hjust = 1)) +
   coord_sf() +
   theme_map(font_size = 14) +
   theme(
@@ -41,7 +47,7 @@ p1 <-
     legend.position = c(1, 0),
     legend.justification = c(1, 0),
     legend.direction = 'horizontal',
-    legend.box.background = element_blank(),
+    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
     legend.box.margin = margin(1, 10, 1, 1),
     legend.margin = margin(),
     legend.key.height = unit(0.125, 'in'),
@@ -80,13 +86,14 @@ p2 <-
     seed = 19
   ) +
   labs(color = bquote(mWm^-2)) +
-  guides(color = guide_colorbar(title.position = 'top', title.hjust = 1)) +
   scale_fill_discrete_sequential('oslo', rev = F, guide = 'none') +
   scale_color_viridis_c(
     option = 'magma',
+    name = bquote(mWm^-2),
     limits = c(0, 250),
     breaks = c(0, 125, 250),
-    na.value = 'transparent'
+    na.value = 'transparent',
+    guide = guide_colorbar(title.vjust = 1, show.limits = T)
   ) +
   coord_sf() +
   theme_map(font_size = 14) +
@@ -95,7 +102,7 @@ p2 <-
     legend.position = c(1, 0),
     legend.justification = c(1, 0),
     legend.direction = 'horizontal',
-    legend.box.background = element_blank(),
+    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
     legend.box.margin = margin(1, 10, 1, 1),
     legend.margin = margin(),
     legend.key.height = unit(0.125, 'in'),
@@ -152,6 +159,7 @@ seg.names %>% walk(~{
   grd <- shp.grid.crop[[.x]] # Interpolation grid
   bbx <- st_bbox(buf) %>% bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) # Bounding box
   world <- suppressWarnings(shp.world %>% st_crop(bbx)) # Countries
+  seafloor <- suppressWarnings(shp.seafloor.age %>% st_crop(bbx)) # Seafloor age
   world.buf <- suppressWarnings(world %>% st_intersection(buf)) # Contries within buffer
   volc <- suppressWarnings(shp.volc %>% st_intersection(buf)) # Contries within buffer
   hf <- shp.hf.crop[[.x]]
@@ -187,6 +195,7 @@ seg.names %>% walk(~{
   # Interpolation domain
   pp1 <- 
     ggplot() +
+    geom_sf(data = seafloor, aes(fill = age), color = NA, alpha = 0.8) +
     geom_sf(data = world, size = 0.1, fill = 'grey80', color = 'grey60') +
     geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
@@ -202,14 +211,21 @@ seg.names %>% walk(~{
       hjust = 0,
       vjust = 1
     ) +
+    scale_fill_discrete_sequential(
+      'oslo',
+      rev = F,
+      name = 'age (Ma)',
+      labels = function(x) {if (length(x) == 2) x else ''},
+      guide = guide_colorsteps(title.vjust = 1, show.limits = T)
+    ) +
     scale_color_viridis_c(
       option = 'magma',
+      name = bquote(mWm^-2),
       limits = c(0, 250),
       breaks = c(0, 125, 250),
-      na.value = 'transparent'
+      na.value = 'transparent',
+      guide = 'none'
     ) +
-    labs(color = bquote(mWm^-2)) +
-    guides(color = guide_colorbar(title.position = 'top', title.hjust = 1)) +
     coord_sf() +
     theme_map(font_size = base.txt.size) +
     theme(
@@ -218,7 +234,7 @@ seg.names %>% walk(~{
       legend.position = c(1, 0),
       legend.justification = c(1, 0),
       legend.direction = 'horizontal',
-      legend.box.background = element_blank(),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
       legend.box.margin = margin(1, 10, 1, 1),
       legend.key.height = unit(0.125, 'in'),
       legend.key.width = unit(0.2, 'in'),
@@ -237,7 +253,7 @@ seg.names %>% walk(~{
   pp2 <- 
     ggplot() +
     geom_sf(data = world, size = 0.1, fill = 'grey80', color = 'grey60') +
-    geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15, show.legend = F) +
+    geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
     geom_sf(data = world.buf, size = 0.1, fill = NA, color = 'grey60') +
     geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
@@ -263,23 +279,24 @@ seg.names %>% walk(~{
     ) +
     scale_color_viridis_c(
       option = 'magma',
+      name = bquote(mWm^-2),
       limits = c(0, 250),
       breaks = c(0, 125, 250),
-      na.value = 'transparent'
+      na.value = 'transparent',
+      guide = guide_colorbar(title.vjust = 1, show.limits = T)
     ) +
-    labs(color = bquote(mWm^-2)) +
     coord_sf() +
     theme_map(font_size = base.txt.size) +
     theme(
       axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
       axis.text.y = element_text(angle = 30, hjust = 1),
-      legend.position = c(1, 1),
-      legend.justification = c(1, 1),
+      legend.position = c(1, 0),
+      legend.justification = c(1, 0),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
       legend.box.margin = margin(0, 8, 0, 0),
       legend.key.height = unit(0.125, 'in'),
-      legend.key.width = unit(0.15, 'in'),
+      legend.key.width = unit(0.2, 'in'),
       legend.title = element_text(vjust = 0, color = 'black', size = base.txt.size),
       panel.grid = element_blank(),
       plot.margin = margin(1, 1, 1, 1)
