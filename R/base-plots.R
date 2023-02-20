@@ -17,8 +17,8 @@ cat('\nVisualizing ...')
 p1 <-
   ggplot() +
   geom_sf(data = shp.seafloor.age, aes(fill = age), color = NA) +
-  geom_sf(data = shp.world, size = 0.1, fill = 'grey80', color = 'grey60') +
-  geom_sf(data = st_union((bind_rows(shp.buffer))), size = 0.3, fill = 'black', alpha = 0.6) +
+  geom_sf(data = shp.world, size = 0.1, fill = 'seashell2', color = 'grey60') +
+  geom_sf(data = st_union((bind_rows(shp.buffer))), size = 0.3, fill = 'black', alpha = 0.5) +
   geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
   geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
   geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
@@ -47,13 +47,14 @@ p1 <-
     legend.position = c(1, 0),
     legend.justification = c(1, 0),
     legend.direction = 'horizontal',
-    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
+    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9)),
     legend.box.margin = margin(1, 10, 1, 1),
     legend.margin = margin(),
     legend.key.height = unit(0.125, 'in'),
     legend.key.width = unit(0.2, 'in'),
     legend.title = element_text(vjust = 0, color = 'black', size = 14),
     panel.grid = element_line(size = 0.01, color = 'grey60'),
+    panel.background = element_rect(fill = 'grey60', color = NA),
     plot.margin = margin()
   )
 # Crop countries and similarity to buffer
@@ -62,7 +63,7 @@ shp.sim <- suppressWarnings(shp.interp.luca %>% st_intersection(bind_rows(shp.bu
 p2 <-
   ggplot() +
   geom_sf(data = shp.seafloor.age, aes(fill = age), color = NA) +
-  geom_sf(data = shp.world, size = 0.1, fill = 'grey80', color = 'grey60') +
+  geom_sf(data = shp.world, size = 0.1, fill = 'seashell2', color = 'grey60') +
   geom_sf(data = shp.sim, aes(color = est.sim), size = 0.1, shape = 15) +
   geom_sf(data = shp.world.buf, size = 0.1, fill = 'grey70', alpha = 0.1) +
   geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
@@ -79,7 +80,7 @@ p2 <-
     segment.color = 'white',
     segment.curvature = -1e-20,
     arrow = arrow(length = unit(0.015, 'npc')),
-    fill = rgb(1, 1, 1, 0.8),
+    fill = rgb(1, 1, 1, 0.9),
     label.padding = unit(0.15, 'lines'),
     label.r = unit(0, 'lines'),
     force = 6,
@@ -102,13 +103,14 @@ p2 <-
     legend.position = c(1, 0),
     legend.justification = c(1, 0),
     legend.direction = 'horizontal',
-    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
+    legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9)),
     legend.box.margin = margin(1, 10, 1, 1),
     legend.margin = margin(),
     legend.key.height = unit(0.125, 'in'),
     legend.key.width = unit(0.2, 'in'),
     legend.title = element_text(vjust = 0, color = 'black', size = 14),
     panel.grid = element_line(size = 0.01, color = 'grey60'),
+    panel.background = element_rect(fill = 'grey60', color = NA),
     plot.margin = margin(1, 1, 1, 1)
   )
 # Global buffer composition
@@ -196,12 +198,13 @@ seg.names %>% walk(~{
   pp1 <- 
     ggplot() +
     geom_sf(data = seafloor, aes(fill = age), color = NA, alpha = 0.8) +
-    geom_sf(data = world, size = 0.1, fill = 'grey80', color = 'grey60') +
+    geom_sf(data = world, size = 0.1, fill = 'seashell2', color = 'grey60') +
     geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = transform, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = seg, size = 2, color = 'black') +
     geom_sf(data = hf, aes(color = hf), shape = 15, size = pnt.size*0.3) +
+    geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
     annotate(
       'text',
       label = 'a',
@@ -234,12 +237,13 @@ seg.names %>% walk(~{
       legend.position = c(1, 0),
       legend.justification = c(1, 0),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9)),
       legend.box.margin = margin(1, 10, 1, 1),
       legend.key.height = unit(0.125, 'in'),
       legend.key.width = unit(0.2, 'in'),
       legend.title = element_text(vjust = 0, color = 'black', size = base.txt.size),
       panel.grid = element_blank(),
+      panel.background = element_rect(fill = 'grey60', color = NA),
       plot.margin = margin(1, 1, 1, 1)
     )
   if(
@@ -252,19 +256,19 @@ seg.names %>% walk(~{
   # Similarity interpolation
   pp2 <- 
     ggplot() +
-    geom_sf(data = world, size = 0.1, fill = 'grey80', color = 'grey60') +
+    geom_sf(data = world, size = 0.1, fill = 'seashell2', color = 'grey60') +
     geom_sf(data = sim, aes(color = est.sim), size = pnt.size, shape = 15) +
     geom_sf(data = world.buf, size = 0.1, fill = NA, color = 'grey60') +
     geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
     geom_sf(data = transform, size = 1.5, color = 'black', alpha = 0.8) +
-    geom_sf(data = buf, size = 0.1, fill = NA, color = 'grey60', alpha = 0.1) +
+    geom_sf(data = buf, size = 0.1, fill = NA, color = 'grey60') +
     geom_sf(data = seg, size = 2, color = 'white') +
     geom_sf_label(
       data = fts,
       aes(label = label),
       size = annt.txt.size*0.5,
-      fill = rgb(1, 1, 1, 0.8),
+      fill = rgb(1, 1, 1, 0.9),
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
     ) +
@@ -293,12 +297,13 @@ seg.names %>% walk(~{
       legend.position = c(1, 0),
       legend.justification = c(1, 0),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9), color = NA),
-      legend.box.margin = margin(0, 8, 0, 0),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9)),
+      legend.box.margin = margin(1, 10, 1, 1),
       legend.key.height = unit(0.125, 'in'),
       legend.key.width = unit(0.2, 'in'),
       legend.title = element_text(vjust = 0, color = 'black', size = base.txt.size),
       panel.grid = element_blank(),
+      panel.background = element_rect(fill = 'grey60', color = NA),
       plot.margin = margin(1, 1, 1, 1)
     )
   if(

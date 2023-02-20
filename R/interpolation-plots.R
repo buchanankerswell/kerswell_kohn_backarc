@@ -38,8 +38,8 @@ pwalk(~{
   v.mod <- ..2
   cost <- ..7
   pnt.size <- 3
-  annt.txt.size <- 4
-  base.txt.size <- 12
+  annt.txt.size <- 7
+  base.txt.size <- 14
   # Define map scale 1:50,000 [meters]
   wdth <- (st_bbox(buf)$xmax - st_bbox(buf)$xmin)/5e4
   hght <- (st_bbox(buf)$ymax - st_bbox(buf)$ymin)/5e4
@@ -64,53 +64,56 @@ pwalk(~{
   # Similarity interpolation
   pp1 <- 
     ggplot() +
-    geom_sf(data = world, size = 0.1, fill = 'grey70', color = 'black') +
+    geom_sf(data = world, size = 0.1, fill = 'seashell2', color = 'grey60') +
     geom_sf(data = dif, aes(color = est.sim), size = pnt.size, shape = 15) +
-    geom_sf(data = world.buf, size = 0.1, color = 'grey80', fill = 'grey70', alpha = 0.1) +
-    geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
-    geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
-    geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
-    geom_sf(data = buf, size = 0.3, fill = NA) +
-    geom_sf(data = seg, size = 1.5, color = 'white') +
+    geom_sf(data = world.buf, size = 0.1, color = 'grey60', fill = NA) +
+    geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
+    geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
+    geom_sf(data = transform, size = 1.5, color = 'black', alpha = 0.8) +
+    geom_sf(data = buf, size = 0.1, fill = NA, color = 'grey60', alpha = 0.1) +
+    geom_sf(data = seg, size = 2, color = 'white') +
     geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
     geom_sf_label(
       data = fts,
       aes(label = label),
-      size = annt.txt.size,
-      fill = rgb(1, 1, 1, 0.8),
+      size = annt.txt.size*0.5,
+      fill = rgb(1, 1, 1, 0.9),
       label.padding = unit(0.15, 'lines'),
       label.r = unit(0.05, 'lines')
     ) +
     annotate(
-      'label',
+      'text',
       label = 'a',
       x = -Inf,
       y = Inf,
-      size = 5,
+      size = annt.txt.size,
       hjust = 0,
-      vjust = 1,
-      fill = 'grey90',
-      label.padding = unit(0.15, 'lines'),
-      label.r = unit(0, 'in')
+      vjust = 1
     ) +
     scale_color_viridis_c(
       option = 'magma',
+      name = bquote(mWm^-2),
       limits = c(0, 250),
       breaks = c(0, 125, 250),
-      na.value = 'transparent'
+      na.value = 'transparent',
+      guide = guide_colorbar(title.vjust = 1, show.limits = T)
     ) +
-    labs(color = bquote(mWm^-2)) +
-    coord_sf(expand = F) +
+    coord_sf() +
     theme_map(font_size = base.txt.size) +
     theme(
-      legend.position = c(1, 1),
-      legend.justification = c(1, 1),
+      axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+      axis.text.y = element_text(angle = 30, hjust = 1),
+      legend.position = c(1, 0),
+      legend.justification = c(1, 0),
       legend.direction = 'horizontal',
-      legend.box.background = element_rect(color = NA, fill = rgb(1, 1, 1, 0.8)),
-      legend.text = element_text(color = 'black'),
+      legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9)),
+      legend.box.margin = margin(0, 8, 0, 0),
       legend.key.height = unit(0.125, 'in'),
-      legend.key.width = unit(0.15, 'in'),
-      legend.title = element_text(vjust = 1, color = 'black', size = 10)
+      legend.key.width = unit(0.2, 'in'),
+      legend.title = element_text(vjust = 0, color = 'black', size = base.txt.size),
+      panel.grid = element_blank(),
+      panel.background = element_rect(fill = 'grey60', color = NA),
+      plot.margin = margin(1, 1, 1, 1)
     )
   if(
      .x %in% c('Alaska Aleutians', 'Kamchatka Marianas', 'Tonga New Zealand', 'Vanuatu')
@@ -122,58 +125,59 @@ pwalk(~{
   # Krige interpolation
   pp2 <- 
     ggplot() +
-      geom_sf(data = world, size = 0.1, fill = 'grey70', color = 'black') +
-      geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
-      geom_sf(data = world.buf, size = 0.1, color = 'grey80', fill = 'grey70', alpha = 0.1) +
-      geom_sf(data = ridge, size = 1, color = 'black', alpha = 0.8) +
-      geom_sf(data = trench, size = 1, color = 'black', alpha = 0.8) +
-      geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
-      geom_sf(data = buf, size = 0.3, fill = NA) +
-      geom_sf(data = seg, size = 1.5, color = 'white') +
-      geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
-      annotate(
-        'label',
-        x = -Inf,
-        y = -Inf,
-        label = paste('model:', v.mod),
-        hjust = 0,
-        vjust = 0,
-        fill = 'grey90',
-        size = annt.txt.size,
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0.05, 'lines')
-      ) +
-      annotate(
-        'label',
-        label = 'b',
-        x = -Inf,
-        y = Inf,
-        size = 5,
-        hjust = 0,
-        vjust = 1,
-        fill = 'grey90',
-        label.padding = unit(0.15, 'lines'),
-        label.r = unit(0, 'in')
-      ) +
-      scale_color_viridis_c(
-        option = 'magma',
-        limits = c(0, 250),
-        breaks = c(0, 125, 250),
-        na.value = 'transparent'
-      ) +
-      labs(color = bquote(mWm^-2)) +
-      coord_sf(expand = F) +
-      theme_map(font_size = base.txt.size) +
-      theme(legend.position = 'none')
-      if(
-         .x %in% c('Alaska Aleutians', 'Kamchatka Marianas', 'Tonga New Zealand', 'Vanuatu')
-       ) {
-        pp2 <-
-          pp2 +
-          scale_x_continuous(
-            breaks = c(130, 140, 150, 160, 170, 180, -170, -160, -150, -140, -130)
-          )
-      }
+    geom_sf(data = world, size = 0.1, fill = 'seashell2', color = 'grey60') +
+    geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
+    geom_sf(data = world.buf, size = 0.1, color = 'grey60', fill = NA) +
+    geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
+    geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
+    geom_sf(data = transform, size = 1, color = 'black', alpha = 0.8) +
+    geom_sf(data = buf, size = 0.1, fill = NA, color = 'grey60', alpha = 0.1) +
+    geom_sf(data = seg, size = 2, color = 'white') +
+    geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
+    annotate(
+      'label',
+      x = Inf,
+      y = -Inf,
+      label = paste('variogram model:', v.mod),
+      hjust = 1,
+      vjust = 0,
+      fill = rgb(1, 1, 1, 0.9),
+      size = annt.txt.size*0.8,
+      label.padding = unit(0.15, 'lines'),
+      label.r = unit(0.05, 'lines')
+    ) +
+    annotate(
+      'text',
+      label = 'b',
+      x = -Inf,
+      y = Inf,
+      size = annt.txt.size,
+      hjust = 0,
+      vjust = 1
+    ) +
+    scale_color_viridis_c(
+      option = 'magma',
+      name = bquote(mWm^-2),
+      limits = c(0, 250),
+      breaks = c(0, 125, 250),
+      na.value = 'transparent',
+      guide = guide_colorbar(title.vjust = 1, show.limits = T)
+    ) +
+    coord_sf() +
+    theme_map(font_size = base.txt.size) +
+    theme(
+      legend.position = 'none',
+      panel.background = element_rect(fill = 'grey60', color = NA),
+    )
+    if(
+       .x %in% c('Alaska Aleutians', 'Kamchatka Marianas', 'Tonga New Zealand', 'Vanuatu')
+     ) {
+      pp2 <-
+        pp2 +
+        scale_x_continuous(
+          breaks = c(130, 140, 150, 160, 170, 180, -170, -160, -150, -140, -130)
+        )
+    }
   # Save with map scale of 1:5,000,000 [meters]
   cat(
     '\nSaving plot to: figs/diff/',
@@ -198,8 +202,6 @@ pwalk(~{
       ) &
       theme(
         plot.margin = margin(1, 1, 1, 1),
-        panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey50', color = NA),
         legend.box.margin = margin(),
         legend.text = element_text(margin = margin(t = -4)),
         legend.margin = margin(0, 8, 0, 0)
@@ -233,8 +235,6 @@ pwalk(~{
       ) &
       theme(
         plot.margin = margin(1, 1, 1, 1),
-        panel.grid = element_line(size = 0.1, color = 'white'),
-        panel.background = element_rect(fill = 'grey50', color = NA),
         legend.box.margin = margin(),
         legend.text = element_text(margin = margin(t = -4)),
         legend.margin = margin(0, 8, 0, 0)
@@ -298,54 +298,54 @@ walk(unique(solns$segment), ~{
       v.mod <- ..2
       cost <- ..7
       # Define points and text sizes
-      pnt.size <- 2
-      annt.txt.size <- 4
-      base.txt.size <- 12
+      pnt.size <- 3
+      annt.txt.size <- 7
+      base.txt.size <- 14
       # Krige interpolation
       p <-
         ggplot() +
-        geom_sf(data = world, size = 0.1, fill = 'grey70', color = 'black') +
+        geom_sf(data = world, size = 0.1, fill = 'seashell2', color = 'grey60') +
         geom_sf(data = dif, aes(color = est.krige), size = pnt.size, shape = 15) +
-        geom_sf(data = world.buf, size = 0.1, color = 'grey80', fill = 'grey70', alpha = 0.1) +
-        geom_sf(data = ridge, size = 0.66, color = 'black', alpha = 0.8) +
-        geom_sf(data = trench, size = 0.66, color = 'black', alpha = 0.8) +
-        geom_sf(data = transform, size = 0.66, color = 'black', alpha = 0.8) +
-        geom_sf(data = buf, size = 0.3, fill = NA) +
-        geom_sf(data = seg, size = 1, color = 'white') +
-        geom_sf(data = volc, size = pnt.size*0.7, color = 'gold', shape = 18) +
+        geom_sf(data = world.buf, size = 0.1, color = 'grey60', fill = NA) +
+        geom_sf(data = ridge, size = 1.5, color = 'black', alpha = 0.8) +
+        geom_sf(data = trench, size = 1.5, color = 'black', alpha = 0.8) +
+        geom_sf(data = transform, size = 1.5, color = 'black', alpha = 0.8) +
+        geom_sf(data = buf, size = 0.1, fill = NA, color = 'grey60') +
+        geom_sf(data = seg, size = 2, color = 'white') +
+        geom_sf(data = volc, size = pnt.size*0.5, color = 'gold', shape = 18) +
         annotate(
           'label',
-          x = -Inf,
+          x = Inf,
           y = -Inf,
-          label = paste('model:', v.mod),
-          hjust = 0,
+          label = paste('variogram model:', v.mod),
+          hjust = 1,
           vjust = 0,
-          size = annt.txt.size,
-          fill = 'grey90',
+          fill = rgb(1, 1, 1, 0.9),
+          size = annt.txt.size*0.8,
           label.padding = unit(0.15, 'lines'),
           label.r = unit(0.05, 'lines')
         ) +
         scale_color_viridis_c(
           option = 'magma',
+          name = bquote(mWm^-2),
           limits = c(0, 250),
           breaks = c(0, 125, 250),
-          na.value = 'transparent'
+          na.value = 'transparent',
+          guide = guide_colorbar(title.vjust = 1, show.limits = T)
         ) +
-        labs(color = bquote(mWm^-2)) +
-        coord_sf(expand = F) +
+        coord_sf() +
         theme_map(font_size = base.txt.size) +
         theme(
-          axis.text = element_text(color = 'grey20'),
-          legend.position = c(1, 1),
-          legend.justification = c(1, 1),
+          legend.position = c(0, 1),
+          legend.justification = c(0, 1),
           legend.direction = 'horizontal',
-          legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.8), color = NA),
-          legend.box.margin = margin(1, 8, 1, 2),
+          legend.box.background = element_rect(fill = rgb(1, 1, 1, 0.9)),
+          legend.box.margin = margin(1, 10, 1, 1),
           legend.key.height = unit(0.125, 'in'),
-          legend.key.width = unit(0.15, 'in'),
-          legend.title = element_text(vjust = 1),
-          panel.grid = element_line(size = 0.1, color = 'white'),
-          panel.background = element_rect(fill = 'grey50', color = NA),
+          legend.key.width = unit(0.2, 'in'),
+          legend.title = element_text(vjust = 0, color = 'black', size = base.txt.size),
+          panel.grid = element_blank(),
+          panel.background = element_rect(fill = 'grey60', color = NA),
           plot.margin = margin(1, 1, 1, 1)
         )
         if(
