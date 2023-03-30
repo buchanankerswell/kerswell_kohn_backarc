@@ -28,9 +28,7 @@
 %%%  2018-07-17 / NRV
 %%%  thanks to John Haiducek for help with citep error
 
-
-
-\ProvidesClass{agujournal2018}
+\ProvidesClass{assets/tex/agujournal2018}
               [08/23/2018]
 
 %% SEARCH BELOW FOR THE NUMBER TO FIND PARTICULAR MACRO GROUP
@@ -85,15 +83,12 @@
 \RequirePackage{xcolor}
 \RequirePackage{url}
 
-%% for better track changes
-\RequirePackage{trackchanges}
-
 %% used for running head which is in light gray
-
 \definecolor{ltgray}{cmyk}{.12,0,0,.3}
 
 %% Line numbering
 \RequirePackage{lineno}
+
 %% add more space between text and number:
 \advance\linenumbersep 12pt
 
@@ -112,6 +107,7 @@
 \newif\ifturnofflinenums
 \let\savesidewaystable\sidewaystable
 \let\savesidewaysfigure\sidewaysfigure
+
 %% turns off line numbers in rotated tables and figures, aesthetic consideration,
 %% not necessary.
 \def\sidewaystable{\turnofflinenumstrue\savesidewaystable\centering}

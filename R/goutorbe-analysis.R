@@ -566,7 +566,7 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
       )
       suppressWarnings(
         ggsave(
-        paste0('figs/goutorbe2011_global_density/', str_replace_all(..4, ' ', '_'), '.png'),
+        paste0('figs/goutorbe2011_global_density/', str_replace_all(..4, ' ', '-'), '.png'),
         plot = p, type = 'cairo', width = 8, height = 4.9
       )
     )

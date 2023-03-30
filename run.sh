@@ -104,6 +104,7 @@ if [[ ! $fnum -gt 0 ]]; then
       R/summary-plots.R
       R/goutorbe-analysis.R
       cp data/sectors.RData draft/assets/r/
+      cp figs/**/*.png draft/assets/figs/
       echo 'finished!'
       # print clock time
       t=$SECONDS
@@ -132,6 +133,7 @@ elif [[ $fnum -gt 0 ]]; then
       R/summary-plots.R
       R/goutorbe-analysis.R
       cp data/sectors.RData draft/assets/r/
+      cp figs/**/*.png draft/assets/figs/
       echo 'finished!'
       # print clock time
       t=$SECONDS
