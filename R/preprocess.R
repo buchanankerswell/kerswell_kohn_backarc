@@ -16,7 +16,7 @@ dir.create('draft/assets/r', showWarnings = F)
 
 # Load packages and functions
 cat(rep('~', 80), sep = '')
-cat('\nLoading packages and functions ...')
+cat('\nLoading packages and functions ...\n')
 source('R/functions.R')
 
 # Color scales
@@ -51,10 +51,8 @@ proj4.rp <-
 # Print Projections
 cat(
   'Defining coordinate reference system ...',
-  '\nWGS:\n',
-  proj4.wgs,
-  '\nRobinson Pacific Centered:\n',
-  proj4.rp
+  '\nWGS:', proj4.wgs,
+  '\nRP:', proj4.rp
 )
 
 # SZ features to include in visualizations
@@ -111,6 +109,29 @@ suppressWarnings({
   })
 })
 
+# Global relief model from NOAA (ETOPO 2022)
+# https://www.ncei.noaa.gov/products/etopo-global-relief-model
+cat('\nReading global relief model (ETOPO 2022, NOAA) ...')
+suppressWarnings({
+  suppressMessages({
+    shp.relief.world <-
+      getNOAA.bathy(
+        180, -180, 90, -90,
+        resolution = 15,
+        keep = T,
+        path = 'data/noaa_etopo2022_relief/'
+      )
+    cat('\nReprojecting ETOPO relief model ...')
+    shp.relief.world <-
+      shp.relief.world %>%
+      as.SpatialGridDataFrame() %>%
+      st_as_sf() %>%
+      st_transform(proj4.rp) %>%
+      st_make_valid() %>%
+      rename(elevation = layer)
+  })
+})
+
 cat('\nReading UTIG plate boundary data ...')
 # Plate boundaries from UTIG
 # http://www-udc.ig.utexas.edu/external/plates/data.htm
@@ -147,34 +168,6 @@ suppressWarnings({
       as_tibble() %>%
       st_as_sf() %>%
       st_transform(proj4.rp)
-  })
-})
-
-# Seafloor age from Earthbyte (Steton et al. 2020)
-# https://www.earthbyte.org/category/resources/data-models/seafloor-age/
-cat('\nReading seafloor age data (Steton et al., 2020) ...')
-suppressWarnings({
-  suppressMessages({
-    shp.seafloor.age <-
-      read_stars('data/seafloor-age-seton-2020-1-GTS2012-6m.nc', quiet = T)
-    names(shp.seafloor.age)[1] <- 'age'
-    shp.seafloor.age$age <- round(shp.seafloor.age$age)
-    shp.seafloor.age <-
-      shp.seafloor.age %>%
-      st_set_crs(proj4.wgs) %>%
-      st_contour(
-        breaks =
-          seq(
-            min(shp.seafloor.age$age, na.rm = T),
-            max(shp.seafloor.age$age, na.rm = T),
-            5
-          )
-      ) %>%
-      st_make_valid() %>%
-      st_difference(shp.sliver) %>%
-      st_transform(proj4.rp) %>%
-      st_make_valid() %>%
-      slice_head(n = -1)
   })
 })
 
@@ -215,8 +208,6 @@ seg.names <-
   str_extract('(?<=gmts\\/)[a-z].*(?=_contours\\.gmt)') %>%
   str_replace_all('_', ' ') %>%
   str_to_title()
-
-cat('\nFound', length(seg.names), 'segments')
 
 # Read contours and project to robinson pacific centered
 shp.contours <-
@@ -394,6 +385,57 @@ hf.crop <-
     ~st_set_geometry(.x, NULL),
     .id = 'segment'
   )
+
+# Global relief model from NOAA (ETOPO 2022)
+# https://www.ncei.noaa.gov/products/etopo-global-relief-model
+cat('\nReading global relief model (ETOPO 2022, NOAA) ...')
+shp.relief.crop <-
+  map(seg.names, ~{
+    bbox <-
+      if (.x == 'Kamchatka Marianas') {
+        c(-179, -2.1, 120, 69.2)
+      } else if (.x == 'Alaska Aleutians') {
+        c(-130, 39.38, 150, 71.06)
+      } else if (.x == 'Scotia') {
+        c(-55.16, -73, 0, -44)
+      } else if (.x == 'Tonga New Zealand') {
+        c(-160.6, -54.86, 158, -2.94)
+      } else {
+        shp.buffer[[.x]] %>%
+        st_bbox() %>%
+        bbox_widen(borders = c(0.05, 0.05, 0.05, 0.05)) %>%
+        st_transform(proj4.wgs) %>%
+        st_bbox()
+      }
+    suppressWarnings({
+      suppressMessages({
+        shp.relief <-
+          getNOAA.bathy(
+            bbox[3], bbox[1], bbox[2], bbox[4],
+            resolution = 4,
+            keep = T,
+            path = 'data/noaa_etopo2022_relief/',
+            antimeridian =
+              ifelse(.x %in% c(
+                'Alaska Aleutians',
+                'Kamchatka Marianas',
+                'Tonga New Zealand',
+                'Vanuatu'
+                ), T, F
+              )
+          )
+        cat('\nReprojecting ETOPO relief model for', .x,' ...')
+        shp.relief <-
+          shp.relief %>%
+          as.SpatialGridDataFrame() %>%
+          st_as_sf() %>%
+          st_transform(proj4.rp) %>%
+          st_make_valid() %>%
+          rename(elevation = layer)
+      })
+    })
+  }) %>%
+  set_names(seg.names)
 
 # Cropped grids from Lucazeau (2019) to bounding boxes
 cat('\nCropping interpolation grids to buffers')

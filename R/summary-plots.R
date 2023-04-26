@@ -9,7 +9,7 @@ cat('Loading packages and functions ...\n\n')
 
 source('R/functions.R')
 load('data/hf.Rdata')
-load(paste0('data/opt.RData'))
+load('data/opt.RData')
 cat('\nSaving plots to: figs/summary/')
 cat('\nSaving plots to: figs/vgrms/\n')
 
@@ -23,17 +23,22 @@ p1 <-
   map_df(~st_set_geometry(.x, NULL), .id = 'segment') %>%
   group_by(segment) %>%
   ggplot() +
+  ggtitle('Observed heat flow: thermoglobe') +
   geom_boxplot(
-    aes(x=hf, y=segment, group=segment),
-    fill = 'ivory',
+    aes(x = hf, y = reorder(segment, hf, FUN = median), fill = segment, group = segment),
     outlier.shape = NA,
     size = 0.5,
-    color = 'black'
+    color = 'black',
+    notch = T
   ) +
-  labs(x = 'milliwatts per square meter', y = NULL) +
-  scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-  theme_dark(base_size = 12) +
-  theme(legend.position = 'none', plot.margin = margin(1, 1, 1, 1))
+  labs(x = bquote('heat flow'~(mWm^-2)), y = 'segment', fill = 'segment') +
+  scale_fill_discrete_qualitative(palette = 'set 2') +
+  theme_dark(base_size = 14) +
+  theme(
+    legend.position = 'none',
+    plot.margin = margin(1, 1, 1, 1),
+    panel.grid = element_blank()
+  )
 # Save
 cat('\nSaving plot to: figs/summary/hfSummary.png')
 suppressWarnings(suppressMessages(
@@ -76,8 +81,8 @@ walk(~{
         cost = ..7,
         v.mod = ..2,
         lineCol = 'white',
-        ylim = ylim,
-        xlim = xlim/1e5
+        ylim = sqrt(ylim),
+        xlim = xlim/1e3
       )
     })
   pp <-
@@ -97,7 +102,9 @@ walk(~{
         axis.text = element_blank()
       )
     ) +
-    (p[[3]]) +
+    (
+      p[[3]]
+    ) +
     (
       p[[4]] +
       theme(
@@ -105,36 +112,36 @@ walk(~{
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank()
       )
-    ) &
-    theme(plot.margin = margin(1, 1, 1, 1))
+    ) +
+    plot_layout(guides = 'collect') &
+    theme(plot.margin = margin(1, 12, 1, 1), legend.position = 'top')
   ggsave(
     paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms.png'),
     plot = pp,
     device = 'png',
     type = 'cairo',
-    width = 6,
-    height = 3
+    width = 6.5,
+    height = 5.2
   )
 })
 
 # Summarise variogram models
-init.vals <-
-  tibble(
-    'lag cutoff' = 3,
-    'number of lags' = 20,
-    'lag shift' = 1,
-    'max local pairs' = 8,
-    'log10 range' = NA,
-    'log10 sill' = NA
-  ) %>%
-  pivot_longer(everything())
+param.labels <-
+  list(
+    'lag cutoff' = 'lag cutoff',
+    'number of lags' = 'number of lags',
+    'lag shift' = 'lag shift',
+    'max local pairs' = 'max local pairs',
+    'range' = 'range (km)',
+    'sill' = bquote(sqrt('sill')~(mWm^-2))
+  )
 p2 <-
   vgrm.summary %>%
   mutate(
     n.lags = n.lags,
     n.max = n.max,
-    sill = log10(sill),
-    range = log10(range/1000)
+    sill = sqrt(sill),
+    range = range/1e3
   ) %>%
   drop_na() %>%
   select(-c(rmse, dir.rmse)) %>%
@@ -144,9 +151,10 @@ p2 <-
     'number of lags' = n.lags,
     'lag shift' = lag.start,
     'max local pairs' = n.max,
-    'log10 range' = range,
-    'log10 sill' = sill,
+    'range' = range,
+    'sill' = sill
   ) %>%
+  select(-c(sill, range)) %>%
   pivot_longer(-c(
     v.mod,
     cost,
@@ -160,51 +168,34 @@ p2 <-
     cv.cost
   )) %>%
   ggplot() +
-  geom_point(aes(x = cost*100, y = value, shape = v.mod, group = name), size = 2) +
-  facet_wrap(~name, ncol = 2, scales = 'free_y') +
-  scale_color_discrete_qualitative('Dark 3') +
-  scale_shape_manual(values = 15:18) +
-  guides(
-    shape =
-      guide_legend(
-        override.aes = list(size = 3),
-        title.position = 'top',
-        title.vjust = 1,
-        label.position = 'bottom'
-      )
+  ggtitle('Kriging parameters selected by iterative optimization') +
+  geom_point(
+    aes(y = cost, x = value, fill = segment, group = name),
+    shape = 22,
+    stroke = 0.5,
+    size = 2,
+    key_glyph = 'rect'
   ) +
-  labs(y = NULL, x = 'cost x 100', shape = NULL) +
-  theme_dark(base_size = 12) +
+  facet_wrap(
+    ~name,
+    ncol = 2,
+    scales = 'free_x',
+    labeller = function(variable, value) {
+      return(param.labels[value])
+    }
+  ) +
+  labs(x = NULL, y = 'cost', color = 'segment') +
+  scale_color_discrete_qualitative('set 2') +
+  scale_fill_discrete_qualitative('set 2') +
+  theme_dark(base_size = 14) +
   theme(
-    strip.background = element_rect(color = 'grey50', fill = 'grey95'),
-    strip.text = element_text(color = 'black', size = 12, margin = margin(1, 0, 1.5, 0)),
-    legend.box.margin = margin(-10, 0, 0, 0),
+    panel.grid = element_blank(),
+    strip.background = element_rect(color = NA, fill = NA),
+    strip.text = element_text(color = 'black', size = 14, margin = margin(0, 0, 2, 0)),
+    strip.placement = 'outside',
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.key = element_rect(color = 'black'),
     plot.margin = margin(1, 1, 1, 1)
-  )
-p2 <-
-  p2 +
-  geom_text(
-    data = init.vals,
-    aes(x = -Inf, y = value, group = name, label = 'inital value'),
-    color = 'white',
-    size = 3,
-    hjust = -0.1,
-    vjust = -0.1
-  ) +
-  geom_hline(
-    data = init.vals,
-    aes(yintercept = value, group = name),
-    color = 'grey90',
-    size = 0.8
-  ) +
-  geom_smooth(
-    aes(x = cost*100, y = value, group = name),
-    formula = y~x,
-    method = 'lm',
-    size = 0.5,
-    color = 'black',
-    fill = 'ivory',
-    fullrange = T
   )
 # Save
 cat('\nSaving plot to: figs/summary/vgrmSummary.png', sep = '')
@@ -215,7 +206,7 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 6.5
+    height = 4.34
   )
 ))
 
@@ -232,18 +223,28 @@ p3 <-
     .id = 'segment'
   ) %>%
   ggplot() +
+  ggtitle('Kriging vs. similarity interpolation differences') +
   geom_boxplot(
-    aes(x=est.diff, y=segment, group=segment),
-    fill = 'ivory',
+    aes(
+      x = est.diff,
+      y = reorder(segment, est.diff, FUN = median),
+      fill = segment,
+      group = segment
+    ),
     outlier.shape = NA,
     size = 0.5,
-    color = 'black'
+    color = 'black',
+    notch = T
    ) +
-  labs(x = 'milliwatts per square meter', y = NULL) +
+  labs(x = bquote('heat flow'~(mWm^-2)), y = 'segment', fill = 'segment') +
+  scale_fill_discrete_qualitative(palette = 'set 2') +
   coord_cartesian(xlim = c(-50, 50)) +
-  scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-  theme_dark(base_size = 12) +
-  theme(legend.position = 'none', plot.margin = margin(1, 1, 1, 1))
+  theme_dark(base_size = 14) +
+  theme(
+    legend.position = 'none',
+    plot.margin = margin(1, 1, 1, 1),
+    panel.grid = element_blank()
+  )
 # Save plot
 cat('\nSaving plot to: figs/summary/interpDiffSummary.png', sep = '')
 suppressWarnings(suppressMessages(
@@ -265,18 +266,28 @@ p3b <-
     .id = 'segment'
   ) %>%
   ggplot() +
+  ggtitle('Kriging vs. similarity interpolation differences') +
   geom_boxplot(
-    aes(x=sigma.diff, y=segment, group=segment),
-    fill = 'ivory',
+    aes(
+      x = sigma.diff,
+      y = reorder(segment, sigma.diff, FUN = median),
+      fill = segment,
+      group = segment
+    ),
     outlier.shape = NA,
     size = 0.5,
-    color = 'black'
+    color = 'black',
+    notch = T
   ) +
-  labs(x = 'milliwatts per square meter', y = NULL) +
+  labs(x = bquote(sigma~(mWm^-2)), y = 'segment', fill = 'segment') +
+  scale_fill_discrete_qualitative(palette = 'set 2') +
   coord_cartesian(xlim = c(-50, 50)) +
-  scale_y_discrete(limits = rev(levels(as.factor(seg.names)))) +
-  theme_dark(base_size = 12) +
-  theme(legend.position = 'none', plot.margin = margin(1, 1, 1, 1))
+  theme_dark(base_size = 14) +
+  theme(
+    legend.position = 'none',
+    plot.margin = margin(1, 1, 1, 1),
+    panel.grid = element_blank()
+  )
 # Save plot
 cat('\nSaving plot to: figs/summary/interpSigmaDiffSummary.png', sep = '')
 suppressWarnings(suppressMessages(
@@ -285,8 +296,8 @@ suppressWarnings(suppressMessages(
     plot = p3b,
     device = 'png',
     type = 'cairo',
-    width = 6,
-    height = 4
+    width = 6.5,
+    height = 4.34
   )
 ))
 
@@ -295,24 +306,35 @@ p4 <-
   opt.trace %>%
   group_by(segment, v.mod) %>%
   ggplot() +
-  geom_path(aes(itr, cost*100, group = segment)) +
+  ggtitle('Cost evaluation during iterative optimization') +
+  geom_path(aes(itr, cost, group = segment), linewidth = 0.2) +
+  geom_point(
+    aes(itr, cost, group = segment, fill = segment),
+    shape = 22,
+    stroke = 0.5,
+    key_glyph = 'rect'
+  ) +
   facet_wrap(~v.mod, nrow = 2) +
-  labs(x = 'iteration', y = 'cost x 100', color = NULL) +
-  theme_dark(base_size = 12) +
+  labs(x = 'iteration', y = 'cost', color = 'segment') +
+  scale_fill_discrete_qualitative(palette = 'set 2') +
+  scale_x_continuous(breaks = seq(0, max(opt.trace$itr), 3)) +
+  theme_dark(base_size = 14) +
   theme(
-    strip.background = element_rect(color = 'grey50', fill = 'grey95'),
-    strip.text = element_text(color = 'black', size = 12, margin = margin(1, 0, 1.5, 0)),
-    legend.box.margin = margin(-10, 0, 0, 0),
-    plot.margin = margin(1, 1, 1, 1)
+    strip.background = element_rect(color = NA, fill = NA),
+    strip.text = element_text(color = 'black', size = 14, margin = margin()),
+    strip.placement = 'outside',
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.key = element_rect(color = 'black'),
+    plot.margin = margin(1, 1, 1, 1),
+    panel.grid = element_blank()
   )
 ggsave(
-  file =
-  paste0('figs/summary/optTrace.png'),
+  file = 'figs/summary/optTrace.png',
   plot = p4,
   device = 'png',
   type = 'cairo',
-  width = 6,
-  height = 4.67
+  width = 6.5,
+  height = 4.34
 )
 
 if(!file.exists('data/sectors.RData')){
@@ -387,8 +409,8 @@ walk2(1:13, borders, ~{
       plot = p,
       device = 'png',
       type = 'cairo',
-      width = 6,
-      height = 5.5
+      width = 6.5,
+      height = 6.5
     )
   })})
 })

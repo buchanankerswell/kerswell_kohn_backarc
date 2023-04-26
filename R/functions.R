@@ -25,8 +25,10 @@ package.list <- c(
   'ggrepel',
   'ggridges',
   'ggsflabel',
+  'ggnewscale',
   'patchwork',
   'cowplot',
+  'marmap',
   'gstat',
   'rgeos',
   'sf',
@@ -420,7 +422,7 @@ cost_function <-
   iwt <- interp.weight # interpolation error
   vwt <- vgrm.weight # variogram fit error
   # Calculate variogram fit cost
-  #   equation: sqrt( vgrm.weight * RMSE / sd(experimental.vgrm) ) [mWm^-2]
+  #   equation: vgrm.weight * sqrt( RMSE / sd(experimental.vgrm) ) [mWm^-2]
   #   note: The weighted RMSE is minimized during the fitting process with weights
   #   defined in fit.variogram method, see table 4.2 in http://www.gstat.org/gstat.pdf
   vgrm.rmse <-
@@ -620,10 +622,10 @@ plot_split_segment <-
   seg.num <- as.numeric(unique(bind_rows(split.seg$pnts)$split_fID))
   bx <- bbox_widen(st_bbox(st_buffer(st_combine(split.seg$seg), dist = 5e5)), borders = borders)
   seg <- bind_rows(split.seg$seg)
-  world <- shp.world
   ridge <- shp.ridge.crop[[seg.name]]
   trench <- shp.trench.crop[[seg.name]]
   transform <- shp.transform.crop[[seg.name]]
+  relief <- shp.relief.crop[[seg.name]]
   volc <- split.seg$volc
   wdth <- range(st_bbox(bind_rows(split.seg$buf))[c('xmin', 'xmax')])/1e3
   rng <-
@@ -636,23 +638,22 @@ plot_split_segment <-
       min.sim = min(est.sim),
       max.sim = max(est.sim)
     )
-  pnt.size <- 1.2
+  pnt.size <- 1
   p0 <-
     ggplot() +
     geom_sf(data = bx, color = NA, fill = NA) +
-    geom_sf(data = world, size = 0.1, fill = 'grey70', color = 'black') +
-    geom_sf(data = ridge, size = 0.5, alpha = 0.8) +
-    geom_sf(data = trench, size = 0.5, alpha = 0.8) +
-    geom_sf(data = transform, size = 0.5, alpha = 0.8) +
-    geom_sf(data = seg, size = 2) +
+    geom_sf(data = relief, aes(color = elevation), shape = 15, size = 0.25) +
+    scale_color_etopo(guide = 'none') +
+    new_scale_color() +
+    geom_sf(data = ridge, linewidth = 0.5) +
+    geom_sf(data = trench, linewidth = 0.5) +
+    geom_sf(data = transform, linewidth = 0.5) +
+    geom_sf(data = seg, linewidth = 1, color = 'white') +
     geom_sf(
       data = bind_rows(split.seg$buf),
-      aes(
-        fill = factor(split_fID, levels = seg.num[order(seg.num)]),
-        color = factor(split_fID, levels = seg.num[order(seg.num)])
-      ),
-      size = 0.5,
-      alpha = 0.5,
+      aes(fill = factor(split_fID, levels = seg.num[order(seg.num)])),
+      linewidth = 0.5,
+      color = 'black',
       show.legend = F
     ) +
     geom_sf(
@@ -663,20 +664,16 @@ plot_split_segment <-
       ),
       size = pnt.size,
       shape = 22,
+      stroke = 0.5,
       show.legend = F
     ) +
-    geom_sf(
-      data = bind_rows(volc),
-      color = 'gold',
-      shape = 18,
-      size = pnt.size * 0.8
-    ) +
+    geom_sf(data = bind_rows(volc), color = 'white', shape = 18, size = pnt.size) +
     annotate(
       'label',
-      label = 'b',
+      label = 'a',
       x = -Inf,
       y = Inf,
-      size = 5,
+      size = 7,
       hjust = 0,
       vjust = 1,
       fill = 'grey90',
@@ -686,10 +683,10 @@ plot_split_segment <-
     coord_sf(
       xlim = c(st_bbox(bx)$xmin, st_bbox(bx)$xmax),
       ylim = c(st_bbox(bx)$ymin, st_bbox(bx)$ymax),
-      label_axes = 'EN--'
-      ) +
-    scale_color_discrete_qualitative('Dark 3') +
-    scale_fill_discrete_qualitative('Dark 3') +
+      label_axes = '--EN'
+    ) +
+    scale_color_discrete_qualitative('set 2') +
+    scale_fill_discrete_qualitative('set 2') +
     guides(
       fill = 
         guide_legend(
@@ -702,10 +699,10 @@ plot_split_segment <-
     ) +
     theme_map(font_size = 9) +
     theme(
+      plot.margin = margin(1, 1, 1, 5),
       axis.text.x = element_text(color = 'grey40', angle = 30, hjust = 0, vjust = 0),
       axis.text.y = element_text(color = 'grey40', angle = 30, hjust = 0),
-      panel.grid = element_line(size = 0.1, color = 'white'),
-      panel.background = element_rect(fill = 'grey50', color = NA)
+      panel.grid = element_line(size = 0.01, color = 'grey60')
     )
     if(
        seg.name %in% c('Alaska Aleutians', 'Kamchatka Marianas', 'Tonga New Zealand', 'Vanuatu')
@@ -731,19 +728,19 @@ plot_split_segment <-
       aes(
         y = value,
         x = factor(split_fID, levels = seg.num[order(seg.num)]),
-        fill = name
+        fill = factor(split_fID, levels = seg.num[order(seg.num)]),
+        color = name,
+        outlier.color = name
       ),
-      color = 'black',
-      outlier.size = pnt.size * 0.5,
-      outlier.color = 'grey20',
+      outlier.size = pnt.size * 0.2,
       size = 0.5
     ) +
     annotate(
       'label',
-      label = 'a',
+      label = 'b',
       x = -Inf,
       y = Inf,
-      size = 5,
+      size = 7,
       hjust = 0,
       vjust = 1,
       fill = 'grey90',
@@ -751,26 +748,29 @@ plot_split_segment <-
       label.r = unit(0, 'in')
     ) +
     guides(
-      fill =
+      color =
         guide_legend(
           nrow = 1,
-          override.aes = list(alpha = 1),
+          override.aes = list(alpha = 1, fill = 'grey50'),
           title.position = 'top',
           title.vjust = 1,
-          label.position = 'bottom'
-        )
+          label.position = 'left'
+        ),
+      fill = 'none'
     ) +
     coord_cartesian(
       ylim = c(min(rng$min.krige, rng$min.sim), max(rng$max.krige, rng$max.sim))
     ) +
-    scale_x_discrete(position = 'top') +
-    scale_fill_manual(values = c('ivory', 'cornflowerblue')) +
-    labs(y = bquote(mWm^-2), x = NULL, fill = 'method') +
-    theme_dark(base_size = 12) +
+    scale_y_continuous(position = 'right') +
+    scale_fill_discrete_qualitative(palette = 'set 2') +
+    scale_color_manual(values = c('black', 'white')) +
+    labs(y = bquote('heat flow'~(mWm^-2)), x = NULL, color = 'interpolation method', fill = NULL) +
+    theme_dark(base_size = 14) +
     theme(
-      axis.title.x = element_text(margin = margin(t = -10)),
       legend.title = element_text(margin = margin(0, 0, -5, 0)),
-      legend.key.height = unit(0.31, 'in')
+      plot.margin = margin(1, 1, 1, 1),
+      panel.grid = element_blank(),
+      panel.background = element_rect(fill = 'grey50')
     )
   labl <-
     tibble(
@@ -794,9 +794,10 @@ plot_split_segment <-
     geom_point(
       data = bind_rows(volc),
       aes(distance.from.seg/1e3, min(rng$min.krige, rng$min.sim)),
-      color = 'gold',
-      size = pnt.size * 0.8,
-      shape = 18
+      color = 'white',
+      size = pnt.size,
+      shape = 18,
+      key_glyph = 'rect'
     ) +
     geom_point(
       data = bind_rows(split.seg$pnts),
@@ -808,7 +809,7 @@ plot_split_segment <-
       ),
       size = pnt.size,
       shape = 22,
-      alpha = 0.1
+      key_glyph = 'rect'
     ) +
     geom_smooth(
       aes(
@@ -817,12 +818,13 @@ plot_split_segment <-
         color = factor(split_fID, levels = seg.num[order(seg.num)]),
         group = factor(split_fID, levels = seg.num[order(seg.num)])
       ),
-      fill = 'ivory',
+      fill = NA,
       method = 'loess',
-      span = 0.95,
+      #span = 0.95,
       alpha = 0.1,
       size = 1,
       se = T,
+      key_glyph = 'rect',
       show.legend = F
     ) +
     geom_label(
@@ -830,7 +832,7 @@ plot_split_segment <-
       aes(label = lbl),
       x = -Inf,
       y = Inf,
-      size = 5,
+      size = 7,
       hjust = 0,
       vjust = 1,
       fill = 'grey90',
@@ -838,15 +840,15 @@ plot_split_segment <-
       label.r = unit(0, 'in')
     ) +
     labs(
-      x = 'kilometers from trench',
-      y = bquote(mWm^-2),
+      x = 'distance from trench (km)',
+      y = bquote('heat flow'~(mWm^-2)),
       fill = 'sector'
     ) +
     guides(
       fill = 
         guide_legend(
           nrow = 1,
-          override.aes = list(alpha = 1, size = 8),
+          override.aes = list(alpha = 1, size = 5),
           title.position = 'top',
           title.vjust = 1,
           label.position = 'bottom'
@@ -855,22 +857,29 @@ plot_split_segment <-
     coord_cartesian(
       ylim = c(min(rng$min.krige, rng$min.sim), max(rng$max.krige, rng$max.sim))
     ) +
-    scale_color_discrete_qualitative('Dark 3') +
-    scale_fill_discrete_qualitative('Dark 3') +
+    scale_color_discrete_qualitative('set 2') +
+    scale_fill_discrete_qualitative('set 2') +
     facet_wrap(~name, ncol = 2) +
-    theme_dark(base_size = 12) +
+    theme_dark(base_size = 14) +
     theme(
       legend.title = element_text(margin = margin(0, 0, -5, 0)),
-      strip.background = element_rect(color = 'grey50', fill = 'grey95'),
-      strip.text = element_text(color = 'black', size = 12, margin = margin(1, 0, 1.5, 0)),
-      legend.spacing.x = unit(0, 'mm')
+      strip.background = element_rect(color = NA, fill = NA),
+      strip.text = element_text(color = 'black', size = 14, margin = margin(0, 0, 2, 0)),
+      strip.placement = 'outside',
+      legend.box.margin = margin(0, 0, 0, 0),
+      legend.key = element_rect(color = 'black'),
+      legend.spacing.x = unit(0, 'mm'),
+      plot.margin = margin(1, 1, 1, 1),
+      panel.grid = element_blank()
     )
   p <-
-    ((p1 | p0) / p2) +
-    plot_layout(guides = 'collect') &
+    ((p0 | p1) / p2) +
+    plot_annotation(title = 'Comparing heat flow interpolations by sector') +
+    plot_layout(widths = 1, guides = 'collect') &
     theme(
-      plot.margin = margin(1, 1, 1, 1),
-      legend.box.margin = margin(t = -5),
+      plot.title = element_text(size = 18),
+      plot.margin = margin(5, 5, 5, 5),
+      legend.box.margin = margin(0, 0, 0, 0),
       legend.margin = margin(),
       legend.position = 'bottom',
       legend.direction = 'horizontal',
@@ -886,46 +895,65 @@ plot_vgrm <-
     fitted.vgrm = NULL,
     cost = NULL,
     v.mod = NULL,
-    lineCol = 'deeppink',
+    lineCol = 'white',
     ylim = NULL,
     xlim = NULL
   ){
   # Check for missing arguments
   if(is.null(experimental.vgrm)) stop('\nMissing experimental variogram!')
+  sill <- round(sqrt(fitted.vgrm[[2]]))
+  range <- round(fitted.vgrm[[3]]/1e3)
   p <- 
     ggplot() +
-    labs(x = 'kilometer x 100', y = 'semivariance') +
+    geom_segment(
+      aes(x = range, xend = range, y = Inf, yend = sill, color = 'range'),
+      arrow = arrow(angle = 10, length = unit(0.05, 'inches'), type = 'closed')
+    ) +
+    geom_segment(
+      aes(x = -Inf, xend = range, y = sill, yend = sill, color = 'sill'),
+      arrow = arrow(angle = 10, length = unit(0.05, 'inches'), type = 'closed')
+    ) +
+    labs(x = 'lag distance (km)', y = bquote(sqrt(hat(gamma)[(h)])~(mWm^-2))) +
+    scale_color_discrete_qualitative(name = NULL, palette = 'set 2') +
+    new_scale_color() +
     coord_cartesian(ylim = ylim, xlim = xlim) +
-    theme_dark(base_size = 12) +
-    theme(
-      plot.margin = margin(1, 1, 1, 1)
-    )
+    theme_dark(base_size = 14) +
+    theme(panel.grid = element_blank())
   plt <- tryCatch(
     {
       p +
       geom_point(
         data = experimental.vgrm,
-        aes(x = dist/1e5, y = gamma),
-        shape = 16
+        aes(x = dist/1e3, y = sqrt(gamma), color = 'experimental variogram'),
+        shape = 20,
+        key_glyph = 'path'
+      ) +
+      geom_path(
+        data = experimental.vgrm,
+        aes(x = dist/1e3, y = sqrt(gamma), color = 'experimental variogram'),
+        key_glyph = 'path'
       ) +
       geom_line(
         data = variogramLine(fitted.vgrm, maxdist = max(experimental.vgrm$dist)),
-        aes(x = dist/1e5, y = gamma),
-        color = lineCol,
-        size = 1.2
+        aes(x = dist/1e3, y = sqrt(gamma), color = 'model variogram'),
+        key_glyph = 'path'
       ) +
       annotate(
-        'label',
-        x = -Inf,
-        y = Inf,
-        label = paste('model:', v.mod, '\ncost:', round(cost, 4)),
-        label.padding = unit(0.1, 'lines'),
-        label.r = unit(0, 'lines'),
-        alpha = 0.8,
-        fill = 'grey90',
-        size = 4,
-        vjust = 1,
-        hjust = 0
+        'text',
+        label = paste0(
+          'fitted variogram: ', v.mod,
+          '\nsill: ', sill, ', ',
+          'range: ', range, ', ',
+          'cost: ', round(cost, 4)
+        ),
+        x = xlim[2]/2,
+        y = -Inf,
+        vjust = -0.2,
+        hjust = 0.5
+      ) +
+      scale_color_manual(
+        name = NULL,
+        values = c('experimental variogram' = 'black', 'model variogram' = lineCol)
       )
     },
     error=function(cond) {
@@ -936,8 +964,8 @@ plot_vgrm <-
       exp.plt <- p +
       geom_point(
         data = experimental.vgrm,
-        aes(x = dist/1e5, y = gamma),
-        shape = 16
+        aes(x = dist/1e3, y = sqrt(gamma)),
+        shape = 20
       )
       return(exp.plt)
     }
