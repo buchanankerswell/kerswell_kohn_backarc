@@ -222,6 +222,7 @@ walk(unique(solns$segment), ~{
   plts <-
     solns %>%
     filter(segment == .x) %>%
+    mutate(lab = c('a) ', 'b) ', 'c) ', 'd) ')) %>%
     pmap(~{
       # Define map parts
       cnt <- shp.contours[[..1]] # Contour
@@ -245,7 +246,7 @@ walk(unique(solns$segment), ~{
       # Krige interpolation
       p <-
         ggplot() +
-        ggtitle(paste0('Model: ', v.mod)) +
+        ggtitle(paste0(..8, 'Model: ', v.mod)) +
         geom_sf(data = relief, aes(color = elevation), shape = 15, size = 0.01) +
         scale_color_etopo(guide = 'none') +
         new_scale_color() +

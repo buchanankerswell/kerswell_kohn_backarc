@@ -4,14 +4,14 @@ classoption: draft,linenumbers
 title: A Comparison of Heat Flow Interpolations Near Subduction Zones
 authors:
 - name: Buchanan C. Kerswell
-  affil: 1
+  affil: 1,2
 - name: Matthew J. Kohn
-  affil: 2
+  affil: 1
 affiliations:
 - number: 1
-  name: Department of Geology & Environmental Earth Science, Miami University, Oxford, OH 45056
-- number: 2
   name: Department of Geosicences, Boise State University, Boise, ID 83725
+- number: 2
+  name: Géosciences Montpellier, Université de Montpellier, 37040 Montpellier, France
 corresponding_author:
 - name: Buchanan C. Kerswell
   email: buchanankerswell@u.boisestate.edu
@@ -22,7 +22,10 @@ keypoints:
 plain_language_summary:
 bibliography_main: assets/bib/main.bib
 bibliography_tglobe: assets/bib/tglobe.bib
+csl: assets/bib/agu.csl
+nocite: '@*'
 link-citations: true
+link-bibliography: true
 header-includes:
 - \usepackage{pdflscape}
 - \newcommand{\blandscape}{\begin{landscape}}
@@ -44,6 +47,7 @@ header-includes:
 - \DeclareUnicodeCharacter{02DA}{$^\circ$}
 - \DeclareUnicodeCharacter{2265}{$\geq$}
 - \DeclareUnicodeCharacter{2264}{$\leq$}
+- \DeclareUnicodeCharacter{177}{$\pm$}
 - \usepackage{hyperref}
 - \def\tightlist{}
 output:
@@ -54,7 +58,7 @@ output:
     citation_package: default
     latex_engine: pdflatex
     template: assets/tex/template.tex
-    pandoc_args: [--csl=assets/bib/agu.csl, --lua-filter, assets/bib/multiple-bibliographies.lua]
+    pandoc_args: [--lua-filter, assets/bib/multiple-bibliographies.lua]
 ---
 
 ```{r echo=FALSE, message=FALSE}
@@ -344,7 +348,7 @@ Below are three examples of subduction zone segments that illustrate part of the
 
 #### Kyushu Ryukyu
 
-Kyushu Ryukyu characterizes a subduction zone segment with relatively consistent upper-plate surface heat flow for thousands of km along-strike. In this case, *consistent* refers to comparable Similarity and Kriging predictions *and* consistent surface heat flow distributions across sectors. That is, medians and IQRs of Similarity and Kriging predictions overlap relatively well across most sectors---differing by only `r sectors.summary$avg.med.dif[sectors.summary$segment == 'Kyushu Ryukyu']` $\pm$ `r 2*sectors.summary$sd.med.dif[sectors.summary$segment == 'Kyushu Ryukyu']` mW/m$^2$ for medians and `r sectors.summary$avg.iqr.dif[sectors.summary$segment == 'Kyushu Ryukyu']` $\pm$ `r 2*sectors.summary$sd.iqr.dif[sectors.summary$segment == 'Kyushu Ryukyu']` mW/m$^2$ for IQRs, on average (Table \@ref(tab:sectorSummaryTable) & Figure \@ref(fig:kyushuRyukyuUpper)). Upper-plate surface heat flow, as estimated by Kriging, appears to increase systematically from the NE to SW across sectors 8-6 before leveling out through sectors 5-1.
+Kyushu Ryukyu characterizes a subduction zone segment with relatively consistent upper-plate surface heat flow for thousands of km along-strike. In this case, *consistent* refers to comparable Similarity and Kriging predictions *and* consistent surface heat flow distributions across sectors. That is, medians and IQRs of Similarity and Kriging predictions overlap relatively well across most sectors---differing by only `r sectors.summary$avg.med.dif[sectors.summary$segment == 'Kyushu Ryukyu']` ± `r 2*sectors.summary$sd.med.dif[sectors.summary$segment == 'Kyushu Ryukyu']` mW/m$^2$ for medians and `r sectors.summary$avg.iqr.dif[sectors.summary$segment == 'Kyushu Ryukyu']` ± `r 2*sectors.summary$sd.iqr.dif[sectors.summary$segment == 'Kyushu Ryukyu']` mW/m$^2$ for IQRs, on average (Table \@ref(tab:sectorSummaryTable) & Figure \@ref(fig:kyushuRyukyuUpper)). Upper-plate surface heat flow, as estimated by Kriging, appears to increase systematically from the NE to SW across sectors 8-6 before leveling out through sectors 5-1.
 
 Meanwhile, ThermoGlobe data within Kyushu Ryukyu upper-plate sectors (n = `r sectors.summary$n.obs[sectors.summary$segment == 'Kyushu Ryukyu']`) vary considerably. Wide distributions of ThermoGlobe data appear near the trench and at approximately 200 km from the trench, coinciding with the young active rifting in the Okinawa trough (Figure \@ref(fig:kyushuRyukyuUpper)). Yet, smoothed trench-orthogonal Similarity and Kriging profiles gently arc through the approximate midrange of ThermoGlobe data. Profile shapes are consistent across sectors and show relatively little spread ($\leq$ 25 mW/m$^2$). All profiles gradually rise from approximately 50 mW/m$^2$ at the trench to maximums of approximately 75-100 mW/m$^2$ before gradually decreasing to approximately 75 mW/m$^2$ at 500 km into the upper-plate.
 
@@ -358,7 +362,7 @@ knitr::include_graphics('assets/figs/kyushuRyukyuUpperPlate.png')
 
 #### Sumatra Banda Sea
 
-Sumatra Banda Sea characterizes a subduction zone segment with moderately consistent upper-plate surface heat flow for thousands of km along-strike. In this case, *moderately consistent* refers to mostly comparable (overlapping) Similarity and Kriging predictions that distinctively fluctuate in a similar manner across sectors. That is, medians and IQRs of Similarity and Kriging predictions overlap well for some sectors, but not others (e.g. sectors 1, 10, & 11, Figure \@ref(fig:sumatraBandaSeaUpper)). Median Similarity and Kriging predictions differ by `r sectors.summary$avg.med.dif[sectors.summary$segment == 'Sumatra Banda Sea']` $\pm$ `r 2*sectors.summary$sd.med.dif[sectors.summary$segment == 'Sumatra Banda Sea']` mW/m$^2$ on average, and IQRs differ by `r sectors.summary$avg.iqr.dif[sectors.summary$segment == 'Sumatra Banda Sea']` $\pm$ `r 2*sectors.summary$sd.iqr.dif[sectors.summary$segment == 'Sumatra Banda Sea']` mW/m$^2$ on average across all sectors (Table \@ref(tab:sectorSummaryTable)). Similarity and Kriging predictions appear to broadly oscillate between higher and lower surface heat flow across adjacent sectors with a wavelength on the order of several sectors (10$^3$ km).
+Sumatra Banda Sea characterizes a subduction zone segment with moderately consistent upper-plate surface heat flow for thousands of km along-strike. In this case, *moderately consistent* refers to mostly comparable (overlapping) Similarity and Kriging predictions that distinctively fluctuate in a similar manner across sectors. That is, medians and IQRs of Similarity and Kriging predictions overlap well for some sectors, but not others (e.g. sectors 1, 10, & 11, Figure \@ref(fig:sumatraBandaSeaUpper)). Median Similarity and Kriging predictions differ by `r sectors.summary$avg.med.dif[sectors.summary$segment == 'Sumatra Banda Sea']` ± `r 2*sectors.summary$sd.med.dif[sectors.summary$segment == 'Sumatra Banda Sea']` mW/m$^2$ on average, and IQRs differ by `r sectors.summary$avg.iqr.dif[sectors.summary$segment == 'Sumatra Banda Sea']` ± `r 2*sectors.summary$sd.iqr.dif[sectors.summary$segment == 'Sumatra Banda Sea']` mW/m$^2$ on average across all sectors (Table \@ref(tab:sectorSummaryTable)). Similarity and Kriging predictions appear to broadly oscillate between higher and lower surface heat flow across adjacent sectors with a wavelength on the order of several sectors (10$^3$ km).
 
 Meanwhile, Similarity and Kriging profiles show obvious differences. For example, Similarity predictions are distributed narrowly and increase monotonically from the trench to 500 km into the upper-plate, whereas Kriging profiles generally ramp up more steeply and begin to disperse at approximately 200 km from the trench. Similarity profiles remain narrowly distributed through at least 300 km from the trench, whereas Kriging profiles show up to 25-30 mW/m$^2$ spread among sectors at 300-500 km from the trench.
 
@@ -372,7 +376,7 @@ knitr::include_graphics('assets/figs/SumatraBandaSeaUpperPlate.png')
 
 #### New Britain Solomon
 
-New Britain Solomon characterizes a subduction zone segment with inconsistent upper-plate surface heat flow and poor overlap between Similarity and Kriging predictions. Only one sector (sector 8) shows overlapping IQRs of Similarity and Kriging predictions, whereas all other sectors strongly diverge (Figure \@ref(fig:newBritainSolomonUpper)). For example, median Kriging predictions range by `r sectors.summary$range.med.krg[sectors.summary$segment == 'New Britain Solomon']` mW/m$^2$ across all sectors, whereas median Similarity predictions range by `r sectors.summary$range.med.sim[sectors.summary$segment == 'New Britain Solomon']` mW/m$^2$. Moreover, Similarity and Kriging medians across all sectors differ by `r sectors.summary$avg.med.dif[sectors.summary$segment == 'New Britain Solomon']` $\pm$ `r 2*sectors.summary$sd.med.dif[sectors.summary$segment == 'New Britain Solomon']` mW/m$^2$ on average. Notably, opposing wave-like oscillations between higher and lower surface heat flow across adjacent sectors are observed in Similarity and Kriging predictions.
+New Britain Solomon characterizes a subduction zone segment with inconsistent upper-plate surface heat flow and poor overlap between Similarity and Kriging predictions. Only one sector (sector 8) shows overlapping IQRs of Similarity and Kriging predictions, whereas all other sectors strongly diverge (Figure \@ref(fig:newBritainSolomonUpper)). For example, median Kriging predictions range by `r sectors.summary$range.med.krg[sectors.summary$segment == 'New Britain Solomon']` mW/m$^2$ across all sectors, whereas median Similarity predictions range by `r sectors.summary$range.med.sim[sectors.summary$segment == 'New Britain Solomon']` mW/m$^2$. Moreover, Similarity and Kriging medians across all sectors differ by `r sectors.summary$avg.med.dif[sectors.summary$segment == 'New Britain Solomon']` ± `r 2*sectors.summary$sd.med.dif[sectors.summary$segment == 'New Britain Solomon']` mW/m$^2$ on average. Notably, opposing wave-like oscillations between higher and lower surface heat flow across adjacent sectors are observed in Similarity and Kriging predictions.
 
 Meanwhile, Similarity and Kriging profiles are obviously distinguishable. For example, Kriging profiles are smooth and closely parallel ThermoGlobe data, whereas Similarity profiles show higher average surface heat flow (Figure \@ref(fig:newBritainSolomonUpper)). In contrast to flat Kriging profiles, high surface heat flow regions along Similarity profiles clearly show the influence of certain tectonic features (e.g. in sector 4, which intersects a volcanic center and ridge segment). Moreover, small confidence intervals around Kriging profiles suggest small uncertainties compared to Similarity. However, Kriging is determined to find the smallest variance solution by definition and can easily overfit the small number (n = `r sectors.summary$n.obs[sectors.summary$segment == 'New Britain Solomon']`) of ThermoGlobe data. Divergence between Similarity and Kriging predictions near New Britain Solomon thus appear to be driven by methodological differences and a tendency for Kriging to overfit small sample sets.
 
@@ -495,7 +499,7 @@ All data, code, and heat flow interpolations can be found at `https://doi.org/10
 
 # Acknowledgments {-}
 
-We gratefully acknowledge high-performance computing support of the Borah compute cluster (DOI: [10.18122/oit/3/boisestate](10.18122/oit/3/boisestate)) provided by Boise State University’s Research Computing Department. We thank D. Hasterok for providing the NGHF references and guidance on citing. This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
+We gratefully acknowledge high-performance computing support of the Borah compute cluster (DOI: [10.18122/oit/3/boisestate](10.18122/oit/3/boisestate)) provided by Boise State University’s Research Computing Department. We thank D. Hasterok for providing the NGHF references and guidance on citing. This work was supported by the National Science Foundation grant OISE 1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
 
 # References {-}
 

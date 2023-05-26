@@ -48,7 +48,8 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 4.34
+    height = 4.34,
+    dpi = 330
   )
 ))
 
@@ -116,12 +117,13 @@ walk(~{
     plot_layout(guides = 'collect') &
     theme(plot.margin = margin(1, 12, 1, 1), legend.position = 'top')
   ggsave(
-    paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms.png'),
+    file = paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms.png'),
     plot = pp,
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 5.2
+    height = 5.2,
+    dpi = 330
   )
 })
 
@@ -206,7 +208,8 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 4.34
+    height = 4.34,
+    dpi = 330
   )
 ))
 
@@ -254,7 +257,8 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 4.34
+    height = 4.34,
+    dpi = 330
   )
 ))
 
@@ -297,7 +301,8 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 4.34
+    height = 4.34,
+    dpi = 330
   )
 ))
 
@@ -334,7 +339,8 @@ ggsave(
   device = 'png',
   type = 'cairo',
   width = 6.5,
-  height = 4.34
+  height = 4.34,
+  dpi = 330
 )
 
 if(!file.exists('data/sectors.RData')){
@@ -410,7 +416,8 @@ walk2(1:13, borders, ~{
       device = 'png',
       type = 'cairo',
       width = 6.5,
-      height = 6.5
+      height = 6.5,
+      dpi = 330
     )
   })})
 })

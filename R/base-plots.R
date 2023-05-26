@@ -101,7 +101,8 @@ suppressWarnings(suppressMessages(
     device = 'png',
     type = 'cairo',
     width = 6.5,
-    height = 6.5
+    height = 6.5,
+    dpi = 330
   )
 ))
 
@@ -238,7 +239,7 @@ seg.names %>% walk(~{
         type = 'cairo',
         width = 6.5,
         height = 6.5,
-        units = 'in'
+        dpi = 330
       )
     ))
   } else {
@@ -274,7 +275,7 @@ seg.names %>% walk(~{
         type = 'cairo',
         width = 6.5,
         height = 6.5,
-        units = 'in'
+        dpi = 330
       )
     ))
   }

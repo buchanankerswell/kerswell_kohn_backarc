@@ -39,34 +39,34 @@ g.full <-
       )
   ) %>%
   rename(`age ocean` = `age ocean (999 on continents)`)
-g.collocated <- g.full %>% filter(!is.na(`observed heat flow`))
+g.colocated <- g.full %>% filter(!is.na(`observed heat flow`))
 
 # Make into sf object
 shp.g.full <-
   st_as_sf(g.full, coords = c(1,2), crs = proj4.wgs) %>%
   st_transform(proj4.rp)
-shp.g.collocated <-
-  st_as_sf(g.collocated, coords = c(1,2), crs = proj4.wgs) %>%
+shp.g.colocated <-
+  st_as_sf(g.colocated, coords = c(1,2), crs = proj4.wgs) %>%
   st_transform(proj4.rp)
 
 # Compute global point density
 dns <-
   MASS::kde2d(
-  map_dbl(shp.g.collocated$geometry, ~.x[1]),
-  map_dbl(shp.g.collocated$geometry, ~.x[2]),
+  map_dbl(shp.g.colocated$geometry, ~.x[1]),
+  map_dbl(shp.g.colocated$geometry, ~.x[2]),
     n = 100,
     lims = c(
       c(st_bbox(shp.world)$xmin, st_bbox(shp.world)$xmax),
       c(st_bbox(shp.world)$ymin, st_bbox(shp.world)$ymax)
     )
   )
-dns.collocated <-
+dns.colocated <-
   expand.grid(dns$x, dns$y) %>%
   as_tibble() %>%
   rename(x = Var1, y = Var2) %>%
   mutate(
     dens = as.vector(dns$z),
-    cnt = nrow(shp.g.collocated) / sum(dens) * dens
+    cnt = nrow(shp.g.colocated) / sum(dens) * dens
   )
 
 # Units for goutorbe2011 dataset
@@ -83,181 +83,146 @@ unts <- c(
 # Plot global density
 p1 <-
   ggplot() +
+  ggtitle('a) Sediment thickness') +
+  geom_sf(data = shp.relief.world, aes(color = elevation), shape = 15, size = 0.01) +
+  scale_color_etopo(guide = 'none') +
+  new_scale_color() +
+  geom_sf(data = st_union((bind_rows(shp.buffer))), linewidth = 0.3, fill = NA) +
+  geom_sf(data = shp.ridge, linewidth = 0.3) +
+  geom_sf(data = shp.trench, linewidth = 0.3) +
+  geom_sf(data = shp.transform, linewidth = 0.3) +
   geom_sf(
-    data = shp.world,
-    size = 0.3,
-    fill = 'grey70',
-    color = 'black'
-  ) +
-  geom_sf(
-    data = st_union((bind_rows(shp.buffer))),
-    size = 0.3, fill = NA, color = rgb(1, 1, 1, 0.5)
-  ) +
-  geom_sf(
-    data = shp.g.collocated,
+    data = shp.g.colocated,
+    aes(color = `sediment thickness`),
     shape = 15,
     size = 0.3
   ) +
-  geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
-  geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
-  geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
-  geom_sf(data = st_union(bind_rows(shp.segs)), size = 0.8, color = 'white') +
-  annotate(
-    'label',
-    label = 'a',
-    x = -Inf,
-    y = Inf,
-    size = 5,
-    hjust = 0,
-    vjust = 1,
-    fill = 'grey90',
-    label.padding = unit(0.02, 'in'),
-    label.r = unit(0, 'in')
+  geom_sf(data = st_union(bind_rows(shp.segs)), linewidth = 1, color = 'white') +
+  scale_color_viridis_c(
+    option = 'viridis',
+    name = 'km',
+    limits = c(
+      round(min(shp.g.colocated[['sediment thickness']])),
+      round(max(shp.g.colocated[['sediment thickness']]))
+    ),
+    breaks = c(
+      round(min(shp.g.colocated[['sediment thickness']])),
+      round(max(shp.g.colocated[['sediment thickness']]))
+    ),
+    na.value = 'transparent',
+    guide = guide_colorbar(title.vjust = 1, show.limits = T)
   ) +
-  coord_sf(expand = F) +
-  theme_map(font_size = 12) +
-  theme(
-    panel.grid = element_line(size = 0.1, color = 'white'),
-    panel.background = element_rect(fill = 'grey50', color = NA),
-    plot.margin = margin(1, 1, 1, 1),
-    legend.position = 'bottom',
-    legend.justification = 'left',
-    legend.spacing.x = unit(0, 'in'),
-    legend.box.margin = margin(),
-    legend.margin = margin()
-  )
+  coord_sf() +
+  theme_map(font_size = 14)
 p2 <-
   ggplot() +
-  geom_contour_fill(
-    data = dns.collocated,
-    aes(x, y, z = cnt)
+  ggtitle('b) Observational frequency') +
+  geom_sf(data = shp.relief.world, aes(color = elevation), shape = 15, size = 0.01) +
+  scale_color_etopo(guide = 'none') +
+  new_scale_color() +
+  geom_contour_fill(data = dns.colocated, aes(x, y, z = cnt), alpha = 0.6) +
+  geom_contour2(data = dns.colocated, aes(x, y, z = cnt), size = 0.3) +
+  scale_fill_viridis_c(
+    option = 'viridis',
+    name = 'frequency',
+    limits = c(min(dns.colocated$cnt), max(dns.colocated$cnt)),
+    breaks = c(min(dns.colocated$cnt), max(dns.colocated$cnt)),
+    labels = c('low', 'high'),
+    na.value = 'transparent',
+    guide = guide_colorbar(title.vjust = 1, show.limits = T)
   ) +
-  geom_contour2(
-    data = dns.collocated,
-    aes(x, y, z = cnt),
-    size = 0.3,
-    color = rgb(1, 1, 1, 0.1)
-  ) +
-  scale_fill_continuous_sequential(
-    'Turku',
-    breaks = MakeBreaks(bins = 7),
-    name = 'observation count density',
-    guide =
-      guide_colorstrip(
-        inside = T,
-        title.position = 'top',
-        title.vjust = 1,
-        barwidth = unit(2.5, 'in')
-      )
-  ) +
-  geom_sf(
-    data = shp.world,
-    size = 0.3,
-    fill = rgb(0, 0, 0, 0.3),
-    color = rgb(1, 1, 1, 0.1)
-  ) +
-  geom_sf(
-    data = shp.g.full,
-    shape = 15,
-    size = 0.3,
-    alpha = 0.1
-  ) +
-  geom_sf(
-    data = st_union((bind_rows(shp.buffer))),
-    size = 0.3, fill = NA, color = rgb(1, 1, 1, 0.5)
-  ) +
-  geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
-  geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
-  geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
-  geom_sf(data = st_union(bind_rows(shp.segs)), size = 0.8, color = 'white') +
-  annotate(
-    'label',
-    label = 'b',
-    x = -Inf,
-    y = Inf,
-    size = 5,
-    hjust = 0,
-    vjust = 1,
-    fill = 'grey90',
-    label.padding = unit(0.02, 'in'),
-    label.r = unit(0, 'in')
-  ) +
-  coord_sf(expand = F) +
-  theme_map(font_size = 12) +
+  geom_sf(data = st_union((bind_rows(shp.buffer))), linewidth = 0.3, fill = NA) +
+  geom_sf(data = shp.ridge, linewidth = 0.3) +
+  geom_sf(data = shp.trench, linewidth = 0.3) +
+  geom_sf(data = shp.transform, linewidth = 0.3) +
+  geom_sf(data = shp.g.colocated, shape = 15, size = 0.3) +
+  geom_sf(data = st_union(bind_rows(shp.segs)), linewidth = 1, color = 'white') +
+  coord_sf() +
+  theme_map(font_size = 14)
+p <-
+  (p1 + theme(axis.text = element_blank())) / p2 &
   theme(
-    panel.grid = element_line(size = 0.1, color = 'white'),
-    panel.background = element_rect(fill = 'grey50', color = NA),
     plot.margin = margin(1, 1, 1, 1),
-    legend.position = 'bottom',
-    legend.justification = 'left',
-    legend.spacing.x = unit(0, 'in'),
-    legend.box.margin = margin(),
-    legend.margin = margin()
+    legend.position = 'top',
+    legend.justification = 'right',
+    legend.direction = 'horizontal',
+    axis.text = element_text(hjust = 1),
+    legend.margin = margin(-4, 0, -12, 0),
+    legend.box.margin = margin(0, 10, 0, 0),
+    legend.key.height = unit(0.125, 'in'),
+    legend.key.width = unit(0.2, 'in'),
+    legend.title = element_text(vjust = 0, color = 'black', size = 14),
+    panel.grid = element_line(size = 0.01, color = 'grey60'),
+    plot.title = element_text(vjust = 0, margin = margin(0, 0, -10, 0))
   )
-p <- p1 / p2
+cat('\nSaving plot to: figs/goutorbe2011_global_density/global-dens.png')
 ggsave(
-  'figs/goutorbe2011_global_density/global_dens.png', plot = p, type = 'cairo',
-  width = 6, height = 9, dpi = 330
+  file = 'figs/goutorbe2011_global_density/global-dens.png',
+  plot = p,
+  device = 'png',
+  type = 'cairo',
+  width = 6.5,
+  height = 6.5,
+  dpi = 330
 )
 
-# Plot collocated maps
+# Plot colocated maps
 plts1 <-
   map2(names(shp.g.full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
-      cat('\nPlotting collocated grids for ', .x, sep = '')
-      shp.g.collocated <- shp.g.collocated[!is.na(shp.g.collocated[[.x]]),]
-      if(!is.numeric(shp.g.collocated[[.x]])) {
-        shp.g.collocated[[.x]] <- encode_ordinal(shp.g.collocated[[.x]])
+      cat('\nPlotting colocated grids for ', .x, sep = '')
+      shp.g.colocated <- shp.g.colocated[!is.na(shp.g.colocated[[.x]]),]
+      if(!is.numeric(shp.g.colocated[[.x]])) {
+        shp.g.colocated[[.x]] <- encode_ordinal(shp.g.colocated[[.x]])
       }
       p <-
         ggplot() +
-        geom_sf(data = shp.world, size = 0.3, fill = 'grey70', color = 'black') +
-        geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
-        geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
-        geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
+        ggtitle(paste0('a) ', .x)) +
+        geom_sf(data = shp.relief.world, aes(color = elevation), shape = 15, size = 0.01) +
+        scale_color_etopo(guide = 'none') +
+        new_scale_color() +
+        geom_sf(data = st_union((bind_rows(shp.buffer))), linewidth = 0.3, fill = NA) +
+        geom_sf(data = shp.ridge, linewidth = 0.3) +
+        geom_sf(data = shp.trench, linewidth = 0.3) +
+        geom_sf(data = shp.transform, linewidth = 0.3) +
         geom_sf(
-          data = shp.g.collocated[.x],
+          data = shp.g.colocated[.x],
           aes(color = get(.x)),
           shape = 15,
           size = 0.3,
           show.legend = F
         ) +
-        geom_sf(data = st_union(bind_rows(shp.segs)), size = 0.8, color = 'white') +
-        geom_sf(
-          data = st_union((bind_rows(shp.buffer))),
-          size = 0.3, fill = NA, color = rgb(1, 1, 1, 0.5)
-        ) +
-        scale_color_continuous_sequential(
-          'Turku',
-          breaks = MakeBreaks(bins = 7),
+        geom_sf(data = st_union(bind_rows(shp.segs)), linewidth = 1, color = 'white') +
+        scale_color_viridis_c(
+          option = 'viridis',
+          name = .y,
+          limits = c(
+            round(min(shp.g.colocated[[.x]])),
+            round(max(shp.g.colocated[[.x]]))
+          ),
+          breaks = c(
+            round(min(shp.g.colocated[[.x]])),
+            round(max(shp.g.colocated[[.x]]))
+          ),
           na.value = 'transparent',
-          guide =
-            guide_colorstrip(
-              inside = T,
-              title.position = 'top',
-              title.vjust = 1,
-              barwidth = unit(3, 'in')
-            )
+          guide = guide_colorbar(title.vjust = 1, show.limits = T)
         ) +
         labs(color = .y) +
-        annotate(
-          'label',
-          label = 'a',
-          x = -Inf,
-          y = Inf,
-          size = 5,
-          hjust = 0,
-          vjust = 1,
-          fill = 'grey90',
-          label.padding = unit(0.02, 'in'),
-          label.r = unit(0, 'in')
-        ) +
-        coord_sf(expand = F) +
-        theme_map(font_size = 12) +
+        coord_sf() +
+        theme_map(font_size = 14) +
         theme(
-          panel.grid = element_line(size = 0.1, color = 'white'),
-          panel.background = element_rect(fill = 'grey50', color = NA),
-          plot.margin = margin(1, 1, 1, 1)
+          plot.margin = margin(1, 1, 1, 1),
+          legend.position = 'top',
+          legend.justification = 'right',
+          legend.direction = 'horizontal',
+          axis.text = element_text(hjust = 1),
+          legend.margin = margin(-4, 0, -12, 0),
+          legend.box.margin = margin(0, 10, 0, 0),
+          legend.key.height = unit(0.125, 'in'),
+          legend.key.width = unit(0.2, 'in'),
+          legend.title = element_text(vjust = 0, color = 'black', size = 14),
+          panel.grid = element_line(size = 0.01, color = 'grey60'),
+          plot.title = element_text(vjust = 0, margin = margin(0, 0, -10, 0))
         )
     } else {
       p <- NULL
@@ -276,60 +241,51 @@ plts2 <-
       }
       p <-
         ggplot() +
+        ggtitle(paste0('b) ', .x)) +
         geom_sf(
           data = shp.g.full[.x],
           aes(color = get(.x)),
           shape = 15,
           size = 0.3
         ) +
-        geom_sf(
-          data = shp.world,
-          size = 0.3,
-          fill = NA,
-          color = 'black'
-        ) +
-        geom_sf(
-          data = st_union((bind_rows(shp.buffer))),
-          size = 0.3, fill = NA, color = rgb(1, 1, 1, 0.5)
-        ) +
-        geom_sf(data = shp.ridge, size = 0.4, color = 'black', alpha = 0.8) +
-        geom_sf(data = shp.trench, size = 0.4, color = 'black', alpha = 0.8) +
-        geom_sf(data = shp.transform, size = 0.4, color = 'black', alpha = 0.8) +
-        geom_sf(data = st_union(bind_rows(shp.segs)), size = 0.8, color = 'white') +
-        annotate(
-          'label',
-          label = 'b',
-          x = -Inf,
-          y = Inf,
-          size = 5,
-          hjust = 0,
-          vjust = 1,
-          fill = 'grey90',
-          label.padding = unit(0.02, 'in'),
-          label.r = unit(0, 'in')
-        ) +
-        scale_color_continuous_sequential(
-          'Turku',
-          breaks = MakeBreaks(bins = 7),
+        geom_sf(data = shp.relief.world, aes(color = elevation), shape = 15, size = 0.01) +
+        scale_color_etopo(guide = 'none') +
+        new_scale_color() +
+        geom_sf(data = st_union((bind_rows(shp.buffer))), linewidth = 0.3, fill = NA) +
+        geom_sf(data = shp.ridge, linewidth = 0.3) +
+        geom_sf(data = shp.trench, linewidth = 0.3) +
+        geom_sf(data = shp.transform, linewidth = 0.3) +
+        geom_sf(data = st_union(bind_rows(shp.segs)), linewidth = 1, color = 'white') +
+        scale_color_viridis_c(
+          option = 'viridis',
+          name = .y,
+          limits = c(
+            round(min(shp.g.colocated[[.x]])),
+            round(max(shp.g.colocated[[.x]]))
+          ),
+          breaks = c(
+            round(min(shp.g.colocated[[.x]])),
+            round(max(shp.g.colocated[[.x]]))
+          ),
           na.value = 'transparent',
-          guide =
-            guide_colorstrip(
-              inside = T,
-              title.position = 'top',
-              title.vjust = 1,
-              barwidth = unit(3, 'in')
-            )
+          guide = guide_colorbar(title.vjust = 1, show.limits = T)
         ) +
         labs(color = .y) +
-        coord_sf(expand = F) +
-        theme_map(font_size = 12) +
+        coord_sf() +
+        theme_map(font_size = 14) +
         theme(
-          panel.grid = element_line(size = 0.1, color = 'white'),
-          panel.background = element_rect(fill = 'grey50', color = NA),
           plot.margin = margin(1, 1, 1, 1),
-          legend.position = 'bottom',
-          legend.justification = 'left',
-          legend.box.margin = margin(t = -10)
+          legend.position = 'top',
+          legend.justification = 'right',
+          legend.direction = 'horizontal',
+          axis.text = element_text(hjust = 1),
+          legend.margin = margin(-4, 0, -12, 0),
+          legend.box.margin = margin(0, 10, 0, 0),
+          legend.key.height = unit(0.125, 'in'),
+          legend.key.width = unit(0.2, 'in'),
+          legend.title = element_text(vjust = 0, color = 'black', size = 14),
+          panel.grid = element_line(size = 0.01, color = 'grey60'),
+          plot.title = element_text(vjust = 0, margin = margin(0, 0, -10, 0))
         )
     } else {
       p <- NULL
@@ -344,23 +300,23 @@ plts3 <-
       cat('\nPlotting densities for ', .x, sep = '')
       if(!is.numeric(shp.g.full[[.x]]) | .x %in% c('Up mantle velocity structure (class)')) {
         X <- encode_ordinal(g.full[[.x]][!is.na(g.full[[.x]])])
-        Y <- encode_ordinal(g.collocated[[.x]][!is.na(g.collocated[[.x]])])
+        Y <- encode_ordinal(g.colocated[[.x]][!is.na(g.colocated[[.x]])])
         d <-
           as_tibble(table(X)) %>%
           rename(type = X, full.count = n) %>%
           mutate(
             type = as.integer(type),
             full.count = full.count/length(X),
-            collocated.count = as_tibble(table(Y))$n/length(X),
-            diff.count = full.count - collocated.count,
+            colocated.count = as_tibble(table(Y))$n/length(X),
+            diff.count = full.count - colocated.count,
             'undersampling' =
-              ifelse(diff.count > 0, full.count-collocated.count, NA),
+              ifelse(diff.count > 0, full.count-colocated.count, NA),
             'oversampling' =
-              ifelse(diff.count < 0, full.count-collocated.count, NA)
+              ifelse(diff.count < 0, full.count-colocated.count, NA)
           ) %>%
           rename(
             'global' = full.count,
-            'hf obs' = collocated.count
+            'hf obs' = colocated.count
           ) %>%
           select(-diff.count)
         p <-
@@ -412,7 +368,7 @@ plts3 <-
           )
       } else {
         X <- g.full[[.x]][!is.na(g.full[[.x]])]
-        Y <- g.collocated[[.x]][!is.na(g.collocated[[.x]])]
+        Y <- g.colocated[[.x]][!is.na(g.colocated[[.x]])]
         dns.full <-
           tibble(
             x =
@@ -432,7 +388,7 @@ plts3 <-
                 n = 1000
               )$y / length(X)
           )
-        dns.collocated <-
+        dns.colocated <-
           tibble(
             x =
               density(
@@ -495,7 +451,7 @@ plts3 <-
             size = 1
           ) +
           geom_path(
-            data = dns.collocated,
+            data = dns.colocated,
             aes(x, dns, color = 'hf obs'),
             size = 1
           ) +
