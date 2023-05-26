@@ -29,13 +29,7 @@ This study is written in R. Follow the instructions at [R's homepage](https://ww
 
 ### GDAL, GEOS, and PROJ
 
-Geographic operations require the geographic libraries [gdal](https://gdal.org), [geos](https://trac.osgeo.org/geos), and [proj](https://proj.org). On Mac, the easiest way to get gdal, geos, and proj is to use Homebrew. If your machine does not have Homebrew, you can install it by running
-
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-Or follow instructions from [Hombrew's webpage](https://brew.sh).
+Geographic operations require the geographic libraries [gdal](https://gdal.org), [geos](https://trac.osgeo.org/geos), and [proj](https://proj.org). On a Mac, the easiest way to get gdal, geos, and proj is to use Homebrew. Follow the instructions at [Hombrew's homepage](https://brew.sh) to download and install Homebrew on your machine.
 
 Once Homebrew is installed, the following will install the latest gdal, geos, and proj libraries together:
 
@@ -63,7 +57,7 @@ make
 
 This will check for required R packages and try to install missing packages automatically.
 
-If all packages are found and available it will proceed to run the study with some initial prompts from the user. The study takes about ??? to run on my MacBook Air (M1 8GB, 2020) setting a maximum of 30 optimization iterations that use the [NLOPT_LN_SBPLX](https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/)  leave-one-out cross validation for computing the cost function (as apposed to k=folds \[;where k = proportion of n\]), and 8 cores computing in parallel. The study takes about ??? minutes to with 1 optimization step (initial guess).
+If all packages are found and available it will proceed to run the study with some initial prompts from the user. The study takes about ??? to run on my MacBook Air (M1 8GB, 2020) setting a maximum of 30 optimization iterations that use the [NLOPT_LN_SBPLX](https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/)  leave-one-out cross validation for computing the cost function and 8 cores computing in parallel. The study takes about ??? minutes to with 1 optimization step (i.e. Kriging with an initial guess without optimization).
 
 ## Coauthors
 
