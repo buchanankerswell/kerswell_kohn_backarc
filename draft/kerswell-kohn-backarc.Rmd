@@ -14,7 +14,7 @@ affiliations:
   name: Géosciences Montpellier, Université de Montpellier, 37040 Montpellier, France
 corresponding_author:
 - name: Buchanan C. Kerswell
-  email: buchanankerswell@u.boisestate.edu
+  email: buchanan.kerswell@umontpellier.fr
 keypoints:
   - Inconsistent spatial patterns and variance characterize heat flow near subduction zones
   - Sampling interpolations is favoured over single transects for hypothesis testing

@@ -57,7 +57,6 @@ package.list <- c(
   'colorspace',
   'ggrepel',
   'ggridges',
-  'ggsflabel',
   'ggnewscale',
   'patchwork',
   'cowplot',

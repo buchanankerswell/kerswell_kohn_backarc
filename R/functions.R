@@ -24,7 +24,6 @@ package.list <- c(
   'metR',
   'ggrepel',
   'ggridges',
-  'ggsflabel',
   'ggnewscale',
   'patchwork',
   'cowplot',
