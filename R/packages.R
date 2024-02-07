@@ -60,6 +60,7 @@ package.list <- c(
   'ggnewscale',
   'patchwork',
   'cowplot',
+  'ggsflabel',
   'marmap',
   'mapproj',
   'gstat',

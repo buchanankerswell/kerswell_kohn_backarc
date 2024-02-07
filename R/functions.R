@@ -27,6 +27,7 @@ package.list <- c(
   'ggnewscale',
   'patchwork',
   'cowplot',
+  'ggsflabel',
   'marmap',
   'gstat',
   'rgeos',
