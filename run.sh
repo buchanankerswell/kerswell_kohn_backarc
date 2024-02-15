@@ -5,21 +5,7 @@ SECONDS=0
 
 # Exit if any command fails
 set -e
-# Check for R dependencies
-R/packages.R
-# Check for files in data directory
-fnum=$(find data -name '*' -print | wc -l)
-if [[ $fnum -lt 33 ]]; then
-  # Download data from osf
-  R/download-data.R
-fi
-# Get opt files from data/opt*.RData
-fnum=$(find data -name 'hf.RData' -print | wc -l)
-if [[ ! $fnum -gt 0 ]]; then
-  # Preprocess data
-  R/preprocess.R
-  cp data/hf.RData draft/assets/r/
-fi
+
 # Get opt files from data/opt*.RData
 fnum=$(find data -name 'opt*' -print | wc -l)
 if [[ ! $fnum -gt 0 ]]; then

@@ -1,114 +1,16 @@
 #!/usr/bin/env Rscript
 
 # Capture output
-sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
-
-# Testing arguments
-args <- commandArgs(trailingOnly = TRUE)
-cat('\n', rep('~', 80), sep = '')
-if(length(args) == 0) {
-  cat('\nNo arguments passed to krige.R')
-  max.eval <- 50
-  alg <- 'NLOPT_LN_SBPLX'
-  iwt <- 0.5
-  vwt <- 0.5
-  n.fold <- NULL
-  n.cores <- future::availableCores() - 2
-  cat('\nUsing defaults')
-  cat('\nMax iterations           :', max.eval)
-  cat('\nAlgorithm                :', alg)
-  cat('\nInterpolation cost weight:', iwt)
-  cat('\nVariogram cost weight    :', vwt)
-  cat('\nk-folds for CV           :', vwt)
-  cat('\nVariogram cost weight    :', vwt)
-} else if(length(args) != 0) {
-  max.eval <- suppressWarnings(as.numeric(args[1]))
-  if(is.na(max.eval)) {
-    max.eval <- 50
-    cat('\nPassed non-numeric argument for max iterations!')
-    cat('\nDefaulting to', max.eval)
-  } else if(max.eval <= 0) {
-    max.eval <- 50
-    cat('\nMax iterations cannot be negative or zero!')
-    cat('\nDefaulting to', max.eval)
-  }
-  alg <- suppressWarnings(as.numeric(args[2]))
-  if(is.na(alg)) {
-    cat('\nAlgorithm passed is not recognized!')
-    cat('\nDefaulting to NLOPT_LN_SBPLX')
-    alg <- 'NLOPT_LN_SBPLX'
-  } else {
-    if(args[2] == 1) {
-      alg <- 'NLOPT_GN_DIRECT_L'   # Global search
-    } else if(args[2] == 2) {
-      alg <- 'NLOPT_LN_SBPLX'      # Local without gradients
-    } else if(args[2] == 3) {
-      alg <- 'NLOPT_LN_NELDERMEAD' # Local without gradients
-    } else if(args[2] == 4) {
-      alg <- 'NLOPT_LN_BOBYQA'     # Local without gradients
-    } else if(args[2] == 5) {
-      alg <- 'NLOPT_LN_COBYLA'     # Local without gradients
-    } else {
-      cat('\nAlgorithm passed is not recognized!')
-      cat('\nDefaulting to NLOPT_LN_SBPLX')
-      alg <- 'NLOPT_LN_SBPLX'
-    }
-  }
-  iwt <- suppressWarnings(as.numeric(args[3]))
-  if(is.na(iwt)) {
-    iwt <- 0.5
-    cat('\nPassed non-numeric argument for interpolation weight!')
-    cat('\nDefaulting to', iwt)
-  }
-  vwt <- suppressWarnings(as.numeric(args[4]))
-  if(is.na(vwt)) {
-    vwt <- 0.5
-    cat('\nPassed non-numeric argument for variogram weight!')
-    cat('\nDefaulting to', vwt)
-  }
-  if((iwt+vwt) != 1) {
-    iwt <- 0.5
-    vwt <- 0.5
-    cat('\nInterpolation and variogram weights must add to one!')
-    cat('\nDefaulting to', iwt, 'and', vwt)
-  }
-  n.fold <- suppressWarnings(as.numeric(args[5]))
-  if(is.na(n.fold)) {
-    n.fold <- NULL
-    cat('\nPassed non-numeric argument for k-fold!')
-    cat('\nDefaulting to leave-one-out cross-validation')
-  } else {
-    if(n.fold < 0) {
-      n.fold <- NULL
-      cat('\nk-fold cannot be negative or zero!')
-      cat('\nDefaulting to leave-one-out cross-validation')
-    } else if(n.fold == 0) {
-      n.fold <- NULL
-      cat('\nDefaulting to leave-one-out cross-validation')
-    }
-  }
-  n.cores <- suppressWarnings(as.numeric(args[6]))
-  if(is.na(n.cores)) {
-    n.cores <- future::availableCores() - 2
-    cat('\nPassed non-numeric argument for number of cores!')
-    cat('\nDefaulting to', n.cores)
-  } else if(n.cores > future::availableCores()) {
-    n.cores <- future::availableCores() - 2
-    cat('\nToo many cores!')
-    cat('\nDefaulting to', n.cores)
-  } else if(n.cores < 0) {
-    n.cores <- future::availableCores() - 2
-    cat('\nCannot run negative cores!')
-    cat('\nDefaulting to', n.cores)
-  }
-}
-
-cat('\nSaving results to: data/opt.RData', sep = '')
+sink(file = paste0('log-', Sys.Date()), append = T, type = 'output', split = T)
 
 # Load functions and libraries
 cat('\nLoading packages and functions ...')
 source('R/functions.R')
-load('data/hf.RData')
+load('assets/hf_data/preprocessed-hf-data.RData')
+
+# Testing arguments
+args <- commandArgs(trailingOnly = TRUE)
+parse_krige_args(args)
 
 # Set parallel computing plan
 plan(multicore, workers = n.cores)
@@ -123,37 +25,20 @@ cat('\nSee https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/')
 cat('\nfor information on nloptr and possible algorithms')
 
 # Upper and lower bounds for constrained search
-bounds <-
-  tibble(
-    cutoff.prop = c(1, 10),
-    n.lags = c(15, 50),
-    lag.start = c(1, 10),
-    n.max = c(5, 50)
-  )
-init.vals <-
-  tibble(
-    cutoff.prop = 3,
-    n.lags = 20,
-    lag.start = 1,
-    n.max = 8,
-    algorithm = alg,
-    maxeval = max.eval
-  )
+bounds <- tibble(cutoff.prop = c(1, 10), n.lags = c(15, 50), lag.start = c(1, 10),
+                 n.max = c(5, 50))
+init.vals <- tibble(cutoff.prop = 3, n.lags = 20, lag.start = 1, n.max = 8, algorithm = alg,
+                    maxeval = max.eval)
+
 # Check init values are within bounds
 pwalk(init.vals, ~{
-  if(
-    ..1 < bounds[1,1] |
-    ..1 > bounds[2,1] |
-    ..2 < bounds[1,2] |
-    ..2 > bounds[2,2] |
-    ..3 < bounds[1,3] |
-    ..3 > bounds[2,3] |
-    ..4 < bounds[1,4] |
-    ..4 > bounds[2,4]
+  if(..1 < bounds[1,1] | ..1 > bounds[2,1] | ..2 < bounds[1,2] | ..2 > bounds[2,2] |
+     ..3 < bounds[1,3] | ..3 > bounds[2,3] | ..4 < bounds[1,4] | ..4 > bounds[2,4]
   ) {
     stop('One or more initial values out of bounds')
   }
 })
+
 # Print settings
 cat(
   '\n',
@@ -190,8 +75,7 @@ cat(
 
 # Setup cost function and nloptr
 f <- function(segment, v.mod) {
-  # Define cost function to minimize with
-  # input parameters (x)
+  # Define cost function to minimize with input parameters (x)
   opt.fun <- function(x) {
     cost_function(
       shp.hf = shp.hf.crop[[segment]],
@@ -208,11 +92,7 @@ f <- function(segment, v.mod) {
     )
   }
   # Using nloptr optimization algorithms to minimize cost function
-  # by tuning parameters (x) within box constrains
-  # (up = upper bound, lb = lower bound)
-  # with starting values x0
   # see https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/
-  # for information on nloptr and possible algorithms
   nloptr(
     x0 = c(
       init.vals$cutoff.prop,
@@ -241,8 +121,7 @@ f <- function(segment, v.mod) {
   )
 }
 
-# Create array of variogram models to optimize
-# for each segment in parallel
+# Create array of variogram models to optimize for each segment in parallel
 optimized.interpolations <-
   tibble(expand.grid(
     segment = seg.names,
@@ -265,7 +144,7 @@ optimized.interpolations <-
 sink()
 
 # Capture output
-sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
+sink(file = paste0('log-', Sys.Date()), append = T, type = 'output', split = T)
 
 # Check for NULL results from errors
 if(any(map_lgl(optimized.interpolations$opt, is.null))) {
@@ -289,7 +168,7 @@ read_file <- function(fpath, ...) {
   on.exit(close(con))
   readLines(con, ...)
 }
-raw.trace <- read_file(paste0('data/log-', Sys.Date()))
+raw.trace <- read_file(paste0('log-', Sys.Date()))
 segs.trace <-
   raw.trace[grepl('^Segment: ', raw.trace)] %>%
   map_chr(~gsub('Segment: ', '', .x))

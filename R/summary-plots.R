@@ -1,8 +1,5 @@
 #!/usr/bin/env Rscript
 
-# Capture output
-sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
-
 # Load functions and libraries
 cat(rep('~', 60), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
@@ -10,8 +7,11 @@ cat('Loading packages and functions ...\n\n')
 source('R/functions.R')
 load('data/hf.Rdata')
 load('data/opt.RData')
-cat('\nSaving plots to: figs/summary/')
-cat('\nSaving plots to: figs/vgrms/\n')
+
+# Create directory
+dir.create('figs/summary', recursive = T, showWarnings = F)
+dir.create('figs/variograms', recursive = T, showWarnings = F)
+dir.create('figs/upper_plate', recursive = T, showWarnings = F)
 
 # Visualize
 cat('\n', rep('~', 60), sep='')
@@ -54,7 +54,7 @@ suppressWarnings(suppressMessages(
 ))
 
 # Plot all variogram models
-cat('\nSaving plots to: figs/vgrms/')
+cat('\nSaving plots to: figs/variograms/')
 
 # Draw composite plots
 unique(solns$segment) %>%
@@ -117,7 +117,7 @@ walk(~{
     plot_layout(guides = 'collect') &
     theme(plot.margin = margin(1, 12, 1, 1), legend.position = 'top')
   ggsave(
-    file = paste0('figs/vgrms/', str_replace_all(.x, ' ', ''), 'Vgrms.png'),
+    file = paste0('figs/variograms/', str_replace_all(.x, ' ', ''), '-variograms.png'),
     plot = pp,
     device = 'png',
     type = 'cairo',
@@ -200,10 +200,10 @@ p2 <-
     plot.margin = margin(1, 1, 1, 1)
   )
 # Save
-cat('\nSaving plot to: figs/summary/vgrmSummary.png', sep = '')
+cat('\nSaving plot to: figs/summary/variogram-summary.png', sep = '')
 suppressWarnings(suppressMessages(
   ggsave(
-    file = paste0('figs/summary/vgrmSummary.png'),
+    file = paste0('figs/summary/variogram-summary.png'),
     plot = p2,
     device = 'png',
     type = 'cairo',
@@ -394,7 +394,7 @@ borders <-
 
 walk2(1:13, borders, ~{
   cat(
-    '\nSaving plot to: figs/upper-plate/',
+    '\nSaving plot to: figs/upper_plate/',
     str_replace_all(names(shp.sectors)[.x], ' ', ''),
     'UpperPlate.png',
     sep = ''
@@ -408,7 +408,7 @@ walk2(1:13, borders, ~{
     ggsave(
       file =
         paste0(
-          'figs/upper-plate/',
+          'figs/upper_plate/',
           str_replace_all(names(shp.sectors)[.x], ' ', ''),
           'UpperPlate.png'
         ),
@@ -423,4 +423,3 @@ walk2(1:13, borders, ~{
 })
 
 cat('\nsummary-plots.R complete!\n\n')
-sink()

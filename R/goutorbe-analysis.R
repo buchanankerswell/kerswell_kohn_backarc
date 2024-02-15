@@ -1,25 +1,23 @@
 #!/usr/bin/env Rscript
 
-# Capture output
-sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
-
 # Load packages and functions
 source('R/functions.R')
+
+# Define map projections
+proj4.wgs <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+proj4.rp <- paste0('+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 ',
+                   '+datum=WGS84 +units=m +no_defs')
+
 load('data/hf.RData')
+
+# Create directory
+dir.create('figs/global_density', recursive = T, showWarnings = F)
 
 # Encoding function for categorical variables
 encode_ordinal <- function(x, order = unique(x)) {
   x <- as.numeric(factor(x, levels = order, exclude = NULL))
   x
 }
-
-# Map projections
-# WGS84
-proj4.wgs <-
-  '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs'
-# Robinson Pacific centered
-proj4.rp <-
-  '+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
 
 # Read goutorbe2011 data
 g <- read_csv('data/goutorbe-2011-similarity-interpolation.csv', show_col_types = F)
@@ -155,9 +153,9 @@ p <-
     panel.grid = element_line(size = 0.01, color = 'grey60'),
     plot.title = element_text(vjust = 0, margin = margin(0, 0, -10, 0))
   )
-cat('\nSaving plot to: figs/goutorbe2011_global_density/global-dens.png')
+cat('\nSaving plot to: figs/global_density/global-dens.png')
 ggsave(
-  file = 'figs/goutorbe2011_global_density/global-dens.png',
+  file = 'figs/global_density/global-dens.png',
   plot = p,
   device = 'png',
   type = 'cairo',
@@ -522,7 +520,7 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
       )
       suppressWarnings(
         ggsave(
-        paste0('figs/goutorbe2011_global_density/', str_replace_all(..4, ' ', '-'), '.png'),
+        paste0('figs/global_density/', str_replace_all(..4, ' ', '-'), '.png'),
         plot = p, type = 'cairo', width = 8, height = 4.9
       )
     )
@@ -530,4 +528,3 @@ pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
 })
 
 cat('\ngoutorbe-analysis.R complete!\n\n')
-sink()

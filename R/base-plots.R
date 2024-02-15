@@ -1,16 +1,16 @@
 #!/usr/bin/env Rscript
 
-# Capture output
-sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
-
-cat(rep('~', 60), '\n', sep='')
+# Load packages and functions
+cat(rep('~', 45), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
-
 source('R/functions.R')
 load('data/hf.RData')
 
+# Create directory
+dir.create('figs/base', recursive = T, showWarnings = F)
+
 # Visualize
-cat('\n', rep('~', 60), sep='')
+cat('\n', rep('~', 45), sep='')
 cat('\nVisualizing ...')
 
 # Global ThermoGlobe buffer
@@ -282,4 +282,3 @@ seg.names %>% walk(~{
 })
 
 cat('\nbase-plots.R complete!\n\n')
-sink()

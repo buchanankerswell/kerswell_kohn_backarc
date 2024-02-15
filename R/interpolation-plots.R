@@ -1,19 +1,17 @@
 #!/usr/bin/env Rscript
 
-# Capture output
-sink(file = paste0('data/log-', Sys.Date()), append = T, type = 'output', split = T)
-
 # Load functions and libraries
-cat(rep('~', 60), '\n', sep='')
+cat(rep('~', 45), '\n', sep='')
 cat('Loading packages and functions ...\n\n')
-
 source('R/functions.R')
 load('data/hf.Rdata')
 load('data/opt.RData')
-cat('\nSaving plots to: figs/diff/')
+
+# Create directory
+dir.create('figs/diff', recursive = T, showWarnings = F)
 
 # Visualize
-cat('\n', rep('~', 60), sep='')
+cat('\n', rep('~', 45), sep='')
 cat('\nVisualizing ...')
 
 # Individual Segments
@@ -332,4 +330,3 @@ walk(unique(solns$segment), ~{
 })
 
 cat('\ninterpolation-plots.R complete!\n\n')
-sink()
