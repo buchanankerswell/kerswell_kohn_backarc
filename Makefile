@@ -7,41 +7,52 @@ R = \
 		R/check-packages.R \
 		R/preprocess-map-data.R \
 		R/preprocess-hf-data.R \
-		R/optimize-krige.R \
+		R/nloptr.R \
+		R/krige.R \
 		R/base-plots.R \
 		R/interpolation-plots.R \
 		R/summary-plots.R \
 		R/goutorbe-analysis.R \
 		R/download-assets.R
 # Kriging parameters
-MAXITR = 6
+MAXITR = 30
 OPTALG = 2 # 1:Direct 2:SBPLX 3:NELDERMEAD 4:BOBYQA 5:COBYLA
 IWT = 0.5
 VWT = 0.5
-NFOLD = 6 # 0:Leave-one-out 0<n<1: proportion of datapoints
+NFOLD = 10
 NCORES = 6
 # Directories with data and scripts
 DATADIR = assets
 # Cleanup directories
-DATAPURGE = log assets.zip $(DATADIR)/hf.RData $(DATADIR)/sectors.RData
+DATAPURGE = \
+						log \
+						assets.zip \
+						$(DATADIR)/hf_data/preprocessed-hf-data.RData \
+						$(DATADIR)/hf_data/global-similarity-interp.csv \
+						$(DATADIR)/opt_data/optimize-krige.RData \
+						$(DATADIR)/sectors.RData
 DATACLEAN = assets draft/assets/r/*.RData
 FIGSPURGE = figs draft/assets/figs
 
-all: preprocess
-	@echo "=============================================" $(LOG)
-	@./run.sh $(LOG)
-	@echo "=============================================" $(LOG)
+all: krige
 
 krige: preprocess
-	@if [ ! -e "$(DATADIR)/hf_data/optimize-krige.RData" ]; then \
-		R/optimize-krige.R $(MAXITR) $(OPTALG) $(IWT) $(VWT) $(NFOLD) $(NCORES) $(LOG); \
+	@if [ ! -e "$(DATADIR)/opt_data/opt.RData" ]; then \
+		R/nloptr.R $(MAXITR) $(OPTALG) $(IWT) $(VWT) $(NFOLD) $(NCORES) $(LOG); \
+		echo "=============================================" $(LOG); \
+	else \
+		echo "Nlopt results found!" $(LOG); \
+		echo "=============================================" $(LOG); \
+	fi
+	@if [ ! -e "$(DATADIR)/opt_data/krige.RData" ]; then \
+		R/krige.R $(LOG); \
 		echo "=============================================" $(LOG); \
 	else \
 		echo "Kriging interpolations found!" $(LOG); \
 		echo "=============================================" $(LOG); \
 	fi
 
-preprocess: $(LOGFILE) $(R) check_packages $(DATADIR)
+preprocess: $(DATADIR)
 	@if [ ! -e "$(DATADIR)/map_data/preprocessed-map-data.RData" ]; then \
 		R/preprocess-map-data.R $(LOG); \
 		echo "=============================================" $(LOG); \
@@ -57,7 +68,7 @@ preprocess: $(LOGFILE) $(R) check_packages $(DATADIR)
 		echo "=============================================" $(LOG); \
 	fi
 
-$(DATADIR): $(LOGFILE) $(R)
+$(DATADIR): check_packages
 	@if [ ! -d "$(DATADIR)" ]; then \
 		R/download-assets.R $(LOG); \
 		echo "=============================================" $(LOG); \

@@ -4,9 +4,6 @@
 cat(rep('~', 45), '\n', sep = '')
 source('R/functions.R')
 
-# Set seed
-set.seed(42)
-
 # Define map projections
 proj4_wgs <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
 proj4_rp <- paste0('+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 ',
@@ -65,7 +62,7 @@ hf_crop <- shp_hf_crop %>% map_df(~st_set_geometry(.x, NULL), .id = 'segment')
 # Read Lucazeau (2019) interpolation
 similarity_interpolation <- read_delim('assets/hf_data/HFgrid14.csv', delim = ';',
                                        col_types = c('ddddd'))
-shp_similarity_interpolation <-
+shp_interp_sim <-
   similarity_interpolation %>%
   rename(lon = longitude, lat = latitude, est_sim = HF_pred, sigma_sim = sHF_pred,
          obs_sim = Hf_obs) %>%
@@ -74,23 +71,16 @@ shp_similarity_interpolation <-
   st_transform(proj4_rp)
 
 # Extract interpolation grid
-shp_grid <- st_geometry(shp_similarity_interpolation)
+shp_grid <- st_geometry(shp_interp_sim)
 
 # Crop interpolation grid
 shp_grid_crop <- shp_buffer %>% map(~shp_grid %>% st_intersection(.x))
 
 # Calculate regional Similarity RMSE
 rmse <-
-  seg_names %>% map_dbl(~interpolation_rmse(.x, shp_similarity_interpolation, shp_buffer,
-                                            shp_grid_crop, shp_hf_crop, 'sim'))
+  seg_names %>% map_dbl(~interpolation_rmse(.x, shp_interp_sim, shp_buffer, shp_grid_crop,
+                                            shp_hf_crop, 'sim'))
 rmse_similarity_interpolation <- tibble(segment = seg_names, rmse = rmse)
-
-# Write global similarity interpolation to csv
-path <- 'assets/hf_data/global-similarity-interp.csv'
-st_transform(shp_similarity_interpolation, proj4_wgs) %>%
-  st_write(path, layer_options = "GEOMETRY=AS_XY", quiet = T)
-read_csv(path, show_col_types = F) %>% mutate(X = round(X, 3), Y = round(Y, 3)) %>%
-  rename(lon = X, lat = Y) %>% write_csv(path)
 
 # Clean up environment
 rm(list = lsf.str())
