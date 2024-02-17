@@ -15,8 +15,8 @@ R = \
 		R/goutorbe-analysis.R \
 		R/download-assets.R
 # Kriging parameters
-MAXITR = 30
-OPTALG = 2 # 1:Direct 2:SBPLX 3:NELDERMEAD 4:BOBYQA 5:COBYLA
+MAXITR = 100
+OPTALG = 6
 IWT = 0.5
 VWT = 0.5
 NFOLD = 10
@@ -27,9 +27,8 @@ DATADIR = assets
 DATAPURGE = \
 						log \
 						assets.zip \
-						$(DATADIR)/hf_data/preprocessed-hf-data.RData \
-						$(DATADIR)/hf_data/global-similarity-interp.csv \
-						$(DATADIR)/opt_data/optimize-krige.RData \
+						$(DATADIR)/opt_data/nloptr.RData \
+						$(DATADIR)/opt_data/krige.RData \
 						$(DATADIR)/sectors.RData
 DATACLEAN = assets draft/assets/r/*.RData
 FIGSPURGE = figs draft/assets/figs

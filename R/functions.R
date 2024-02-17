@@ -12,7 +12,7 @@ sshhh <- function(package_list) {
 package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
                   'magrittr', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
                   'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'gstat',
-                  'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr')
+                  'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr', 'zoo')
 
 # Load packages quietly
 sapply(package_list, sshhh)
@@ -142,7 +142,7 @@ split_lines <- function(input_lines, max_length, id=NULL) {
 # split segment !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 split_segment <- function(seg_name, shp_hf_crop, shp_segs, shp_volc, buf_dir='l', seg_num=6,
-                          buf_len=5e5, sector_exclude=NULL) {
+                          sector_exclude=NULL, buf_len=5e5) {
   pnts <- shp_hf_crop[[seg_name]]
   seg <- shp_segs[[seg_name]]
   buf <- st_buffer(seg, dist=buf_len, endCapStyle='ROUND')
@@ -163,7 +163,7 @@ split_segment <- function(seg_name, shp_hf_crop, shp_segs, shp_volc, buf_dir='l'
       st_intersection(volc, split_buf[[.x]]) %>%
       mutate(distance_from_seg=as.vector(st_distance(split_seg[.x,]$geometry, geometry)),
              .before=geometry))
-  best_mod <- solns %>% filter(segment == seg_name) %>% slice_min(cost)
+  best_mod <- opt_solutions %>% filter(segment == seg_name) %>% slice_min(cost)
   interp <- best_mod[['shp_interp_diff']][[1]]
   interp_buf <-
     map(1:seg_num, ~
@@ -207,17 +207,19 @@ parse_krige_args <- function(args) {
       alg <- 'NLOPT_LN_SBPLX'
     } else {
       if (args[2] == 1) {
-        alg <- 'NLOPT_GN_DIRECT_L'   # Global search
+        alg <- 'NLOPT_GN_DIRECT'
       } else if (args[2] == 2) {
-        alg <- 'NLOPT_LN_SBPLX'      # Local without gradients
+        alg <- 'NLOPT_GN_DIRECT_L'
       } else if (args[2] == 3) {
-        alg <- 'NLOPT_LN_NELDERMEAD' # Local without gradients
-      } else if (args[2] == 4) {
-        alg <- 'NLOPT_LN_BOBYQA'     # Local without gradients
-      } else if (args[2] == 5) {
-        alg <- 'NLOPT_LN_COBYLA'     # Local without gradients
-      } else {
         alg <- 'NLOPT_LN_SBPLX'
+      } else if (args[2] == 4) {
+        alg <- 'NLOPT_LN_NELDERMEAD'
+      } else if (args[2] == 5) {
+        alg <- 'NLOPT_LN_BOBYQA'
+      } else if (args[2] == 6) {
+        alg <- 'NLOPT_LN_COBYLA'
+      } else {
+        alg <- 'NLOPT_LN_COBYLA'
       }
     }
     iwt <- suppressWarnings(as.numeric(args[3]))
@@ -283,7 +285,9 @@ cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, mod
   if (is.null(shp_hf)) {stop('\nMissing heat flow data model!')}
   if (is.null(n_fold)) {n_fold <- nrow(shp_hf)}
   if (n_fold > 0 & n_fold <= 1) {n_fold <- nrow(shp_hf) * n_fold}
-  experimental_vgrm <- try(experimental_vgrm(shp_hf, cutoff, n_lags, lag_start))
+  suppressWarnings({
+    experimental_vgrm <- try(experimental_vgrm(shp_hf, cutoff, n_lags, lag_start))
+  })
   if (nrow(experimental_vgrm) < 2) {
     if (verbose) {
       cat('\nExperimental variogram has less than two lags!')
@@ -312,7 +316,9 @@ cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, mod
     cat('\n', rep('+', 30), sep='')
     cat('\nComputing cross-validation')
   }
-  k_cv <- try(krige.cv(hf~1, shp_hf, model=fitted_vgrm, nmax=n_max, nfold=n_fold))
+  suppressWarnings({
+    k_cv <- try(krige.cv(hf~1, shp_hf, model=fitted_vgrm, nmax=n_max, nfold=n_fold))
+  })
   if (any(class(k_cv) == 'try-error')) {
     if (verbose) {
       cat('\nCross-validation error!')
@@ -361,7 +367,8 @@ cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, mod
     cat('\nVariogram model:', model_vgrm)
     cat('\n')
     print(fitted_vgrm)
-    cat('\n', rep('-', 40), '\n', sep='')
+    cat(rep('+', 30), sep='')
+    cat('\n', rep('-', 40), sep='')
   }
   return(vgrm_cost + interp_cost)
 }
@@ -458,9 +465,52 @@ interp_diff <- function(shp_interp_krige, shp_interp_sim) {
 #######################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot vgrm !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_vgrm <- function(experimental_vgrm, fitted_vgrm=NULL, cost=NULL, v_mod=NULL,
+                      line_col='black', ylim=NULL, xlim=NULL) {
+  if (is.null(experimental_vgrm)) {stop('\nMissing experimental variogram!')}
+  sill <- round(sqrt(fitted_vgrm[[2]]))
+  range <- round(fitted_vgrm[[3]] / 1e3)
+  p <- 
+    ggplot() +
+    geom_segment(aes(x=range, xend=range, y=Inf, yend=sill, color='range'),
+                 arrow=arrow(angle=10, length=unit(0.1, 'inches'), type='closed'),
+                 linewidth=0.8) +
+    geom_segment(aes(x=-Inf, xend=range, y=sill, yend=sill, color='sill'),
+                 arrow=arrow(angle=10, length=unit(0.1, 'inches'), type='closed'),
+                 linewidth=0.8) +
+    labs(x='lag distance (km)', y=bquote(sqrt(hat(gamma)[(h)])~(mWm^-2))) +
+    scale_color_discrete_qualitative(name=NULL, palette='set 2') +
+    new_scale_color() +
+    coord_cartesian(ylim=ylim, xlim=xlim) +
+    theme_bw(base_size=14) +
+    theme(plot.margin=margin(5, 5, 5, 5), panel.background=element_rect(fill='grey90'),
+          panel.border=element_rect(linewidth=1.2))
+  plt <- tryCatch(
+    {
+      p +
+      geom_point(data=experimental_vgrm, aes(x=dist / 1e3, y=sqrt(gamma)), shape=20) +
+      geom_line(data=variogramLine(fitted_vgrm, maxdist=max(experimental_vgrm$dist)),
+                aes(x=dist / 1e3, y=sqrt(gamma), color='variogram model')) +
+      annotate('text', label=paste0('(', v_mod, ') cost: ', round(cost, 4)),
+               x=xlim[2] / 2, y=0, vjust=-0.2, hjust=0.5) +
+      scale_color_manual(name=NULL, values=c('experimental variogram'='black',
+                                             'variogram model'=line_col))
+    },
+    error=function(cond) {
+      exp_plt <- p +
+      geom_point(data=experimental_vgrm, aes(x=dist / 1e3, y=sqrt(gamma)), shape=20)
+      return(exp_plt)
+    }
+  )
+  return(plt)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot split segment !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1, 0.1)) {
+plot_split_segment <- function(split_seg, borders=c(0.1, 0.1, 0.1, 0.1), running_avg=3) {
   seg_name <- split_seg$interp[[1]]$segment[1]
   seg_num <- as.numeric(unique(bind_rows(split_seg$pnts)$split_fID))
   bx <- bbox_widen(st_bbox(st_buffer(st_combine(split_seg$seg), dist=5e5)), borders=borders)
@@ -489,13 +539,13 @@ plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1
     geom_sf(data=seg, linewidth=1, color='white') +
     geom_sf(data=bind_rows(split_seg$buf),
             aes(fill=factor(split_fID, levels=seg_num[order(seg_num)])),
-            linewidth=0.5, color='black', show_legend=F) +
+            linewidth=0.5, color='black', show.legend=F) +
     geom_sf(data=bind_rows(split_seg$pnts),
             aes(fill=factor(split_fID, levels=seg_num[order(seg_num)]),
                 group=factor(split_fID, levels=seg_num[order(seg_num)])),
-            size=pnt_size, shape=22, stroke=0.5, show_legend=F) +
+            size=pnt_size, shape=22, stroke=0.5, show.legend=F) +
     geom_sf(data=bind_rows(volc), color='white', shape=18, size=pnt_size) +
-    annotate('label', label='a', x=-Inf, y=Inf, size=7, hjust=0, vjust=1, fill='grey90',
+    annotate('label', label='a', x=-Inf, y=Inf, size=7, hjust=0, vjust=1, fill='white',
              label.padding=unit(0.02, 'in'), label.r=unit(0, 'in')) +
     coord_sf(xlim=c(st_bbox(bx)$xmin, st_bbox(bx)$xmax),
              ylim=c(st_bbox(bx)$ymin, st_bbox(bx)$ymax), label_axes='--EN') +
@@ -504,7 +554,7 @@ plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1
     guides(fill=guide_legend(nrow=1, override.aes=list(alpha=1, size=8),
                              title.position='top', title.vjust=1, label.position='bottom')) +
     theme_map(font_size=9) +
-    theme(plot.margin=margin(1, 1, 1, 5),
+    theme(plot.margin=margin(5, 5, 5, 5),
           axis.text.x=element_text(color='grey40', angle=30, hjust=0, vjust=0),
           axis.text.y=element_text(color='grey40', angle=30, hjust=0),
           panel.grid=element_line(size=0.01, color='grey60'))
@@ -525,21 +575,21 @@ plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1
     geom_boxplot(aes(y=value, x=factor(split_fID, levels=seg_num[order(seg_num)]),
                      fill=factor(split_fID, levels=seg_num[order(seg_num)]), color=name,
                      outlier.color=name), outlier.size=pnt_size * 0.2, size=0.5) +
-    annotate('label', label='b', x=-Inf, y=Inf, size=7, hjust=0, vjust=1, fill='grey90',
+    annotate('label', label='b', x=-Inf, y=Inf, size=7, hjust=0, vjust=1, fill='white',
              label.padding=unit(0.02, 'in'), label.r=unit(0, 'in')) +
-    guides(color=guide_legend(nrow=1, override.aes=list(alpha=1, fill='grey50'),
+    guides(color=guide_legend(nrow=1, override.aes=list(alpha=1, fill=NA),
                               title.position='top', title.vjust=1, label.position='left'),
            fill='none') +
     coord_cartesian(ylim=c(min(rng$min_krige, rng$min_sim),
                            max(rng$max_krige, rng$max_sim))) +
     scale_y_continuous(position='right') +
     scale_fill_discrete_qualitative(palette='set 2') +
-    scale_color_manual(values=c('black', 'white')) +
+    scale_color_manual(values=c('black', 'black')) +
     labs(y=bquote('heat flow'~(mWm^-2)), x=NULL, color='interpolation method', fill=NULL) +
-    theme_dark(base_size=14) +
+    theme_bw(base_size=14) +
     theme(legend.title=element_text(margin=margin(0, 0, -5, 0)),
-          plot.margin=margin(1, 1, 1, 1), panel.grid=element_blank(),
-          panel.background=element_rect(fill='grey50'))
+          plot.margin=margin(5, 5, 5, 5), panel.background=element_rect(fill='grey90'),
+          panel.border=element_rect(linewidth=1.2))
   labl <- tibble(name=c('Kriging', 'Similarity'), lbl=c('c', 'd'))
   p2 <-
     bind_rows(split_seg$interp) %>%
@@ -547,27 +597,27 @@ plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1
     filter(distance_from_seg <= 500000) %>%
     select(est_sim, est_krige, split_fID, distance_from_seg) %>%
     arrange(distance_from_seg) %>%
-    mutate(Similarity=rollmean(est_sim, running.avg, fill=NA),
-           Kriging=rollmean(est_krige, running.avg, fill=NA)) %>%
+    mutate(Similarity=rollmean(est_sim, running_avg, fill=NA),
+           Kriging=rollmean(est_krige, running_avg, fill=NA)) %>%
     select(-c(est_sim, est_krige)) %>%
     pivot_longer(-c(split_fID, distance_from_seg)) %>%
     group_by(name) %>%
     ggplot() +
     geom_point(data=bind_rows(volc),
-               aes(distance_from_seg/1e3, min(rng$min_krige, rng$min_sim)), color='white',
+               aes(distance_from_seg / 1e3, min(rng$min_krige, rng$min_sim)), color='black',
                size=pnt_size, shape=18, key_glyph='rect') +
     geom_point(data=bind_rows(split_seg$pnts),
-               aes(distance_from_seg/1e3, hf,
+               aes(distance_from_seg / 1e3, hf,
                    fill=factor(split_fID, levels=seg_num[order(seg_num)]),
                    group=factor(split_fID, levels=seg_num[order(seg_num)])),
                size=pnt_size, shape=22, key_glyph='rect') +
-    geom_smooth(aes(distance_from_seg/1e3, value,
+    geom_smooth(aes(distance_from_seg / 1e3, value,
                     color=factor(split_fID, levels=seg_num[order(seg_num)]),
                     group=factor(split_fID, levels=seg_num[order(seg_num)])),
-                fill=NA, method='loess', alpha=0.1, size=1, se=T, key_glyph='rect',
-                show.legend=F) +
+                fill=NA, method='loess', formula = y ~ x, alpha=0.1, size=1, se=T,
+                key_glyph='rect', show.legend=F) +
     geom_label(data=labl, aes(label=lbl), x=-Inf, y=Inf, size=7, hjust=0, vjust=1,
-               fill='grey90', label.padding=unit(0.02, 'in'), label.r=unit(0, 'in')) +
+               fill='white', label.padding=unit(0.02, 'in'), label.r=unit(0, 'in')) +
     labs(x='distance from trench (km)', y=bquote('heat flow'~(mWm^-2)), fill='sector') +
     guides(fill=guide_legend(nrow=1, override.aes=list(alpha=1, size=5), title.position='top',
                              title.vjust=1, label.position='bottom')) +
@@ -576,13 +626,14 @@ plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1
     scale_color_discrete_qualitative('set 2') +
     scale_fill_discrete_qualitative('set 2') +
     facet_wrap(~name, ncol=2) +
-    theme_dark(base_size=14) +
+    theme_bw(base_size=14) +
     theme(legend.title=element_text(margin=margin(0, 0, -5, 0)),
           strip.background=element_rect(color=NA, fill=NA),
           strip.text=element_text(color='black', size=14, margin=margin(0, 0, 2, 0)),
           strip.placement='outside', legend.box.margin=margin(0, 0, 0, 0),
           legend.key=element_rect(color='black'), legend.spacing.x=unit(0, 'mm'),
-          plot.margin=margin(1, 1, 1, 1), panel.grid=element_blank())
+          plot.margin=margin(5, 5, 5, 5), panel.background=element_rect(fill='grey90'),
+          panel.border=element_rect(linewidth=1.2))
   p <-
     ((p0 | p1) / p2) + plot_annotation(title='Comparing heat flow interpolations by sector') +
     plot_layout(widths=1, guides='collect') &
@@ -591,51 +642,4 @@ plot_split_segment <- function(split_seg, running_avg=3, borders=c(0.1, 0.1, 0.1
           legend.position='bottom', legend.direction='horizontal',
           legend.justification='left')
   p
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# plot vgrm !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_vgrm <- function(experimental_vgrm, fitted_vgrm=NULL, cost=NULL, v_mod=NULL,
-                      line_col='white', ylim=NULL, xlim=NULL) {
-  if (is.null(experimental_vgrm)) {stop('\nMissing experimental variogram!')}
-  sill <- round(sqrt(fitted_vgrm[[2]]))
-  range <- round(fitted_vgrm[[3]]/1e3)
-  p <- 
-    ggplot() +
-    geom_segment(aes(x=range, xend=range, y=Inf, yend=sill, color='range'),
-                 arrow=arrow(angle=10, length=unit(0.05, 'inches'), type='closed')) +
-    geom_segment(aes(x=-Inf, xend=range, y=sill, yend=sill, color='sill'),
-                 arrow=arrow(angle=10, length=unit(0.05, 'inches'), type='closed')) +
-    labs(x='lag distance (km)', y=bquote(sqrt(hat(gamma)[(h)])~(mWm^-2))) +
-    scale_color_discrete_qualitative(name=NULL, palette='set 2') +
-    new_scale_color() +
-    coord_cartesian(ylim=ylim, xlim=xlim) +
-    theme_dark(base_size=14) +
-    theme(panel.grid=element_blank())
-  plt <- tryCatch(
-    {
-      p +
-      geom_point(data=experimental_vgrm,
-                 aes(x=dist / 1e3, y=sqrt(gamma), color='experimental variogram'),
-                 shape=20, key_glyph='path') +
-      geom_path(data=experimental_vgrm,
-                aes(x=dist / 1e3, y=sqrt(gamma), color='experimental variogram'),
-                key_glyph='path') +
-      geom_line(data=variogramLine(fitted_vgrm, maxdist=max(experimental_vgrm$dist)),
-                aes(x=dist / 1e3, y=sqrt(gamma), color='model variogram'),
-                key_glyph='path') +
-      annotate('text', label=paste0('fitted variogram: ', v_mod, '\nsill: ', sill, ', ',
-                                    'range: ', range, ', ', 'cost: ', round(cost, 4)),
-               x=xlim[2] / 2, y=-Inf, vjust=-0.2, hjust=0.5) +
-      scale_color_manual(name=NULL, values=c('experimental variogram'='black',
-                                             'model variogram'=line_col))
-    },
-    error=function(cond) {
-      exp_plt <- p +
-      geom_point(data=experimental_vgrm, aes(x=dist/1e3, y=sqrt(gamma)), shape=20)
-      return(exp_plt)
-    }
-  )
-  return(plt)
 }

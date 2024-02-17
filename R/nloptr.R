@@ -30,10 +30,10 @@ f <- function(segment, v_mod) {
     hf_obs <- shp_hf_crop[[segment]]
     cost_function(hf_obs, x[1], x[2], x[3], x[4], v_mod, n_fold, iwt, vwt, segment)
   }
-  x0 <- c(3, 30, 1, 8) # Initial search values (cutoff, n_lags, lag_start, n_max)
-  lb <- c(1, 15, 1, 5) # Lower bounds
-  ub <- c(10, 50, 10, 50) # Upper bounds
-  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, ftol_rel=1e-2)
+  x0 <- c(3, 50, 3, 10) # Initial search values (cutoff, n_lags, lag_start, n_max)
+  lb <- c(1, 30, 1, 2) # Lower bounds
+  ub <- c(12, 100, 10, 50) # Upper bounds
+  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, ftol_rel=1e-5)
   nloptr(x0, opt_fun, lb=lb, ub=ub, opts=opts)
 }
 
