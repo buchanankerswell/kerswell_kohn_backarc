@@ -57,7 +57,6 @@ ggsave(file='figs/base/ThermoGlobeBufferComp.png', plot=p3, width=6.5, height=6.
 # Individual Segments
 seg_names %>% walk(~{
   # Crop map parts
-  cnt <- shp_contours[[.x]]
   seg <- shp_segs[[.x]]
   buf <- shp_buffer[[.x]]
   grd <- shp_grid_crop[[.x]]

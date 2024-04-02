@@ -34,7 +34,7 @@ package.list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibb
                   'magrittr', 'ggplot2', 'metR', 'colorspace', 'ggrepel', 'ggridges',
                   'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'mapproj',
                   'gstat', 'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr', 'future', 'zoo',
-                  'sp')
+                  'sp', 'jsonlite')
 
 # Check dependencies and install missing packages
 cat('Checking required packages ...')

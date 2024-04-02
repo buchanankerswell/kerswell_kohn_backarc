@@ -12,18 +12,23 @@ sshhh <- function(package_list) {
 package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
                   'magrittr', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
                   'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'gstat',
-                  'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr', 'zoo')
+                  'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr', 'zoo', 'jsonlite')
 
 # Load packages quietly
 sapply(package_list, sshhh)
 rm(package_list, sshhh)
 
 # Don't allow sf to use google's s2 library for spherical geometry
-# This reverts to using the GEOS library instead which is what sf used before 1.0 release
+# This reverts to using the GEOS library on cartesian coordinates
 sf_use_s2(F)
 
 # Set seed
 set.seed(42)
+
+# Set map projections
+wgs <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+eck3 <- paste0('+proj=eck3 +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 ',
+               '+datum=WGS84 +units=m +no_defs')
 
 #######################################################
 ## .1.         General Helper Functions          !!! ##
@@ -36,6 +41,97 @@ extract_RData_object <- function(file, object) {
   E <- new.env()
   load(file=file, envir=E)
   return(get(object, envir=E, inherits=F))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# combine json to df !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+combine_json_to_df <- function(json_files) {
+  map_dfr(json_files, ~fromJSON(.x))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# bbox widen !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bbox_widen <- function(bbox, borders=c(0, 0, 0, 0), crs=NULL) {
+  if (is.null(bbox)) stop('\nMissing bounding box!')
+  if (is.null(crs)) {crs <- st_crs(bbox)}
+  b <- bbox
+  xrange <- b$xmax - b$xmin
+  yrange <- b$ymax - b$ymin
+  b[1] <- b[1] - (borders[1] * xrange)
+  b[3] <- b[3] + (borders[2] * xrange)
+  b[4] <- b[4] + (borders[3] * yrange)
+  b[2] <- b[2] - (borders[4] * yrange)
+  box <- c(b$xmin, b$ymax, b$xmin, b$ymin, b$xmax, b$ymin, b$xmax, b$ymax, b$xmin, b$ymax)
+  st_polygon(list(matrix(box, ncol=2, byrow=T))) %>% st_sfc(crs=crs)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# slice dateline !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+slice_dateline <- function(shp) {
+  sliver <- list(rbind(c(25.001, 90), c(25, 90), c(25, -90), c(25.001, -90), c(25.001, 90)))
+  shp_sliver <- st_polygon(x=sliver) %>% st_sfc() %>% st_set_crs(wgs)
+  if (st_crs(shp) != st_crs(wgs)) {shp <- st_transform(shp, wgs)}
+  suppressWarnings({suppressMessages({
+    shp %>% st_difference(shp_sliver) %>% as_tibble() %>% st_as_sf(crs=wgs) %>%
+      st_transform(eck3) %>% st_make_valid()
+  })})
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# crop feature !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crop_feature <- function(ft, bbox, crs=NULL) {
+  if (is.null(bbox)) stop('\nMissing bounding box!')
+  if (is.null(ft)) stop('\nMissing feature!')
+  if (is.null(crs)) {crs <- st_crs(bbox)}
+  x <- st_crop(ft, bbox)
+  if (nrow(x) == 0) {NA} else {st_sfc(st_union(x), crs=crs)}
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# get world bathy !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+get_world_bathy <- function(path='assets/map_data/relief/') {
+  suppressWarnings({suppressMessages({
+    getNOAA.bathy(180, -180, 90, -90, resolution=15, keep=T, path=path) %>%
+      as.SpatialGridDataFrame() %>% st_as_sf(crs=wgs) %>% slice_dateline() %>%
+      rename(elev=layer)
+  })})
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# get seg bathy !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+get_seg_bathy <- function(bbox, res=4, borders=c(0, 0, 0, 0), path='assets/map_data/relief/') {
+  tryCatch({
+    bbx <-
+      bbox_widen(st_bbox(bbox), borders=borders) %>% st_transform(wgs) %>%
+      st_bbox() %>% round(2)
+    if (bbx[3] - bbx[1] > 180) {antim <- T} else {antim <- F}
+    getNOAA.bathy(bbx[3], bbx[1], bbx[2], bbx[4], resolution=res, keep=TRUE,
+                  antimeridian=antim, path=path) %>%
+    as.SpatialGridDataFrame() %>% st_as_sf() %>% st_transform(eck3) %>%
+    st_make_valid() %>% rename(elev=layer)
+  }, error = function(e) {
+    cat('An error occurred in get_bathy:', conditionMessage(e), '\n')
+    return(NULL)
+  })
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# read latlong !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+read_latlong <- function(file=NULL, crs=NULL) {
+  if (is.null(file)) {stop('\nMissing filename!')}
+  if (is.null(crs)) {stop('\nMissing coordinate reference system!')}
+  pattern <- '(?<=gmts\\/)[a-z].*(?=_contours\\.gmt)'
+  seg_name <- file %>% str_extract(pattern) %>% str_replace_all('_', ' ') %>% str_to_title()
+  proj <- '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs'
+  st_read(file, crs=proj, quiet=T) %>% st_transform(crs) %>% as_tibble() %>%
+    st_as_sf() %>% mutate(segment=seg_name, .before=geometry)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,123 +157,6 @@ interpolation_rmse <- function(seg_name, interpolation=NULL, shp_buffer=NULL,
   } else {
     stop('invalid type!')
   }
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# bbox widen !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bbox_widen <- function(bbox, borders=c(0, 0, 0, 0), crs=NULL) {
-  if (is.null(bbox)) stop('\nMissing bounding box!')
-  if (is.null(crs)) {crs <- st_crs(bbox)}
-  b <- bbox
-  xrange <- b$xmax - b$xmin
-  yrange <- b$ymax - b$ymin
-  b[1] <- b[1] - (borders[1] * xrange)
-  b[3] <- b[3] + (borders[2] * xrange)
-  b[4] <- b[4] + (borders[3] * yrange)
-  b[2] <- b[2] - (borders[4] * yrange)
-  box <- c(b$xmin, b$ymax, b$xmin, b$ymin, b$xmax, b$ymin, b$xmax, b$ymax, b$xmin, b$ymax)
-  shp_box <- st_polygon(list(matrix(box, ncol=2, byrow=T))) %>% st_sfc(crs=crs)
-  return(shp_box)
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# read latlong !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-read_latlong <- function(file=NULL, crs=NULL) {
-  if (is.null(file)) {stop('\nMissing filename!')}
-  if (is.null(crs)) {stop('\nMissing coordinate reference system!')}
-  pattern <- '(?<=gmts\\/)[a-z].*(?=_contours\\.gmt)'
-  seg_name <- file %>% str_extract(pattern) %>% str_replace_all('_', ' ') %>% str_to_title()
-  proj <- '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs'
-  st_read(file, crs=proj, quiet=T) %>% st_transform(crs) %>% as_tibble() %>%
-    st_as_sf() %>% mutate(segment=seg_name, .before=geometry)
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# split lines !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-split_lines <- function(input_lines, max_length, id=NULL) {
-  geom_column <- attr(input_lines, "sf_column")
-  input_crs <- st_crs(input_lines)
-  input_lines[["geom_len"]] <- st_length(input_lines[[geom_column]])
-  attr(input_lines[["geom_len"]], "units") <- NULL
-  input_lines[["geom_len"]] <- as.numeric(input_lines[["geom_len"]])
-  too_long <- input_lines %>% select(all_of(id), all_of(geom_column), geom_len) %>%
-    filter(geom_len >= max_length)
-  rm(input_lines)
-  too_long <- too_long %>% mutate(pieces=ceiling(geom_len / max_length),
-                                  piece_len=(geom_len / pieces), fID=1:nrow(too_long))
-  split_points <-
-    st_set_geometry(too_long, NULL)[rep(seq_len(nrow(too_long)), too_long[["pieces"]]),]
-  split_points <- split_points %>% mutate(split_fID=row.names(split_points)) %>%
-    select(-geom_len, -pieces) %>% group_by(fID) %>% mutate(ideal_len=cumsum(piece_len)) %>%
-    ungroup()
-  coords <- data.frame(st_coordinates(too_long[[geom_column]]))
-  rm(too_long)
-  coords <- rename(coords, fID=L1) %>% mutate(nID=1:nrow(coords))
-  split_nodes <- coords %>% group_by(fID) %>%
-    mutate(len =sqrt(((X - (lag(X)))^2) + (((Y - (lag(Y)))^2)))) %>%
-    mutate(len=ifelse(is.na(len), 0, len)) %>% mutate(len=cumsum(len)) %>%
-    left_join(select(split_points, fID, ideal_len, split_fID), by="fID") %>%
-    mutate(diff_len=abs(len - ideal_len)) %>% group_by(split_fID) %>%
-    filter(!is.na(diff_len) & diff_len == min(diff_len)) %>% ungroup() %>%
-    mutate(start_nID=lag(nID), new_feature=fID - lag(fID, default=-1),
-           start_nID=ifelse(new_feature == 1, start_nID + 1, start_nID)) %>%
-    select(fID, split_fID, start_nID, stop_nID=nID, -diff_len, -ideal_len, -len, -X, -Y)
-  split_nodes$start_nID[1] <- 1
-  split_points <- split_points %>%
-    left_join(select(split_nodes, split_fID, start_nID, stop_nID), by="split_fID")
-  new_line <- function(start_stop, coords) {
-    st_linestring(as.matrix(coords[start_stop[1]:start_stop[2], c("X", "Y")]))
-  }
-  split_lines <- apply(as.matrix(split_points[c("start_nID", "stop_nID")]), MARGIN=1,
-                       FUN=new_line, coords=coords)
-  split_lines <- st_sf(split_points[c(id, "split_fID")],
-                       geometry=st_sfc(split_lines, crs=input_crs))
-  return(split_lines)
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# split segment !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-split_segment <- function(seg_name, shp_hf_crop, shp_segs, shp_volc, buf_dir='l', seg_num=6,
-                          sector_exclude=NULL, buf_len=5e5) {
-  pnts <- shp_hf_crop[[seg_name]]
-  seg <- shp_segs[[seg_name]]
-  buf <- st_buffer(seg, dist=buf_len, endCapStyle='ROUND')
-  volc <- shp_volc
-  split_seg <- split_lines(seg, as.numeric(st_length(seg)/seg_num))
-  split_buf <-
-    map(1:seg_num, ~
-      st_buffer(split_seg[.x,], dist=ifelse(buf_dir == 'l', -1 * buf_len, 1 * buf_len),
-                singleSide=T) %>%
-      st_intersection(buf))
-  pnts_buf <-
-    map(1:seg_num, ~
-      st_intersection(pnts, split_buf[[.x]]) %>%
-      mutate(distance_from_seg=as.vector(st_distance(split_seg[.x,]$geometry, geometry)),
-             .before=geometry))
-  volc_buf <-
-    map(1:seg_num, ~
-      st_intersection(volc, split_buf[[.x]]) %>%
-      mutate(distance_from_seg=as.vector(st_distance(split_seg[.x,]$geometry, geometry)),
-             .before=geometry))
-  best_mod <- opt_solutions %>% filter(segment == seg_name) %>% slice_min(cost)
-  interp <- best_mod[['shp_interp_diff']][[1]]
-  interp_buf <-
-    map(1:seg_num, ~
-      st_intersection(interp, split_buf[[.x]]) %>%
-      mutate(distance_from_seg=as.vector(st_distance(split_seg[.x,]$geometry, geometry)),
-             .before=geometry))
-  if (!is.null(sector_exclude)) {
-    split_buf <- split_buf[-sector_exclude]
-    pnts_buf <- pnts_buf[-sector_exclude]
-    volc_buf <- volc_buf[-sector_exclude]
-    interp_buf <- interp_buf[-sector_exclude]
-  }
-  return(list('seg'=split_seg, 'buf'=split_buf, 'pnts'=pnts_buf, 'volc'=volc_buf,
-              'interp'=interp_buf))
 }
 
 #######################################################
@@ -262,6 +241,25 @@ parse_krige_args <- function(args) {
   assign('n_cores', n_cores, envir=.GlobalEnv)
 }
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# optimize krige !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Minimization function
+optimize_krige <- function(segment, v_mod, hf, alg, max_eval, n_fold, iwt, vwt) {
+  # Initial values (cutoff, n_lags, lag_start, n_max)
+  x0 <- c(3, 50, 3, 10)
+  lb <- c(1, 30, 1, 2)
+  ub <- c(12, 100, 10, 50)
+  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, ftol_rel=1e-5)
+  hf_obs <- shp_hf_crop[[segment]]
+  opt_fun <- function(x) {
+    cost_function(hf_obs, x[1], x[2], x[3], x[4], v_mod, n_fold, iwt, vwt, segment)
+  }
+  nloptr(x0, opt_fun, lb=lb, ub=ub, opts=opts)
+}
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # experimental vgrm !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -279,9 +277,9 @@ experimental_vgrm <- function(shp_hf=NULL, cutoff=3, n_lags=30, lag_start=1) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # cost function !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, model_vgrm='Sph',
-                          n_fold=NULL, interp_weight=0.5, vgrm_weight=0.5, segment=NULL,
-                          verbose=T) {
+cost_function <- function(shp_hf, cutoff=3, n_lags=50, lag_start=3, n_max=10,
+                          model_vgrm='Sph', n_fold=NULL, interp_weight=0.5, vgrm_weight=0.5,
+                          segment=NULL, verbose=T) {
   if (is.null(shp_hf)) {stop('\nMissing heat flow data model!')}
   if (is.null(n_fold)) {n_fold <- nrow(shp_hf)}
   if (n_fold > 0 & n_fold <= 1) {n_fold <- nrow(shp_hf) * n_fold}
@@ -340,9 +338,8 @@ cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, mod
   }
   k_cv <- k_cv %>% filter(!is.na(residual))
   # Calculating cost after Li et al. (2018)
-  # Extra sqrt for vgrm to match hf units
   suppressWarnings({
-    vgrm_rmse <- sqrt(sqrt(attr(fitted_vgrm, "SSErr") / nrow(experimental_vgrm)))
+    vgrm_rmse <- sqrt(sqrt(attr(fitted_vgrm, 'SSErr') / nrow(experimental_vgrm)))
     vgrm_sd <- sqrt(sd(experimental_vgrm$gamma, na.rm=T))
     vgrm_cost <- vgrm_weight * vgrm_rmse / vgrm_sd
     interp_rmse <- sqrt(sum(k_cv$residual^2, na.rm=T) / nrow(k_cv))
@@ -350,6 +347,7 @@ cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, mod
     interp_cost <- interp_weight * interp_rmse / interp_sd
   })
   if (verbose) {
+    sink(paste0('log/nlopt-out-', format(Sys.Date(), '%d-%m-%Y')), append=T, split=T)
     cat('\nSegment:', segment)
     cat('\nCutoff proportion:', cutoff)
     cat('\nNumber of lags:', n_lags)
@@ -369,6 +367,7 @@ cost_function <- function(shp_hf, cutoff=3, n_lags=30, lag_start=1, n_max=8, mod
     print(fitted_vgrm)
     cat(rep('+', 30), sep='')
     cat('\n', rep('-', 40), sep='')
+    sink()
   }
   return(vgrm_cost + interp_cost)
 }
@@ -409,7 +408,7 @@ read_nloptr_trace <- function(fpath) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Krige !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Krige <- function(shp_hf=NULL, fitted_vgrm=NULL, shp_interp_grid=NULL, n_max=8,
+Krige <- function(shp_hf=NULL, fitted_vgrm=NULL, shp_interp_grid=NULL, n_max=10,
                   seg_name=NULL) {
   if (is.null(shp_hf)) {stop('\nMissing heat flow data!')}
   if (is.null(fitted_vgrm)) {stop('\nMissing variogram model!')}

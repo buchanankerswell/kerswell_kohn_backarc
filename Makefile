@@ -36,7 +36,7 @@ FIGSPURGE = figs draft/assets/figs
 all: krige
 
 krige: preprocess
-	@if [ ! -e "$(DATADIR)/opt_data/opt.RData" ]; then \
+	@if [ ! -e "$(DATADIR)/opt_data/nloptr.RData" ]; then \
 		R/nloptr.R $(MAXITR) $(OPTALG) $(IWT) $(VWT) $(NFOLD) $(NCORES) $(LOG); \
 		echo "=============================================" $(LOG); \
 	else \

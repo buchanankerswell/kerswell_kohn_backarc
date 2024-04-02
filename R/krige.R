@@ -8,7 +8,7 @@ load('assets/opt_data/nloptr.RData')
 
 # Read nloptr trace
 cat('\nCompiling nloptr solutions ...')
-nloptr_trace <- read_nloptr_trace(paste0('log/log-', format(Sys.time(), '%d-%m-%Y')))
+nloptr_trace <- read_nloptr_trace(paste0('log/nlopt-out-', format(Sys.time(), '%d-%m-%Y')))
 
 # Decode nloptr results and construct variograms
 opt_vgrms <- optimized_interpolations %>% drop_na() %>%
