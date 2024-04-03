@@ -11,24 +11,23 @@ sshhh <- function(package_list) {
 # Package list
 package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
                   'magrittr', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
-                  'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'gstat',
-                  'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr', 'zoo', 'jsonlite')
+                  'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'scales',
+                  'ggspatial', 'gstat', 'rgeos', 'sp', 'sf', 'rnaturalearth', 'nloptr', 'zoo',
+                  'jsonlite')
 
 # Load packages quietly
 sapply(package_list, sshhh)
 rm(package_list, sshhh)
 
-# Don't allow sf to use google's s2 library for spherical geometry
-# This reverts to using the GEOS library on cartesian coordinates
+# Turn off S2 geometry
 sf_use_s2(F)
 
 # Set seed
 set.seed(42)
 
 # Set map projections
-wgs <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
-eck3 <- paste0('+proj=eck3 +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 ',
-               '+datum=WGS84 +units=m +no_defs')
+wgs <- '+proj=longlat +datum=WGS84 +ellps=WGS84 +no_defs'
+prj <- '+proj=eck3 +lon_0=-180 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs'
 
 #######################################################
 ## .1.         General Helper Functions          !!! ##
@@ -46,118 +45,162 @@ extract_RData_object <- function(file, object) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # combine json to df !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-combine_json_to_df <- function(json_files) {
-  map_dfr(json_files, ~fromJSON(.x))
+combine_json_to_df <- function(files) {
+  map_dfr(files, ~fromJSON(.x))
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # bbox widen !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bbox_widen <- function(bbox, borders=c(0, 0, 0, 0), crs=NULL) {
-  if (is.null(bbox)) stop('\nMissing bounding box!')
-  if (is.null(crs)) {crs <- st_crs(bbox)}
-  b <- bbox
-  xrange <- b$xmax - b$xmin
-  yrange <- b$ymax - b$ymin
-  b[1] <- b[1] - (borders[1] * xrange)
-  b[3] <- b[3] + (borders[2] * xrange)
-  b[4] <- b[4] + (borders[3] * yrange)
-  b[2] <- b[2] - (borders[4] * yrange)
-  box <- c(b$xmin, b$ymax, b$xmin, b$ymin, b$xmax, b$ymin, b$xmax, b$ymax, b$xmin, b$ymax)
-  st_polygon(list(matrix(box, ncol=2, byrow=T))) %>% st_sfc(crs=crs)
+bbox_widen <- function(bbox, ext=rep(0, 4)) {
+  xrange <- bbox$xmax - bbox$xmin
+  yrange <- bbox$ymax - bbox$ymin
+  bbox[1] <- bbox[1] - (ext[1] * xrange)
+  bbox[3] <- bbox[3] + (ext[2] * xrange)
+  bbox[4] <- bbox[4] + (ext[3] * yrange)
+  bbox[2] <- bbox[2] - (ext[4] * yrange)
+  box <- c(bbox$xmin, bbox$ymax, bbox$xmin, bbox$ymin, bbox$xmax, bbox$ymin, bbox$xmax,
+           bbox$ymax, bbox$xmin, bbox$ymax)
+  st_polygon(list(matrix(box, ncol=2, byrow=T))) %>% st_sfc(crs=st_crs(bbox))
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# slice dateline !!
+# reproject center pacific !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-slice_dateline <- function(shp) {
-  sliver <- list(rbind(c(25.001, 90), c(25, 90), c(25, -90), c(25.001, -90), c(25.001, 90)))
-  shp_sliver <- st_polygon(x=sliver) %>% st_sfc() %>% st_set_crs(wgs)
+reproject_center_pacific <- function(shp, break_dateline=T, tol=1) {
   if (st_crs(shp) != st_crs(wgs)) {shp <- st_transform(shp, wgs)}
-  suppressWarnings({suppressMessages({
-    shp %>% st_difference(shp_sliver) %>% as_tibble() %>% st_as_sf(crs=wgs) %>%
-      st_transform(eck3) %>% st_make_valid()
-  })})
+  if (any(st_geometry_type(shp) %in% 'POINT') || !break_dateline) {
+    shp %>% st_make_valid() %>% st_transform(prj)
+  } else {
+    lon0 <- as.numeric(str_extract(prj, '(?<=lon_0=)-?\\d+')) + 360
+    suppressWarnings({suppressMessages({
+      shp %>% st_make_valid() %>%
+        st_wrap_dateline(options=c('WRAPDATELINE=YES', paste0('DATELINEOFFSET=', lon0))) %>%
+        st_break_antimeridian(lon_0=lon0, tol=tol) %>% st_transform(prj)
+    })})
+  }
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # crop feature !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-crop_feature <- function(ft, bbox, crs=NULL) {
-  if (is.null(bbox)) stop('\nMissing bounding box!')
-  if (is.null(ft)) stop('\nMissing feature!')
-  if (is.null(crs)) {crs <- st_crs(bbox)}
-  x <- st_crop(ft, bbox)
-  if (nrow(x) == 0) {NA} else {st_sfc(st_union(x), crs=crs)}
+crop_feature <- function(ft, bbox, crop_within=F, keep_df=F) {
+  if (st_crs(ft) != st_crs(bbox)) {ft <- st_transform(ft, st_crs(bbox))}
+  if (!crop_within) {
+    ft_cropped <- st_crop(ft, bbox)
+  } else {
+    ft_cropped <- st_intersection(ft, bbox)
+  }
+  if (!is.data.frame(ft_cropped)) {l <- length(ft_cropped)} else {l <- nrow(ft_cropped)}
+  if (l == 0) {NA} else {
+    if (!keep_df) {st_sfc(st_union(ft_cropped), crs=st_crs(bbox))} else {ft_cropped}
+  }
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # get world bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-get_world_bathy <- function(path='assets/map_data/relief/') {
-  suppressWarnings({suppressMessages({
-    getNOAA.bathy(180, -180, 90, -90, resolution=15, keep=T, path=path) %>%
-      as.SpatialGridDataFrame() %>% st_as_sf(crs=wgs) %>% slice_dateline() %>%
-      rename(elev=layer)
-  })})
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# get seg bathy !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-get_seg_bathy <- function(bbox, res=4, borders=c(0, 0, 0, 0), path='assets/map_data/relief/') {
+get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
   tryCatch({
-    bbx <-
-      bbox_widen(st_bbox(bbox), borders=borders) %>% st_transform(wgs) %>%
-      st_bbox() %>% round(2)
-    if (bbx[3] - bbx[1] > 180) {antim <- T} else {antim <- F}
-    getNOAA.bathy(bbx[3], bbx[1], bbx[2], bbx[4], resolution=res, keep=TRUE,
-                  antimeridian=antim, path=path) %>%
-    as.SpatialGridDataFrame() %>% st_as_sf() %>% st_transform(eck3) %>%
-    st_make_valid() %>% rename(elev=layer)
+    suppressWarnings({suppressMessages({
+      getNOAA.bathy(180, -180, 90, -90, res, T, F, path) %>%
+        as.SpatialGridDataFrame() %>% st_as_sf(crs=wgs) %>% rename(elev=layer) %>%
+        reproject_center_pacific()
+    })})
   }, error = function(e) {
-    cat('An error occurred in get_bathy:', conditionMessage(e), '\n')
+    cat('An error occurred in get_world_bathy:', conditionMessage(e), '\n')
     return(NULL)
   })
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# read latlong !!
+# get seg bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-read_latlong <- function(file=NULL, crs=NULL) {
-  if (is.null(file)) {stop('\nMissing filename!')}
-  if (is.null(crs)) {stop('\nMissing coordinate reference system!')}
-  pattern <- '(?<=gmts\\/)[a-z].*(?=_contours\\.gmt)'
-  seg_name <- file %>% str_extract(pattern) %>% str_replace_all('_', ' ') %>% str_to_title()
-  proj <- '+proj=longlat +lon_wrap=180 +ellps=WGS84 +datum=WGS84 +no_defs'
-  st_read(file, crs=proj, quiet=T) %>% st_transform(crs) %>% as_tibble() %>%
-    st_as_sf() %>% mutate(segment=seg_name, .before=geometry)
+get_seg_bathy <- function(bbox, res=2, ext=rep(0, 4), path='assets/map_data/relief/', tol=1) {
+  tryCatch({
+    bbx <- bbox_widen(st_bbox(bbox), ext=ext) %>% st_transform(wgs) %>% st_bbox() %>% round(2)
+    if (bbx[3] - bbx[1] > 180) {antim <- T} else {antim <- F}
+    getNOAA.bathy(bbx[3], bbx[1], bbx[2], bbx[4], res, T, antim, path) %>%
+      as.SpatialGridDataFrame() %>% st_as_sf(crs=wgs) %>% st_make_valid() %>%
+      st_transform(prj) %>% rename(elev=layer)
+  }, error = function(e) {
+    cat('An error occurred in get_seg_bathy:', conditionMessage(e), '\n')
+    return(NULL)
+  })
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# interpolation rmse !!
+# handle zerodist obs !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-interpolation_rmse <- function(seg_name, interpolation=NULL, shp_buffer=NULL,
-                               shp_grid_crop=NULL, shp_hf_crop=NULL, type='sim') {
-  if (is.null(interpolation)) {stop('need interpolation sf object!')}
-  if (is.null(shp_buffer)) {stop('need buffer sf object!')}
-  if (is.null(shp_grid_crop)) {stop('need grid_crop sf object!')}
-  if (is.null(shp_hf_crop)) {stop('need hf_crop sf object!')}
-  buf <- shp_buffer[[seg_name]]
-  grd <- shp_grid_crop[[seg_name]]
-  obs <- shp_hf_crop[[seg_name]]
-  if (type == 'sim') {
-    interpolation <- suppressWarnings(st_intersection(interpolation, buf))
-    nearest_est_sim <- interpolation$est_sim[st_nearest_feature(obs, grd)]
-    return(sqrt(mean((nearest_est_sim - obs$hf)^2)))
-  } else if (type == 'krg') {
+handle_zerodist_obs <- function(df) {
+  dup <- zerodist(as_Spatial(df))
+  n_dup <- nrow(dup)
+  rid <- map_dbl(1:n_dup, ~ {
+    i <- .x
+    if (
+      df$code6[dup[i, 1]] != df$code6[dup[i, 2]] &
+      df$code6[dup[i, 1]] > df$code6[dup[i, 2]]
+    ) {
+      return(dup[i, 1])
+    } else if (
+      df$code6[dup[i, 1]] != df$code6[dup[i, 2]] &
+      df$code6[dup[i, 1]] < df$code6[dup[i, 2]]
+    ) {
+      return(dup[i, 2])
+    } else {
+      return(dup[i, sample(1:2, 1)])
+    }
+  })
+  slice(df, -rid)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# calculate interp rmse !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+calculate_interp_rmse <- function(obs, interp, type='similarity') {
+  if (!(type %in% c('krige', 'similarity'))) stop('invalid type!')
+  if (type == 'similarity') {
+    nearest_est <- interp$est_sim[st_nearest_feature(obs, st_geometry(interp))]
+    print(nearest_est)
+    sqrt(mean((nearest_est - obs$obs)^2))
+  } else if (type == 'krige') {
     interpolation <- interpolation
-    nearest_est_krige <- interpolation$est_krige[st_nearest_feature(obs, grd)]
-    return(sqrt(mean((nearest_est_krige - obs$hf)^2)))
-  } else {
-    stop('invalid type!')
+    nearest_est <- interp$est_krige[st_nearest_feature(obs, st_geometry(interp))]
+    sqrt(mean((nearest_est - obs$obs)^2))
   }
 }
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# compile transect data !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compile_transect_data <- function(trans) {
+  if (!exists('shp_submap', envir=.GlobalEnv)) {
+    stop('Missing map data! Use "load(path/to/map-data.RData"')
+  }
+  if (is.numeric(trans) && all(trans >= 1) && all(trans <= nrow(shp_submap))) {
+    x <- slice(shp_submap, trans)
+  } else if (is.character(trans) && all(trans %in% shp_submap$short_name)) {
+    x <- filter(shp_submap, short_name %in% trans)
+  } else {
+    stop('Unrecognized input for trans! Use the trans short_name or row number ...')
+  }
+  suppressWarnings({suppressMessages({
+    x %>% rowwise() %>%
+      mutate(buffer=st_buffer(transect, 5e5, endCapStyle='ROUND')) %>%
+      mutate(bbox=bbox_widen(st_bbox(buffer), ext=rep(0.2, 4))) %>%
+      mutate(grid=crop_feature(shp_grid, bbox)) %>%
+      mutate(ridge=crop_feature(shp_ridge, bbox)) %>%
+      mutate(trench=crop_feature(shp_trench, bbox)) %>%
+      mutate(transform=crop_feature(shp_transform, bbox)) %>%
+      mutate(volcano=crop_feature(select(shp_volc, geometry), bbox)) %>%
+      mutate(tglobe_box=list(crop_feature(shp_tglobe, bbox, F, T))) %>%
+      mutate(tglobe_buff=list(crop_feature(shp_tglobe, buffer, T, T))) %>%
+      mutate(sim=list(crop_feature(shp_sim, buffer, T, T))) %>%
+      mutate(bathy=list(get_seg_bathy(bbox))) %>%
+      ungroup()
+  })})
+}
+
 
 #######################################################
 ## .2.             Kriging Functions             !!! ##
@@ -464,6 +507,102 @@ interp_diff <- function(shp_interp_krige, shp_interp_sim) {
 #######################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot transect tglobe !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_transect_tglobe <- function(short_name) {
+  fig_path <- paste0('~/Downloads/segs/', short_name,'-tglobe.png')
+  if (file.exists(fig_path)) {cat('\n', fig_path, ' already exists ...'); return()}
+  cat('\ncompiling map data for: ', short_name)
+  x <- compile_transect_data(short_name)
+  cat('\nplotting: ', short_name)
+  suppressWarnings({suppressMessages({
+    p <-
+      ggplot(x) +
+      geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+      scale_color_etopo(name='Elev (m)',
+                        guide=guide_colorbar(title.vjust=1, show.limits=T),
+                        labels=label_number(scale_cut=cut_short_scale())) +
+      new_scale_color() +
+      geom_sf(aes(geometry=buffer), fill=NA, linewidth=0.5) +
+      geom_sf(aes(geometry=ridge), color='white') +
+      geom_sf(aes(geometry=transform), color='white') +
+      geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+      geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+      geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+      geom_sf(data=x$tglobe_buff[[1]], aes(color=obs), shape=20) +
+      geom_sf(data=x$tglobe_box[[1]], aes(color=obs), shape=19, size=0.5) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)),
+                            limits=c(0, 250), breaks=c(0, 125, 250), na.value='transparent',
+                            guide=guide_colorbar(title.vjust=1, show.limits=T)) +
+      xlab('Longitude') + ylab('Latitude') +
+      ggtitle(paste0(short_name, ': ', x$trench_name)) +
+      coord_sf(expand=F, lims_method='geometry_bbox') +
+      theme_bw(base_size=14) +
+      theme(plot.margin=margin(20, 20, 20, 20), legend.position='bottom',
+            legend.justification='center', legend.direction='horizontal',
+            axis.text=element_text(hjust=1), legend.margin=margin(),
+            legend.box.margin=margin(15, 15, 15, 15), legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.6, 'cm'),
+            legend.title=element_text(vjust=0, color='black', size=14),
+            panel.grid=element_line(linewidth=0.05, color='grey20'),
+            plot.title=element_text(vjust=0, margin=margin(0, 0, 10, 10))) +
+      annotation_scale(location='bl', width_hint=0.33, text_cex=1, style='ticks',
+                       line_width=2.5, text_face='bold') +
+      annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
+                             pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
+    ggsave(file=fig_path, plot=p, width=6.5, height=6.5, dpi=300, bg='white')
+  })})
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot transect sim !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_transect_sim <- function(short_name) {
+  fig_path <- paste0('~/Downloads/segs/', short_name,'-sim.png')
+  if (file.exists(fig_path)) {cat('\n', fig_path, ' already exists ...'); return()}
+  cat('\ncompiling map data for: ', short_name)
+  x <- compile_transect_data(short_name)
+  cat('\nplotting: ', short_name)
+  suppressWarnings({suppressMessages({
+    p <-
+      ggplot(x) +
+      geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+      scale_color_etopo(name='Elev (m)',
+                        guide=guide_colorbar(title.vjust=1, show.limits=T),
+                        labels=label_number(scale_cut=cut_short_scale())) +
+      new_scale_color() +
+      geom_sf(aes(geometry=buffer), fill=NA, linewidth=0.5) +
+      geom_sf(aes(geometry=ridge), color='white') +
+      geom_sf(aes(geometry=transform), color='white') +
+      geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+      geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+      geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+      geom_sf(data=x$tglobe_box[[1]], aes(color=obs), shape=19, size=0.5) +
+      geom_sf(data=x$sim[[1]], aes(color=est_sim), shape=15) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)),
+                            limits=c(0, 250), breaks=c(0, 125, 250), na.value='transparent',
+                            guide=guide_colorbar(title.vjust=1, show.limits=T)) +
+      xlab('Longitude') + ylab('Latitude') +
+      ggtitle(paste0(short_name, ': ', x$trench_name)) +
+      coord_sf(expand=F, lims_method='geometry_bbox') +
+      theme_bw(base_size=14) +
+      theme(plot.margin=margin(20, 20, 20, 20), legend.position='bottom',
+            legend.justification='center', legend.direction='horizontal',
+            axis.text=element_text(hjust=1), legend.margin=margin(),
+            legend.box.margin=margin(15, 15, 15, 15), legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.6, 'cm'),
+            legend.title=element_text(vjust=0, color='black', size=14),
+            panel.grid=element_line(linewidth=0.05, color='grey20'),
+            plot.title=element_text(vjust=0, margin=margin(0, 0, 10, 10))) +
+      annotation_scale(location='bl', width_hint=0.33, text_cex=1, style='ticks',
+                       line_width=2.5, text_face='bold') +
+      annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
+                             pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
+    ggsave(file=fig_path, plot=p, width=6.5, height=6.5, dpi=300, bg='white')
+  })})
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot vgrm !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_vgrm <- function(experimental_vgrm, fitted_vgrm=NULL, cost=NULL, v_mod=NULL,
@@ -509,10 +648,10 @@ plot_vgrm <- function(experimental_vgrm, fitted_vgrm=NULL, cost=NULL, v_mod=NULL
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot split segment !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_split_segment <- function(split_seg, borders=c(0.1, 0.1, 0.1, 0.1), running_avg=3) {
+plot_split_segment <- function(split_seg, ext=c(0.1, 0.1, 0.1, 0.1), running_avg=3) {
   seg_name <- split_seg$interp[[1]]$segment[1]
   seg_num <- as.numeric(unique(bind_rows(split_seg$pnts)$split_fID))
-  bx <- bbox_widen(st_bbox(st_buffer(st_combine(split_seg$seg), dist=5e5)), borders=borders)
+  bx <- bbox_widen(st_bbox(st_buffer(st_combine(split_seg$seg), dist=5e5)), ext=ext)
   seg <- bind_rows(split_seg$seg)
   ridge <- shp_ridge_crop[[seg_name]]
   trench <- shp_trench_crop[[seg_name]]

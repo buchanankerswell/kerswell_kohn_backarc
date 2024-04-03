@@ -30,15 +30,15 @@ check_dependencies <- function(packages) {
 }
 
 # Package list
-package.list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
-                  'magrittr', 'ggplot2', 'metR', 'colorspace', 'ggrepel', 'ggridges',
-                  'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'mapproj',
-                  'gstat', 'rgeos', 'sf', 'stars', 'rnaturalearth', 'nloptr', 'future', 'zoo',
-                  'sp', 'jsonlite')
+package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
+                  'magrittr', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
+                  'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'scales',
+                  'ggspatial', 'gstat', 'rgeos', 'sp', 'sf', 'rnaturalearth', 'nloptr', 'zoo',
+                  'jsonlite')
 
 # Check dependencies and install missing packages
 cat('Checking required packages ...')
-check_dependencies(package.list)
+check_dependencies(package_list)
 
 # Print session info
 cat('\n', rep('~', 45), '\n', sep='')
