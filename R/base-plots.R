@@ -5,12 +5,8 @@ cat(rep('~', 45), '\n', sep='')
 source('R/functions.R')
 load('assets/map_data/map-data.RData')
 
-# Plot global base map
+# Plot base maps
 plot_tglobe_base()
-
-# Plot submap transects
-short_names <- shp_submap$short_name
-walk(short_names, plot_transect_tglobe)
-walk(short_names, plot_transect_sim)
+walk(shp_submap$short_name, plot_transect)
 
 cat('\nbase-plots.R complete!\n\n')
