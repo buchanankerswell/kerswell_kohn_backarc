@@ -119,6 +119,7 @@ crop_feature <- function(ft, bbox, crop_within=F, keep_df=F) {
 # get world bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
+  if (!dir.exists(path)) {dir.create(path)}
   tryCatch({
     suppressWarnings({suppressMessages({
       getNOAA.bathy(180, -180, 90, -90, res, T, F, path) %>%
@@ -135,6 +136,7 @@ get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
 # get seg bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 get_seg_bathy <- function(shp, res=2, path='assets/map_data/relief/', tol=1) {
+  if (!dir.exists(path)) {dir.create(path)}
   tryCatch({
     bbx <- shp %>% st_transform(wgs) %>% st_bbox() %>% round(2)
     if (bbx[3] - bbx[1] > 180) {antim <- T} else {antim <- F}
