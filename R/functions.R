@@ -110,7 +110,9 @@ crop_feature <- function(ft, bbox, crop_within=F, keep_df=F) {
     ft_cropped <- st_intersection(ft, bbox)
   }
   if (!is.data.frame(ft_cropped)) {l <- length(ft_cropped)} else {l <- nrow(ft_cropped)}
-  if (l == 0) {NA} else {
+  if (l == 0) {
+    if(!keep_df) {NA} else {NULL}
+  } else {
     if (!keep_df) {st_sfc(st_union(ft_cropped), crs=st_crs(bbox))} else {ft_cropped}
   }
 }
@@ -119,7 +121,7 @@ crop_feature <- function(ft, bbox, crop_within=F, keep_df=F) {
 # get world bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
-  if (!dir.exists(path)) {dir.create(path)}
+  if (!dir.exists(path)) {dir.create(path, recursive=T, showWarnings=F)}
   tryCatch({
     suppressWarnings({suppressMessages({
       getNOAA.bathy(180, -180, 90, -90, res, T, F, path) %>%
@@ -136,7 +138,7 @@ get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
 # get seg bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 get_seg_bathy <- function(shp, res=2, path='assets/map_data/relief/', tol=1) {
-  if (!dir.exists(path)) {dir.create(path)}
+  if (!dir.exists(path)) {dir.create(path, recursive=T, showWarnings=F)}
   tryCatch({
     bbx <- shp %>% st_transform(wgs) %>% st_bbox() %>% round(2)
     if (bbx[3] - bbx[1] > 180) {antim <- T} else {antim <- F}
@@ -231,6 +233,7 @@ compile_transect_data <- function(trans_id, large_buff=5e5, small_buff=5e4) {
 # project obs to transect !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 project_obs_to_transect <- function(transect, tglobe_small_buff) {
+  if (is.null(tglobe_small_buff)) {return(NULL)}
   if (st_crs(transect) != st_crs(tglobe_small_buff)) {
     stop('transect and tglobe_small_buff crs not the same!')
   }
@@ -558,9 +561,7 @@ interp_diff <- function(shp_interp_krige, shp_interp_sim) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_tglobe_base <- function() {
   fig_path <- 'figs/tglobe.png'
-  if (!dir.exists('figs')) {
-    dir.create('figs', recursive=T, showWarnings=F)
-  }
+  if (!dir.exists('figs')) {dir.create('figs', recursive=T, showWarnings=F)}
   if (file.exists(fig_path)) {
     cat('\n', fig_path, 'already exists ...')
     return(invisible())
@@ -657,11 +658,17 @@ plot_transect_tglobe <- function(short_name, base_size=20) {
                        line_width=2.5, text_face='bold') +
       annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
                              pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
-    p2 <-
-      ggplot(x$tglobe_projected[[1]]) +
-      geom_smooth(aes(projected_distances, obs), method='loess', formula=y~x, color='black') +
-      geom_point(aes(projected_distances, obs), shape=20, color='grey20') +
-      geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc")) +
+    if (is.null(x$tglobe_projected[[1]])) {
+      p2 <- ggplot(data=data.frame(), aes())
+    } else {
+      p2 <-
+        ggplot(x$tglobe_projected[[1]]) +
+        geom_smooth(aes(projected_distances, obs), method='loess', formula=y~x,
+                    color='black') +
+        geom_point(aes(projected_distances, obs), shape=20, color='grey20') +
+        geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc"))
+    }
+    p2 <- p2 +
       labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
       scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                             breaks=c(0, 125, 250), na.value='transparent',
@@ -679,7 +686,9 @@ plot_transect_tglobe <- function(short_name, base_size=20) {
             legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
             legend.key.width=unit(0.9, 'cm'), legend.box.margin=margin(5, 5, 5, 5),
             legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size))
-    p3 <- p1 + p2 + plot_annotation(tag_levels = 'a', tag_suffix = ')') &
+    p3 <- p1 + p2 +
+      plot_annotation(tag_levels = 'a', tag_suffix = ')') +
+      plot_layout(ncol=2, nrow=1, widths=c(1, 1), heights=c(1, 1)) &
       theme(plot.tag = element_text(size=base_size*1.5))
     ggsave(file=fig_path, plot=p3, width=13, height=6.5, dpi=300, bg='white')
   })})
