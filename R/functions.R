@@ -50,17 +50,35 @@ combine_json_to_df <- function(files) {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# bbox widen !!
+# bbox extend !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bbox_widen <- function(bbox, ext=rep(0, 4)) {
-  xrange <- bbox$xmax - bbox$xmin
-  yrange <- bbox$ymax - bbox$ymin
-  bbox[1] <- bbox[1] - (ext[1] * xrange)
-  bbox[3] <- bbox[3] + (ext[2] * xrange)
-  bbox[4] <- bbox[4] + (ext[3] * yrange)
-  bbox[2] <- bbox[2] - (ext[4] * yrange)
-  box <- c(bbox$xmin, bbox$ymax, bbox$xmin, bbox$ymin, bbox$xmax, bbox$ymin, bbox$xmax,
-           bbox$ymax, bbox$xmin, bbox$ymax)
+bbox_extend <- function(bbox, ext=rep(0, 4), square=F) {
+  b <- bbox
+  if (any(ext != 0)) {
+    xrange <- b$xmax - b$xmin
+    yrange <- b$ymax - b$ymin
+    b[1] <- b[1] - (ext[1] * xrange)
+    b[3] <- b[3] + (ext[2] * xrange)
+    b[2] <- b[2] - (ext[4] * yrange)
+    b[4] <- b[4] + (ext[3] * yrange)
+  }
+  if (square) {
+    xrange <- b$xmax - b$xmin
+    yrange <- b$ymax - b$ymin
+    factor <- xrange / yrange
+    if (factor > 1) {
+      center_y <- (b[2] + b[4]) / 2
+      y_half <- xrange / 2
+      b[2] <- center_y - y_half
+      b[4] <- center_y + y_half
+    } else {
+      center_x <- (b[1] + b[3]) / 2
+      x_half <- yrange / 2
+      b[1] <- center_x - x_half
+      b[3] <- center_x + x_half
+    }
+  }
+  box <- c(b$xmin, b$ymax, b$xmin, b$ymin, b$xmax, b$ymin, b$xmax, b$ymax, b$xmin, b$ymax)
   st_polygon(list(matrix(box, ncol=2, byrow=T))) %>% st_sfc(crs=st_crs(bbox))
 }
 
@@ -116,9 +134,9 @@ get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # get seg bathy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-get_seg_bathy <- function(bbox, res=2, ext=rep(0, 4), path='assets/map_data/relief/', tol=1) {
+get_seg_bathy <- function(shp, res=2, path='assets/map_data/relief/', tol=1) {
   tryCatch({
-    bbx <- bbox_widen(st_bbox(bbox), ext=ext) %>% st_transform(wgs) %>% st_bbox() %>% round(2)
+    bbx <- shp %>% st_transform(wgs) %>% st_bbox() %>% round(2)
     if (bbx[3] - bbx[1] > 180) {antim <- T} else {antim <- F}
     getNOAA.bathy(bbx[3], bbx[1], bbx[2], bbx[4], res, T, antim, path) %>%
       as.SpatialGridDataFrame() %>% st_as_sf(crs=wgs) %>% st_make_valid() %>%
@@ -158,10 +176,10 @@ handle_zerodist_obs <- function(df) {
 # calculate interp rmse !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 calculate_interp_rmse <- function(obs, interp, type='similarity') {
-  if (!(type %in% c('krige', 'similarity'))) stop('invalid type!')
+  if (!(type %in% c('krige', 'similarity'))) stop('\ninvalid type!')
   if (type == 'similarity') {
     nearest_est <- interp$est_sim[st_nearest_feature(obs, st_geometry(interp))]
-    print(nearest_est)
+    cat('\n', nearest_est)
     sqrt(mean((nearest_est - obs$obs)^2))
   } else if (type == 'krige') {
     interpolation <- interpolation
@@ -173,32 +191,59 @@ calculate_interp_rmse <- function(obs, interp, type='similarity') {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compile transect data !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile_transect_data <- function(trans) {
+compile_transect_data <- function(trans_id, large_buff=5e5, small_buff=5e4) {
   if (!exists('shp_submap', envir=.GlobalEnv)) {
-    stop('Missing map data! Use "load(path/to/map-data.RData"')
+    stop('\nMissing map data! Use "load(path/to/map-data.RData"')
   }
-  if (is.numeric(trans) && all(trans >= 1) && all(trans <= nrow(shp_submap))) {
-    x <- slice(shp_submap, trans)
-  } else if (is.character(trans) && all(trans %in% shp_submap$short_name)) {
-    x <- filter(shp_submap, short_name %in% trans)
+  if (is.numeric(trans_id) && all(trans_id >= 1) && all(trans_id <= nrow(shp_submap))) {
+    x <- slice(shp_submap, trans_id)
+  } else if (is.character(trans_id) && all(trans_id %in% shp_submap$short_name)) {
+    x <- filter(shp_submap, short_name %in% trans_id)
   } else {
-    stop('Unrecognized input for trans! Use the trans short_name or row number ...')
+    stop('\nUnrecognized input for trans_id! Use the transect short_name or row number ...')
   }
+  if (nrow(x) == 0) {
+    stop('\n', trans_id, ' not found in shp_submap!')
+  }
+  cat('\nCompiling transect data for:', trans_id)
   suppressWarnings({suppressMessages({
     x %>% rowwise() %>%
-      mutate(buffer=st_buffer(transect, 5e5, endCapStyle='ROUND')) %>%
-      mutate(bbox=bbox_widen(st_bbox(buffer), ext=rep(0.2, 4))) %>%
+      mutate(large_buffer=st_buffer(transect, large_buff, endCapStyle='ROUND')) %>%
+      mutate(small_buffer=st_buffer(transect, small_buff, endCapStyle='FLAT')) %>%
+      mutate(bbox=bbox_extend(st_bbox(large_buffer), square=T)) %>%
       mutate(grid=crop_feature(shp_grid, bbox)) %>%
       mutate(ridge=crop_feature(shp_ridge, bbox)) %>%
       mutate(trench=crop_feature(shp_trench, bbox)) %>%
       mutate(transform=crop_feature(shp_transform, bbox)) %>%
       mutate(volcano=crop_feature(select(shp_volc, geometry), bbox)) %>%
-      mutate(tglobe_box=list(crop_feature(shp_tglobe, bbox, F, T))) %>%
-      mutate(tglobe_buff=list(crop_feature(shp_tglobe, buffer, T, T))) %>%
-      mutate(sim=list(crop_feature(shp_sim, buffer, T, T))) %>%
+      mutate(tglobe_large_buff=list(crop_feature(shp_tglobe, large_buffer, T, T))) %>%
+      mutate(tglobe_small_buff=list(crop_feature(shp_tglobe, small_buffer, T, T))) %>%
+      mutate(tglobe_projected=list(project_obs_to_transect(transect, tglobe_small_buff))) %>%
+      mutate(sim=list(crop_feature(shp_sim, large_buffer, T, T))) %>%
       mutate(bathy=list(get_seg_bathy(bbox))) %>%
       ungroup()
   })})
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# project obs to transect !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+project_obs_to_transect <- function(transect, tglobe_small_buff) {
+  if (st_crs(transect) != st_crs(tglobe_small_buff)) {
+    stop('transect and tglobe_small_buff crs not the same!')
+  }
+  if (!any(class(transect) == 'sfc')) {
+    stop('\ntransect needs to be an sf object!')
+  }
+  if (!any(class(tglobe_small_buff) == 'sf')) {
+    stop('\nUnrecognized tglobe_small_buff passed to project_obs_to_transect() !')
+  }
+  if (!any(names(tglobe_small_buff) == 'obs')) {
+    stop('\nUnrecognized sf object passed to project_obs_to_transect() !')
+  }
+  projected_distances <- st_line_project(transect, tglobe_small_buff$tglobe, normalized=T)
+  st_as_sf(st_line_interpolate(transect, projected_distances)) %>%
+    mutate(projected_distances=projected_distances, obs=tglobe_small_buff$obs)
 }
 
 
@@ -507,50 +552,134 @@ interp_diff <- function(shp_interp_krige, shp_interp_sim) {
 #######################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot tglobe !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_tglobe_base <- function() {
+  fig_path <- 'figs/tglobe.png'
+  if (!dir.exists('figs')) {
+    dir.create('figs', recursive=T, showWarnings=F)
+  }
+  if (file.exists(fig_path)) {
+    cat('\n', fig_path, 'already exists ...')
+    return(invisible())
+  }
+  cat('\nplotting: tglobe base')
+  suppressWarnings({suppressMessages({
+    p1 <-
+      ggplot() +
+      geom_sf(data=shp_relief_world, aes(color=elev), shape=15, size=0.01) +
+      scale_color_etopo(guide='none') +
+      geom_sf(data=shp_ridge, linewidth=0.3, color='white') +
+      geom_sf(data=shp_transform, linewidth=0.3, color='white') +
+      geom_sf(data=shp_trench, linewidth=0.3, color='white') +
+      geom_sf(data=shp_submap, color='black') +
+      ggtitle('Submap Transects') +
+      coord_sf(expand=F, lims_method='geometry_bbox') +
+      theme_map(font_size=14)
+    p2 <-
+      ggplot() +
+      geom_sf(data=shp_relief_world, aes(color=elev), shape=15, size=0.01) +
+      scale_color_etopo(guide='none') +
+      new_scale_color() +
+      geom_sf(data=shp_ridge, linewidth=0.3, color='white') +
+      geom_sf(data=shp_transform, linewidth=0.3, color='white') +
+      geom_sf(data=shp_trench, linewidth=0.3, color='white') +
+      geom_sf(data=shp_tglobe, aes(color=obs), size=0.1, shape=20) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)),
+                            limits=c(0, 250), breaks=c(0, 125, 250), na.value='transparent',
+                            guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                 frame.colour='black',
+                                                 ticks.colour='black')) +
+      ggtitle('Thermoglobe Observations') +
+      coord_sf(expand=F, lims_method='geometry_bbox') +
+      theme_map(font_size=14)
+    p3 <- p1 / p2 &
+      theme(plot.margin=margin(), legend.position='bottom',
+            legend.justification='center', legend.direction='horizontal',
+            axis.text=element_blank(), legend.margin=margin(),
+            legend.box.margin=margin(5, 5, 5, 5), legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.6, 'cm'),
+            legend.title=element_text(vjust=0, color='black', size=14),
+            panel.grid=element_line(linewidth=0.05, color='grey20'),
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(10, 10, 10, 10)))
+    ggsave(file=fig_path, plot=p3, width=6.5, height=6.5, bg='white')
+  })})
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot transect tglobe !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_transect_tglobe <- function(short_name) {
-  fig_path <- paste0('~/Downloads/segs/', short_name,'-tglobe.png')
-  if (file.exists(fig_path)) {cat('\n', fig_path, ' already exists ...'); return()}
-  cat('\ncompiling map data for: ', short_name)
+plot_transect_tglobe <- function(short_name, base_size=20) {
+  fig_path <- paste0('figs/transect_tglobe/', short_name,'-tglobe.png')
+  if (!dir.exists('figs/transect_tglobe')) {
+    dir.create('figs/transect_tglobe', recursive=T, showWarnings=F)
+  }
+  if (file.exists(fig_path)) {
+    cat('\n', fig_path, 'already exists ...')
+    return(invisible())
+  }
+  cat('\nCompiling map data for:', short_name)
   x <- compile_transect_data(short_name)
   cat('\nplotting: ', short_name)
   suppressWarnings({suppressMessages({
-    p <-
+    p1 <-
       ggplot(x) +
       geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
-      scale_color_etopo(name='Elev (m)',
-                        guide=guide_colorbar(title.vjust=1, show.limits=T),
-                        labels=label_number(scale_cut=cut_short_scale())) +
+      scale_color_etopo(name='Elevation (m)',
+                        labels=label_number(scale_cut=cut_short_scale()),
+                        guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                             frame.colour='black', ticks.colour='black')) +
       new_scale_color() +
-      geom_sf(aes(geometry=buffer), fill=NA, linewidth=0.5) +
+      geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+      geom_sf(aes(geometry=small_buffer), fill=NA, linewidth=0.5) +
       geom_sf(aes(geometry=ridge), color='white') +
       geom_sf(aes(geometry=transform), color='white') +
       geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
       geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
       geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-      geom_sf(data=x$tglobe_buff[[1]], aes(color=obs), shape=20) +
-      geom_sf(data=x$tglobe_box[[1]], aes(color=obs), shape=19, size=0.5) +
-      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)),
-                            limits=c(0, 250), breaks=c(0, 125, 250), na.value='transparent',
-                            guide=guide_colorbar(title.vjust=1, show.limits=T)) +
+      geom_sf(data=x$tglobe_large_buff[[1]], aes(color=obs), shape=20) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                            breaks=c(0, 125, 250), na.value='transparent', guide='none') +
       xlab('Longitude') + ylab('Latitude') +
-      ggtitle(paste0(short_name, ': ', x$trench_name)) +
+      ggtitle(paste0('Submap ', short_name, ': ', x$trench_name)) +
       coord_sf(expand=F, lims_method='geometry_bbox') +
-      theme_bw(base_size=14) +
-      theme(plot.margin=margin(20, 20, 20, 20), legend.position='bottom',
-            legend.justification='center', legend.direction='horizontal',
-            axis.text=element_text(hjust=1), legend.margin=margin(),
-            legend.box.margin=margin(15, 15, 15, 15), legend.key.height=unit(0.5, 'cm'),
-            legend.key.width=unit(0.6, 'cm'),
-            legend.title=element_text(vjust=0, color='black', size=14),
+      theme_bw(base_size=base_size) +
+      theme(plot.margin=margin(5, 5, 5, 5), axis.text=element_text(hjust=1),
             panel.grid=element_line(linewidth=0.05, color='grey20'),
-            plot.title=element_text(vjust=0, margin=margin(0, 0, 10, 10))) +
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10)),
+            legend.justification='center', legend.position='bottom',
+            legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.9, 'cm'), legend.box.margin=margin(5, 5, 5, 5),
+            legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size)) +
       annotation_scale(location='bl', width_hint=0.33, text_cex=1, style='ticks',
                        line_width=2.5, text_face='bold') +
       annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
                              pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
-    ggsave(file=fig_path, plot=p, width=6.5, height=6.5, dpi=300, bg='white')
+    p2 <-
+      ggplot(x$tglobe_projected[[1]]) +
+      geom_smooth(aes(projected_distances, obs), method='loess', formula=y~x, color='black') +
+      geom_point(aes(projected_distances, obs), shape=20, color='grey20') +
+      geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc")) +
+      labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                            breaks=c(0, 125, 250), na.value='transparent',
+                            guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                 frame.colour='black',
+                                                 ticks.colour='black')) +
+      scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+      scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) +
+      ggtitle('Projected Observations') +
+      theme_bw(base_size=base_size) +
+      theme(plot.margin=margin(5, 5, 5, 5),
+            panel.grid=element_line(linewidth=0.05, color='grey20'),
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10)),
+            legend.justification='center', legend.position='bottom',
+            legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.9, 'cm'), legend.box.margin=margin(5, 5, 5, 5),
+            legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size))
+    p3 <- p1 + p2 + plot_annotation(tag_levels = 'a', tag_suffix = ')') &
+      theme(plot.tag = element_text(size=base_size*1.5))
+    ggsave(file=fig_path, plot=p3, width=13, height=6.5, dpi=300, bg='white')
   })})
 }
 
@@ -558,42 +687,46 @@ plot_transect_tglobe <- function(short_name) {
 # plot transect sim !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_transect_sim <- function(short_name) {
-  fig_path <- paste0('~/Downloads/segs/', short_name,'-sim.png')
-  if (file.exists(fig_path)) {cat('\n', fig_path, ' already exists ...'); return()}
-  cat('\ncompiling map data for: ', short_name)
+  fig_path <- paste0('figs/transect_sim/', short_name,'-sim.png')
+  if (!dir.exists('figs/transect_sim')) {
+    dir.create('figs/transect_sim', recursive=T, showWarnings=F)
+  }
+  if (file.exists(fig_path)) {
+    cat('\n', fig_path, 'already exists ...')
+    return(invisible())
+  }
+  cat('\nCompiling map data for:', short_name)
   x <- compile_transect_data(short_name)
   cat('\nplotting: ', short_name)
   suppressWarnings({suppressMessages({
     p <-
       ggplot(x) +
       geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
-      scale_color_etopo(name='Elev (m)',
+      scale_color_etopo(name='Elevation (m)',
                         guide=guide_colorbar(title.vjust=1, show.limits=T),
                         labels=label_number(scale_cut=cut_short_scale())) +
       new_scale_color() +
-      geom_sf(aes(geometry=buffer), fill=NA, linewidth=0.5) +
+      geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
       geom_sf(aes(geometry=ridge), color='white') +
       geom_sf(aes(geometry=transform), color='white') +
       geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
       geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
       geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-      geom_sf(data=x$tglobe_box[[1]], aes(color=obs), shape=19, size=0.5) +
-      geom_sf(data=x$sim[[1]], aes(color=est_sim), shape=15) +
-      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)),
-                            limits=c(0, 250), breaks=c(0, 125, 250), na.value='transparent',
-                            guide=guide_colorbar(title.vjust=1, show.limits=T)) +
+      geom_sf(data=x$sim[[1]], aes(color=est_sim), shape=20) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                            breaks=c(0, 125, 250), na.value='transparent', guide='none') +
       xlab('Longitude') + ylab('Latitude') +
-      ggtitle(paste0(short_name, ': ', x$trench_name)) +
+      ggtitle(paste0('Submap ', short_name, ': ', x$trench_name)) +
       coord_sf(expand=F, lims_method='geometry_bbox') +
       theme_bw(base_size=14) +
-      theme(plot.margin=margin(20, 20, 20, 20), legend.position='bottom',
+      theme(plot.margin=margin(5, 5, 5, 5), legend.position='bottom',
             legend.justification='center', legend.direction='horizontal',
             axis.text=element_text(hjust=1), legend.margin=margin(),
-            legend.box.margin=margin(15, 15, 15, 15), legend.key.height=unit(0.5, 'cm'),
-            legend.key.width=unit(0.6, 'cm'),
+            legend.box.margin=margin(5, 5, 5, 5), legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.75, 'cm'), legend.text=element_text(size=base_size*0.694),
             legend.title=element_text(vjust=0, color='black', size=14),
             panel.grid=element_line(linewidth=0.05, color='grey20'),
-            plot.title=element_text(vjust=0, margin=margin(0, 0, 10, 10))) +
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10))) +
       annotation_scale(location='bl', width_hint=0.33, text_cex=1, style='ticks',
                        line_width=2.5, text_face='bold') +
       annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
@@ -651,7 +784,7 @@ plot_vgrm <- function(experimental_vgrm, fitted_vgrm=NULL, cost=NULL, v_mod=NULL
 plot_split_segment <- function(split_seg, ext=c(0.1, 0.1, 0.1, 0.1), running_avg=3) {
   seg_name <- split_seg$interp[[1]]$segment[1]
   seg_num <- as.numeric(unique(bind_rows(split_seg$pnts)$split_fID))
-  bx <- bbox_widen(st_bbox(st_buffer(st_combine(split_seg$seg), dist=5e5)), ext=ext)
+  bx <- bbox_extend(st_bbox(st_buffer(st_combine(split_seg$seg), dist=5e5)), ext=ext)
   seg <- bind_rows(split_seg$seg)
   ridge <- shp_ridge_crop[[seg_name]]
   trench <- shp_trench_crop[[seg_name]]
