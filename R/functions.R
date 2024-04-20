@@ -223,7 +223,9 @@ compile_transect_data <- function(trans_id, large_buff=5e5, small_buff=5e4) {
       mutate(tglobe_large_buff=list(crop_feature(shp_tglobe, large_buffer, T, T))) %>%
       mutate(tglobe_small_buff=list(crop_feature(shp_tglobe, small_buffer, T, T))) %>%
       mutate(tglobe_projected=list(project_obs_to_transect(transect, tglobe_small_buff))) %>%
-      mutate(sim=list(crop_feature(shp_sim, large_buffer, T, T))) %>%
+      mutate(sim_large_buff=list(crop_feature(shp_sim, large_buffer, T, T))) %>%
+      mutate(sim_small_buff=list(crop_feature(shp_sim, small_buffer, T, T))) %>%
+      mutate(sim_projected=list(project_obs_to_transect(transect, sim_small_buff))) %>%
       mutate(bathy=list(get_seg_bathy(bbox))) %>%
       ungroup()
   })})
@@ -232,23 +234,30 @@ compile_transect_data <- function(trans_id, large_buff=5e5, small_buff=5e4) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # project obs to transect !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-project_obs_to_transect <- function(transect, tglobe_small_buff) {
-  if (is.null(tglobe_small_buff)) {return(NULL)}
-  if (st_crs(transect) != st_crs(tglobe_small_buff)) {
-    stop('transect and tglobe_small_buff crs not the same!')
+project_obs_to_transect <- function(transect, shp_obs) {
+  if (is.null(shp_obs)) {return(NULL)}
+  if (st_crs(transect) != st_crs(shp_obs)) {
+    stop('transect and shp_obs crs not the same!')
   }
   if (!any(class(transect) == 'sfc')) {
     stop('\ntransect needs to be an sf object!')
   }
-  if (!any(class(tglobe_small_buff) == 'sf')) {
-    stop('\nUnrecognized tglobe_small_buff passed to project_obs_to_transect() !')
+  if (!any(class(shp_obs) == 'sf')) {
+    stop('\nUnrecognized shp_obs passed to project_obs_to_transect() !')
   }
-  if (!any(names(tglobe_small_buff) == 'obs')) {
+  if (!any(names(shp_obs) %in% c('obs', 'est_sim'))) {
     stop('\nUnrecognized sf object passed to project_obs_to_transect() !')
   }
-  projected_distances <- st_line_project(transect, tglobe_small_buff$tglobe, normalized=T)
+  if (any(names(shp_obs) == 'tglobe')) {
+    obs <- shp_obs$obs
+  } else if (any(names(shp_obs) == 'similarity')) {
+    obs <- shp_obs$est_sim
+  } else if (any(names(shp_obs) == 'krige')) {
+    obs <- shp_obs$est_krg
+  }
+  projected_distances <- st_line_project(transect, st_geometry(shp_obs), normalized=T)
   st_as_sf(st_line_interpolate(transect, projected_distances)) %>%
-    mutate(projected_distances=projected_distances, obs=tglobe_small_buff$obs)
+    mutate(projected_distances=projected_distances, obs=obs)
 }
 
 
@@ -610,17 +619,13 @@ plot_tglobe_base <- function() {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# plot transect tglobe !!
+# plot transect !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_transect_tglobe <- function(short_name, base_size=20) {
-  fig_path <- paste0('figs/transect_tglobe/', short_name,'-tglobe.png')
-  if (!dir.exists('figs/transect_tglobe')) {
-    dir.create('figs/transect_tglobe', recursive=T, showWarnings=F)
-  }
-  if (file.exists(fig_path)) {
-    cat('\n', fig_path, 'already exists ...')
-    return(invisible())
-  }
+plot_transect <- function(short_name, base_size=20) {
+  fig_dir <- 'figs/transect/'
+  fig_path <- paste0(fig_dir, short_name, '-tglobe-sim.png')
+  if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
+  if (file.exists(fig_path)) {cat('\n', fig_path, 'already exists ...'); return(invisible())}
   cat('\nCompiling map data for:', short_name)
   x <- compile_transect_data(short_name)
   cat('\nplotting: ', short_name)
@@ -647,7 +652,7 @@ plot_transect_tglobe <- function(short_name, base_size=20) {
       ggtitle(paste0('Submap ', short_name, ': ', x$trench_name)) +
       coord_sf(expand=F, lims_method='geometry_bbox') +
       theme_bw(base_size=base_size) +
-      theme(plot.margin=margin(5, 5, 5, 5), axis.text=element_text(hjust=1),
+      theme(plot.margin=margin(5, 5, 5, 5),
             panel.grid=element_line(linewidth=0.05, color='grey20'),
             plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10)),
             legend.justification='center', legend.position='bottom',
@@ -677,7 +682,7 @@ plot_transect_tglobe <- function(short_name, base_size=20) {
                                                  ticks.colour='black')) +
       scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
       scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) +
-      ggtitle('Projected Observations') +
+      ggtitle('Thermoglobe Observations') +
       theme_bw(base_size=base_size) +
       theme(plot.margin=margin(5, 5, 5, 5),
             panel.grid=element_line(linewidth=0.05, color='grey20'),
@@ -686,63 +691,74 @@ plot_transect_tglobe <- function(short_name, base_size=20) {
             legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
             legend.key.width=unit(0.9, 'cm'), legend.box.margin=margin(5, 5, 5, 5),
             legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size))
-    p3 <- p1 + p2 +
-      plot_annotation(tag_levels = 'a', tag_suffix = ')') +
-      plot_layout(ncol=2, nrow=1, widths=c(1, 1), heights=c(1, 1)) &
-      theme(plot.tag = element_text(size=base_size*1.5))
-    ggsave(file=fig_path, plot=p3, width=13, height=6.5, dpi=300, bg='white')
-  })})
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# plot transect sim !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_transect_sim <- function(short_name) {
-  fig_path <- paste0('figs/transect_sim/', short_name,'-sim.png')
-  if (!dir.exists('figs/transect_sim')) {
-    dir.create('figs/transect_sim', recursive=T, showWarnings=F)
-  }
-  if (file.exists(fig_path)) {
-    cat('\n', fig_path, 'already exists ...')
-    return(invisible())
-  }
-  cat('\nCompiling map data for:', short_name)
-  x <- compile_transect_data(short_name)
-  cat('\nplotting: ', short_name)
-  suppressWarnings({suppressMessages({
-    p <-
+    p3 <-
       ggplot(x) +
       geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
       scale_color_etopo(name='Elevation (m)',
-                        guide=guide_colorbar(title.vjust=1, show.limits=T),
-                        labels=label_number(scale_cut=cut_short_scale())) +
+                        labels=label_number(scale_cut=cut_short_scale()),
+                        guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                             frame.colour='black', ticks.colour='black')) +
       new_scale_color() +
       geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+      geom_sf(aes(geometry=small_buffer), fill=NA, linewidth=0.5) +
       geom_sf(aes(geometry=ridge), color='white') +
       geom_sf(aes(geometry=transform), color='white') +
       geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
       geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
       geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-      geom_sf(data=x$sim[[1]], aes(color=est_sim), shape=20) +
+      geom_sf(data=x$sim_large_buff[[1]], aes(color=est_sim), shape=20) +
       scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                             breaks=c(0, 125, 250), na.value='transparent', guide='none') +
       xlab('Longitude') + ylab('Latitude') +
       ggtitle(paste0('Submap ', short_name, ': ', x$trench_name)) +
       coord_sf(expand=F, lims_method='geometry_bbox') +
-      theme_bw(base_size=14) +
-      theme(plot.margin=margin(5, 5, 5, 5), legend.position='bottom',
-            legend.justification='center', legend.direction='horizontal',
-            axis.text=element_text(hjust=1), legend.margin=margin(),
-            legend.box.margin=margin(5, 5, 5, 5), legend.key.height=unit(0.5, 'cm'),
-            legend.key.width=unit(0.75, 'cm'), legend.text=element_text(size=base_size*0.694),
-            legend.title=element_text(vjust=0, color='black', size=14),
+      theme_bw(base_size=base_size) +
+      theme(plot.margin=margin(5, 5, 5, 5),
             panel.grid=element_line(linewidth=0.05, color='grey20'),
-            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10))) +
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10)),
+            legend.justification='center', legend.position='bottom',
+            legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.9, 'cm'), legend.box.margin=margin(5, 5, 5, 5),
+            legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size)) +
       annotation_scale(location='bl', width_hint=0.33, text_cex=1, style='ticks',
                        line_width=2.5, text_face='bold') +
       annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
                              pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
-    ggsave(file=fig_path, plot=p, width=6.5, height=6.5, dpi=300, bg='white')
+    if (is.null(x$sim_projected[[1]])) {
+      p4 <- ggplot(data=data.frame(), aes())
+    } else {
+      p4 <-
+        ggplot(x$sim_projected[[1]]) +
+        geom_smooth(aes(projected_distances, obs), method='loess', formula=y~x,
+                    color='black') +
+        geom_point(aes(projected_distances, obs), shape=20, color='grey20') +
+        geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc"))
+    }
+    p4 <- p4 +
+      labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                            breaks=c(0, 125, 250), na.value='transparent',
+                            guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                 frame.colour='black',
+                                                 ticks.colour='black')) +
+      scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+      scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) +
+      ggtitle('Similarity Interpolation') +
+      theme_bw(base_size=base_size) +
+      theme(plot.margin=margin(5, 5, 5, 5),
+            panel.grid=element_line(linewidth=0.05, color='grey20'),
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 0, 10, 10)),
+            legend.justification='center', legend.position='bottom',
+            legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
+            legend.key.width=unit(0.9, 'cm'), legend.box.margin=margin(5, 5, 5, 5),
+            legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size))
+    p5 <-
+      (p1 + p2 & theme(legend.position='none', axis.title.x=element_blank())) /
+      (p3 + p4) +
+      plot_annotation(tag_levels = 'a', tag_suffix = ')') &
+      plot_layout(widths=1, heights=1) &
+      theme(plot.tag = element_text(size=base_size * 1.5))
+    ggsave(file=fig_path, plot=p5, width=13, height=11, dpi=300, bg='white')
   })})
 }
 
