@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Load packages and functions
+# Load packages and data
 cat(rep('~', 45), '\n', sep='')
 source('R/functions.R')
 load('assets/map_data/map-data.RData')

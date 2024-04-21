@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Load packages and functions
+# Load packages
 cat(rep('~', 45), '\n', sep='')
 source('R/functions.R')
 
@@ -91,7 +91,7 @@ rm(list=lsf.str())
 rm(ct, prj, wgs)
 
 # Save
-cat('\nSaving data to: assets/map_data/map-data.RData')
+cat('\n\nSaving data to: assets/map_data/map-data.RData')
 save.image('assets/map_data/map-data.RData')
 
 cat('\npreprocess-map-data.R complete!\n')
