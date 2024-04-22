@@ -66,7 +66,7 @@ shp_grid <- st_geometry(shp_sim)
 
 # Read and process submap transects
 cat('\nProcessing Submap data (Lallemand & Heuret, 2017) ...')
-cat('\nhttps://submap.gm.umontpellier.fr')
+cat('\nhttps://submap.gm.umontpellier.fr\n')
 suppressWarnings({suppressMessages({
   shp_submap <-
     combine_json_to_df(list.files('assets/map_data/submap', full.names=T)) %>%
@@ -85,6 +85,11 @@ suppressWarnings({suppressMessages({
     select(id, zone, short_name, trench_name, harc1, a, phi, m56_vc, m56_azvc, m56_vsn,
            alphad, dz, dz1, n, n1, tau, tau1)
 })})
+
+# Plot base maps
+cat('\nDrawing base maps ...')
+plot_tglobe_base()
+walk(shp_submap$short_name, plot_transect)
 
 # Clean up environment
 rm(list=lsf.str())
