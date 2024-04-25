@@ -31,7 +31,7 @@ check_dependencies <- function(packages) {
 
 # Package list
 package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
-                  'magrittr', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
+                  'magrittr', 'units', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
                   'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'scales',
                   'ggspatial', 'gstat', 'rgeos', 'sp', 'sf', 'rnaturalearth', 'nloptr', 'zoo',
                   'jsonlite')
