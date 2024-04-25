@@ -7,8 +7,6 @@ R = \
 		R/check-packages.R \
 		R/preprocess-map-data.R \
 		R/nloptr.R \
-		R/krige.R \
-		R/base-plots.R \
 		R/interpolation-plots.R \
 		R/summary-plots.R \
 		R/goutorbe-analysis.R \
@@ -16,28 +14,14 @@ R = \
 # Directories with data and scripts
 DATADIR = assets
 # Cleanup directories
-DATAPURGE = \
-						log \
-						assets.zip \
-						$(DATADIR)/opt_data/nloptr.RData \
-						$(DATADIR)/opt_data/krige.RData \
-						$(DATADIR)/sectors.RData
-DATACLEAN = assets draft/assets/r/*.RData
-FIGSPURGE = figs draft/assets/figs
+DATAPURGE = log
+DATACLEAN = $(DATADIR)
+FIGSPURGE = figs
 
 all: krige
 
-krige: preprocess
-	@if [ ! -e "$(DATADIR)/opt_data/krige.RData" ]; then \
-		R/krige.R $(LOG); \
-		echo "=============================================" $(LOG); \
-	else \
-		echo "Kriging interpolations found!" $(LOG); \
-		echo "=============================================" $(LOG); \
-	fi
-
 nlopt: preprocess
-	@if [ ! -e "$(DATADIR)/opt_data/opt-SWP.RData" ]; then \
+	@if [ ! -e "$(DATADIR)/nlopt_data/interpolation-summary.RData" ]; then \
 		R/nloptr.R $(LOG); \
 		echo "=============================================" $(LOG); \
 	else \

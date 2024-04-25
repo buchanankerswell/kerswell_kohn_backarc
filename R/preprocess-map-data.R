@@ -86,11 +86,6 @@ suppressWarnings({suppressMessages({
            alphad, dz, dz1, n, n1, tau, tau1)
 })})
 
-# Plot base maps
-cat('\nDrawing base maps ...')
-plot_tglobe_base()
-walk(shp_submap$short_name, plot_transect)
-
 # Clean up environment
 rm(list=lsf.str())
 rm(ct, prj, wgs)
