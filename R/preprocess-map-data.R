@@ -4,11 +4,6 @@
 cat(rep('~', 45), '\n', sep='')
 source('R/functions.R')
 
-# Read and process segment feature labels
-shp_fts <-
-  read_csv('assets/map_data/segment-feature-labels.csv', show_col_types=F) %>%
-  st_as_sf(coords=c(2, 1), crs=wgs) %>% reproject_center_pacific()
-
 # Read and process country boundaries
 shp_world <- ne_countries(returnclass='sf') %>% reproject_center_pacific()
 
@@ -44,17 +39,19 @@ shp_volc <-
   st_as_sf(coords=c('Lon', 'Lat'), crs=wgs) %>%
   reproject_center_pacific()
 
-# Read and process ThermoGlobe database (Lucazeau, 2019)
-shp_tglobe <-
-  read_csv('assets/hf_data/tglobe.csv', show_col_types=F) %>%
-  select(longitude, latitude, `heat-flow (mW/m2)`, code6) %>%
-  rename(obs=`heat-flow (mW/m2)`) %>%
-  filter(!is.na(obs)) %>% filter(code6 != 'D') %>% filter(!is.na(longitude)) %>%
-  filter(!is.na(latitude)) %>% filter(obs > 0 & obs <= 250) %>%
-  st_as_sf(coords=c(1,2), crs=wgs) %>% reproject_center_pacific() %>%
-  handle_zerodist_obs() %>% rename(tglobe=geometry) %>% select(obs, tglobe)
+# Read and process IHFC database
+cat('\nProcessing IHFC database 2024 release ...')
+cat('\nhttps://doi.org/10.5880/fidgeo.2024.014\n')
+shp_ghfdb <-
+  read_excel('assets/hf_data/IHFC_2024_GHFDB.xlsx', skip=5) %>%
+  select(long_EW, lat_NS, q, Quality_Code) %>% rename(obs=q) %>%
+  filter(obs > 0 & obs <= 250) %>% st_as_sf(coords=c(1,2), crs=wgs) %>%
+  reproject_center_pacific() %>% parse_zerodist_obs() %>%
+  rename(ghfdb=geometry) %>% select(obs, ghfdb)
 
 # Read and process similarity interpolation (Lucazeau, 2019)
+cat('\nProcessing similarity interpolation (Lucazeau, 2019) ...')
+cat('\nhttps://doi.org/10.1029/2019GC008389\n')
 shp_sim <-
   read_delim('assets/hf_data/HFgrid14.csv', delim=';', col_types=c('ddddd')) %>%
   rename(lon=longitude, lat=latitude, est_sim=HF_pred, sigma_sim=sHF_pred, obs_sim=Hf_obs) %>%
@@ -91,7 +88,7 @@ rm(list=lsf.str())
 rm(ct, prj, wgs)
 
 # Save
-cat('\n\nSaving data to: assets/map_data/map-data.RData')
+cat('\nSaving data to: assets/map_data/map-data.RData')
 save.image('assets/map_data/map-data.RData')
 
 cat('\npreprocess-map-data.R complete!\n')

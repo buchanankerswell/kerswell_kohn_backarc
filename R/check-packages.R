@@ -30,11 +30,11 @@ check_dependencies <- function(packages) {
 }
 
 # Package list
-package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'purrr', 'furrr', 'tibble', 'dplyr',
-                  'magrittr', 'units', 'ggplot2', 'colorspace', 'metR', 'ggrepel', 'ggridges',
-                  'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel', 'marmap', 'scales',
-                  'ggspatial', 'gstat', 'rgeos', 'sp', 'sf', 'rnaturalearth', 'nloptr', 'zoo',
-                  'jsonlite')
+package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'readxl', 'purrr', 'furrr',
+                  'tibble', 'dplyr', 'magrittr', 'units', 'ggplot2', 'colorspace', 'metR',
+                  'ggrepel', 'ggridges', 'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel',
+                  'marmap', 'scales', 'ggspatial', 'gstat', 'rgeos', 'sp', 'sf',
+                  'rnaturalearth', 'nloptr', 'zoo', 'jsonlite')
 
 # Check dependencies and install missing packages
 cat('Checking required packages ...')
