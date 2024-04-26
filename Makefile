@@ -21,13 +21,8 @@ FIGSPURGE = figs
 all: krige
 
 nlopt: preprocess
-	@if [ ! -e "$(DATADIR)/nlopt_data/interpolation-summary.RData" ]; then \
-		R/nloptr.R $(LOG); \
-		echo "=============================================" $(LOG); \
-	else \
-		echo "nlopt results found!" $(LOG); \
-		echo "=============================================" $(LOG); \
-	fi
+	@R/nloptr.R $(LOG)
+	@echo "=============================================" $(LOG)
 
 preprocess: $(DATADIR)
 	@if [ ! -e "$(DATADIR)/map_data/map-data.RData" ]; then \
