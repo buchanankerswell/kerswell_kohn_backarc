@@ -287,7 +287,7 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=5e4, fv=NULL,
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # get closest interp obs !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-get_closest_interp_obs <- function(trans_id=NULL, fv=NULL, np=NULL) {
+get_closest_interp_obs <- function(trans_id=NULL, fv=NULL, np=NULL, thresh=1e4) {
   if (is.null(trans_id)) {stop('\nMissing submap transect ids!')}
   if (!is.null(fv) && !is.null(np)) {
     x <- compile_transect_data(trans_id, fv=fv, np=np)
@@ -300,8 +300,8 @@ get_closest_interp_obs <- function(trans_id=NULL, fv=NULL, np=NULL) {
   obs <- x$ghfdb_large_buff[[1]]
   nearest_obs <- st_nearest_feature(grid, obs)
   nearest_itp <- st_nearest_feature(obs, grid)
-  dt_obs <- st_distance(grid, obs[nearest_obs,], by_element=T) < set_units(1e4, 'm')
-  dt_itp <- st_distance(obs, grid[nearest_itp,], by_element=T) < set_units(1e4, 'm')
+  dt_obs <- st_distance(grid, obs[nearest_obs,], by_element=T) < set_units(thresh, 'm')
+  dt_itp <- st_distance(obs, grid[nearest_itp,], by_element=T) < set_units(thresh, 'm')
   obs_n <- obs[nearest_obs,][dt_obs,]
   itp_n <- itp[nearest_itp,][dt_itp,]
   if (any(names(itp_n) %in% c('est_sim', 'similarity'))) {
@@ -338,8 +338,9 @@ experimental_vgrm <- function(shp_hf=NULL, cutoff=3, n_lags=30) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # cost function !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, v_mod='Sph',
-                          n_fold=NULL, interp_weight=0.5, vgrm_weight=0.5, trans_id=NULL) {
+cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1e5,
+                          v_mod='Sph', n_fold=NULL, interp_weight=0.5, vgrm_weight=0.5,
+                          trans_id=NULL) {
   if (is.null(shp_hf)) {stop('\nMissing heat flow data model!')}
   if (is.null(n_fold)) {n_fold <- nrow(shp_hf)}
   if (!is.null(n_fold)) {if (n_fold > 0 & n_fold <= 1) {n_fold <- nrow(shp_hf) * n_fold}}
@@ -348,33 +349,41 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, v_mod='Sph
       ev <- experimental_vgrm(shp_hf, cutoff, n_lags)
     }, error=function(e) {
       cat('\nAn error occurred in experimental_vgrm:\n', conditionMessage(e))
-      return(runif(1, 1, 1.5))
+      return(3)
     })
-    if (nrow(ev) < 2) {return(runif(1, 1, 1.5))}
+    if (nrow(ev) < 2) {return(3)}
     tryCatch({
       fv <- fit.variogram(ev, vgm(model=v_mod), fit.method=6)
     }, error=function(e) {
       cat('\nAn error occurred in fit.variogram:\n', conditionMessage(e))
-      return(runif(1, 1, 1.5))
+      return(3)
     })
     tryCatch({
-      k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, nfold=n_fold)
+      k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, maxdist=max_dist, nfold=n_fold)
     }, error=function(e) {
       cat('\nAn error occurred in krige.cv:\n', conditionMessage(e))
-      return(runif(1, 1, 1.5))
+      return(3)
     })
-    if (sum(is.na(k_cv)) != 0) {
-      if (sum(is.na(k_cv$residual)) >= nrow(k_cv) / 2) {return(runif(1, 1, 1.5))}
+    na_sum <- sum(is.na(k_cv$residual))
+    na_thresh <- nrow(k_cv) / 8
+    if (na_sum != 0) {
+      if (na_sum >= na_thresh) {
+        cat('\nToo many NAs in krige.cv:', na_sum, '/', na_thresh)
+        return(3)
+      }
     }
-  })
-  k_cv <- k_cv %>% filter(!is.na(residual))
-  suppressWarnings({
-    vgrm_rmse <- sqrt(sqrt(attr(fv, 'SSErr') / nrow(ev)))
-    vgrm_sd <- sqrt(sd(ev$gamma, na.rm=T))
-    vgrm_cost <- vgrm_weight * vgrm_rmse / vgrm_sd
-    interp_rmse <- sqrt(sum(k_cv$residual^2, na.rm=T) / nrow(k_cv))
-    interp_sd <- sd(k_cv$var1.pred, na.rm=T)
-    interp_cost <- interp_weight * interp_rmse / interp_sd
+    tryCatch({
+      k_cv <- k_cv %>% filter(!is.na(residual))
+      vgrm_rmse <- sqrt(sqrt(attr(fv, 'SSErr') / nrow(ev)))
+      vgrm_sd <- sqrt(sd(ev$gamma, na.rm=T))
+      vgrm_cost <- vgrm_weight * vgrm_rmse / vgrm_sd
+      interp_rmse <- sqrt(sum(k_cv$residual^2, na.rm=T) / nrow(k_cv))
+      interp_sd <- sd(k_cv$var1.pred, na.rm=T)
+      interp_cost <- interp_weight * interp_rmse / interp_sd
+    }, error=function(e) {
+      cat('\nAn error occurred in cost_function:\n', conditionMessage(e))
+      return(3)
+    })
   })
   log_dir <- 'assets/nlopt_data/nlopt_itr'
   log_file <- paste0(log_dir, '/nlopt-out-', trans_id, '-', v_mod)
@@ -382,9 +391,11 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, v_mod='Sph
   if (!file.exists(log_file)) {file.create(log_file, showWarnings=F)}
   sink(log_file, append=T)
   cat('\nTransect:', trans_id)
+  cat('\nN obs:', nrow(shp_hf))
   cat('\nCutoff:', cutoff)
   cat('\nN lags:', n_lags)
   cat('\nN pairs:', n_max)
+  cat('\nMax dist:', max_dist)
   cat('\nVgrm weight:', vgrm_weight)
   cat('\nVgrm rmse:', vgrm_rmse)
   cat('\nVgrm sd:', vgrm_sd)
@@ -441,14 +452,14 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
     return(invisible())
   }
   if (!dir.exists(nlopt_dir)) {dir.create(nlopt_dir, recursive=T, showWarnings=F)}
-  x0 <- c(3, 50, 10) # Initial values (cutoff, n_lags, n_max)
-  lb <- c(1, 30, 2) # Lower bound (cutoff, n_lags, n_max)
-  ub <- c(12, 100, 50) # Upper bound (cutoff, n_lags, n_max)
-  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-8)
+  x0 <- c(3, 50, 10, 1e5) # Initial values (cutoff, n_lags, n_max, max_dist)
+  lb <- c(1, 30, 2, 5e4) # Lower bound (cutoff, n_lags, n_max, max_dist)
+  ub <- c(12, 100, 50, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
+  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-10)
   x <- compile_transect_data(trans_id)
   obs <- x$ghfdb_large_buff[[1]]
   nlopt_fun <- function(x) {
-    cost_function(obs, x[1], x[2], x[3], v_mod, n_fold, iwt, vwt, trans_id)
+    cost_function(obs, x[1], x[2], x[3], x[4], v_mod, n_fold, iwt, vwt, trans_id)
   }
   tryCatch({
     cat('\nOptimizing', v_mod, 'kriging model for submap transect:', trans_id)
@@ -490,9 +501,11 @@ read_nloptr_itr <- function(fpath) {
   }
   t <- read_file(fpath)
   trans_id_t <- t[grepl('^Transect: ', t)] %>% map_chr(~gsub('Transect: ', '', .x))
+  n_obs_t <- t[grepl('^N obs: ', t)] %>% map_dbl(~as.numeric(gsub('N obs: ', '', .x)))
   cutoff_t <- t[grepl('^Cutoff: ', t)] %>% map_dbl(~as.numeric(gsub('Cutoff: ', '', .x)))
   n_lags_t <- t[grepl('^N lags: ', t)] %>% map_dbl(~as.numeric(gsub('N lags: ', '', .x)))
   n_pairs_t <- t[grepl('^N pairs: ', t)] %>% map_dbl(~as.numeric(gsub('N pairs: ', '', .x)))
+  max_d_t <- t[grepl('^Max dist: ', t)] %>% map_dbl(~as.numeric(gsub('Max dist: ', '', .x)))
   vmod_t <- t[grepl('^Vgrm model:', t)] %>% map_chr(~gsub('Vgrm model: ', '', .x))
   vwt_t <- t[grepl('^Vgrm weight', t)] %>% map_dbl(~as.numeric(gsub('Vgrm weight: ', '', .x)))
   vrmse_t <- t[grepl('^Vgrm rmse', t)] %>% map_dbl(~as.numeric(gsub('Vgrm rmse: ', '', .x)))
@@ -501,9 +514,9 @@ read_nloptr_itr <- function(fpath) {
   irmse_t <- t[grepl('^Int rmse', t)] %>% map_dbl(~as.numeric(gsub('Int rmse: ', '', .x)))
   icost_t <- t[grepl('^Int cost', t)] %>% map_dbl(~as.numeric(gsub('Int cost: ', '', .x)))
   cost_t <- t[grepl('^Cost', t)] %>% map_dbl(~as.numeric(gsub('Cost: ', '', .x)))
-  tibble(short_name=trans_id_t, cutoff=cutoff_t, n_lags=n_lags_t, n_pairs=n_pairs_t,
-         v_mod=vmod_t, vgrm_wt=vwt_t, vgrm_rmse=vrmse_t, vgrm_cost=vcost_t, cv_wt=iwt_t,
-         cv_rmse=irmse_t, cv_cost=icost_t, cost=cost_t) %>%
+  tibble(short_name=trans_id_t, n_obs=n_obs_t, cutoff=cutoff_t, n_lags=n_lags_t,
+         n_pairs=n_pairs_t, max_dist=max_d_t, v_mod=vmod_t, vgrm_wt=vwt_t, vgrm_rmse=vrmse_t,
+         vgrm_cost=vcost_t, cv_wt=iwt_t, cv_rmse=irmse_t, cv_cost=icost_t, cost=cost_t) %>%
   group_by(short_name, v_mod) %>% mutate(itr=row_number(), .after=short_name) %>% ungroup()
 }
 
@@ -540,17 +553,20 @@ get_optimal_krige_model <- function(trans_id=NULL) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Krige !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Krige <- function(shp_hf=NULL, fv=NULL, shp_grid=NULL, n_max=10) {
+Krige <- function(shp_hf=NULL, fv=NULL, shp_grid=NULL, n_max=10, max_dist=1e5) {
   if (is.null(shp_hf)) {stop('\nMissing heat flow data!')}
   if (is.null(fv)) {stop('\nMissing variogram model!')}
   if (is.null(shp_grid)) {stop('\nMissing kriging locations (grid)!')}
   if (is.null(n_max)) {stop('\nMissing max pairs!')}
+  if (is.null(max_dist)) {stop('\nMissing max distance!')}
   suppressWarnings({
     tryCatch({
-      krige(obs~1, shp_hf, newdata=shp_grid, model=fv, nmax=n_max, debug.level=0) %>%
-        as_tibble() %>% st_as_sf() %>%
+      krige(obs~1, shp_hf, newdata=shp_grid, model=fv, nmax=n_max, maxdist=max_dist,
+            debug.level=0) %>% as_tibble() %>% st_as_sf() %>%
         rename(est_krg=var1.pred, var_krg=var1.var, krige=geometry) %>%
-        mutate(sigma_krg=sqrt(var_krg), .before=krige)
+        mutate(sigma_krg=sqrt(var_krg), .before=krige) %>%
+        mutate(est_krg=ifelse(est_krg > 0 & est_krg <= 250, est_krg, NA),
+               var_krg=ifelse(est_krg > 0 & est_krg <= 250, est_krg, NA))
     }, error=function(e) {
       cat('\nAn error occurred in Krige:\n', conditionMessage(e))
     })
@@ -606,7 +622,7 @@ summarize_interpolation_differences <- function(trans_ids, parallel=T) {
       np <- km$opt_krige_mod_summary$n_pairs
       compile_transect_data(x, fv=fv, np=np)$dff_large_buff[[1]] %>%
         st_set_geometry(NULL) %>%
-        summarise(short_name=x, n=n(), rmse=sqrt(mean(est_dff^2, na.rm=T)),
+        summarise(short_name=x, n=sum(!is.na(est_dff)), rmse=sqrt(mean(est_dff^2, na.rm=T)),
                   min=min(est_dff, na.rm=T), max=max(est_dff, na.rm=T),
                   med=median(est_dff, na.rm=T), iqr=IQR(est_dff, na.rm=T),
                   mean=mean(est_dff, na.rm=T), sigma=sd(est_dff, na.rm=T))
@@ -634,6 +650,7 @@ summarize_interpolation_accuracy <- function(trans_ids, parallel=T) {
       comps_sim <- get_closest_interp_obs(x)
       comps_krg <- get_closest_interp_obs(x, fv=fv, np=np)
       tibble(short_name=x,
+             n_sim=nrow(comps_sim[!is.na(comps_sim$est_sim),]),
              min_obs_sim=min(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
              max_obs_sim=max(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
              mean_obs_sim=mean(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
@@ -641,6 +658,7 @@ summarize_interpolation_accuracy <- function(trans_ids, parallel=T) {
              med_obs_sim=median(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
              iqr_obs_sim=IQR(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
              rmse_obs_sim=sqrt(mean((comps_sim$est_sim - comps_sim$obs_ghfdb)^2, na.rm=T)),
+             n_krg=nrow(comps_krg[!is.na(comps_krg$est_krg),]),
              min_obs_krg=min(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
              max_obs_krg=max(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
              mean_obs_krg=mean(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
@@ -671,7 +689,7 @@ plot_ghfdb_base <- function() {
   fig_path <- 'figs/ghfdb.png'
   if (!dir.exists('figs')) {dir.create('figs', recursive=T, showWarnings=F)}
   if (file.exists(fig_path)) {
-    cat('\n', fig_path, 'already exists ...')
+    cat('\n', fig_path, ' already exists ...', sep='')
     return(invisible())
   }
   cat('\nPlotting:', fig_path)
@@ -724,35 +742,42 @@ plot_transect <- function(trans_id, base_size=20) {
   fig_dir <- 'figs/transect/'
   fig_path <- paste0(fig_dir, trans_id, '-transect.png')
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
-  if (file.exists(fig_path)) {cat('\n', fig_path, 'already exists ...'); return(invisible())}
+  if (file.exists(fig_path)) {
+    cat('\n', fig_path, ' already exists ...', sep='')
+    return(invisible())
+  }
   tryCatch({
+    cat('\nPlotting:', fig_path)
     km <- get_optimal_krige_model(trans_id)
     fv <- km$fitted_vgrm
     np <- km$opt_krige_mod_summary$n_pairs
     x <- compile_transect_data(trans_id, fv=fv, np=np)
-    cat('\nPlotting:', fig_path)
-    suppressWarnings({suppressMessages({
-      map_theme <- list(
+    comps_sim <- get_closest_interp_obs(trans_id)
+    comps_krg <- get_closest_interp_obs(trans_id, fv=fv, np=np)
+    hf_pt_size <- 3
+    comps_pt_size <- 3.5
+    map_theme <- list(
+      theme_bw(base_size=base_size),
+      theme(plot.margin=margin(5, 5, 5, 5),
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 5, 10, 5))),
+      annotation_scale(location='bl', width_hint=0.33, text_cex=1.6, style='ticks',
+                       line_width=4, text_face='bold'),
+      annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
+                             height=unit(2, 'cm'), width=unit(2, 'cm'),
+                             pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
+    )
+    profile_theme <-
+      list(
         theme_bw(base_size=base_size),
-        theme(plot.margin=margin(5, 5, 5, 5),
-              plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 5, 10, 5))),
-        annotation_scale(location='bl', width_hint=0.33, text_cex=1.6, style='ticks',
-                         line_width=4, text_face='bold'),
-        annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
-                               height=unit(2, 'cm'), width=unit(2, 'cm'),
-                               pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
+        theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+              plot.margin=margin(5, 5, 5, 5),
+              legend.justification='right', legend.position=c(0.92, 0.85),
+              legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
+              legend.key.width=unit(1, 'cm'), legend.box.margin=margin(2, 2, 2, 2),
+              legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size),
+              legend.background=element_blank())
       )
-      profile_theme <-
-        list(
-          theme_bw(base_size=base_size),
-          theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
-                plot.margin=margin(5, 5, 5, 5),
-                legend.justification='right', legend.position=c(0.92, 0.85),
-                legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
-                legend.key.width=unit(1, 'cm'), legend.box.margin=margin(2, 2, 2, 2),
-                legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size),
-                legend.background=element_blank())
-        )
+    suppressWarnings({suppressMessages({
       p1 <-
         ggplot(x) +
         geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
@@ -765,7 +790,7 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
         geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-        geom_sf(data=x$ghfdb_large_buff[[1]], aes(color=obs), shape=20) +
+        geom_sf(data=x$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
         ggtitle('Global HF Observations') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
@@ -800,9 +825,13 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
         geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-        geom_sf(data=x$sim_large_buff[[1]], aes(color=est_sim), shape=20) +
+        geom_sf(data=x$sim_large_buff[[1]], aes(color=est_sim), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_sim[!is.na(comps_sim$est_sim),], aes(fill=est_sim), shape=21,
+                size=comps_pt_size, stroke=1, color='white') +
         ggtitle('Similarity Interpolation') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
       if (is.null(x$sim_projected[[1]])) {
@@ -835,9 +864,13 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
         geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-        geom_sf(data=x$krg_large_buff[[1]], aes(color=est_krg), shape=20) +
+        geom_sf(data=x$krg_large_buff[[1]], aes(color=est_krg), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_krg[!is.na(comps_krg$est_krg),], aes(fill=est_krg), shape=21,
+                size=comps_pt_size, stroke=1, color='white') +
         ggtitle('Krige Interpolation') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
       if (is.null(x$krg_projected[[1]])) {
@@ -876,12 +909,15 @@ plot_transect <- function(trans_id, base_size=20) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot optimal krige model !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_optimal_krige_model <- function(trans_id=NULL, base_size=18) {
+plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
   if (is.null(trans_id)) {stop('\nMissing submap transect ids!')}
   fig_dir <- 'figs/nlopt/'
   fig_path <- paste0(fig_dir, trans_id, '-opt-krige.png')
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
-  if (file.exists(fig_path)) {cat('\n', fig_path, 'already exists ...'); return(invisible())}
+  if (file.exists(fig_path)) {
+    cat('\n', fig_path, ' already exists ...', sep='')
+    return(invisible())
+  }
   tryCatch({
     cat('\nPlotting:', fig_path)
     opt_krige_mod <- get_optimal_krige_model(trans_id)
@@ -896,37 +932,46 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=18) {
                  plot.margin=margin(5, 5, 5, 5),
                  plot.title=element_text(vjust=0, hjust=0.5, margin=margin(10, 10, 10, 10)),
                  legend.position='none'))
+    p0 <-
+      ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
+      geom_path(aes(itr, max_dist / 1e3), color='forestgreen', linewidth=1) +
+      geom_point(data=opt_kmod, aes(itr, max_dist / 1e3), color='forestgreen', size=3) +
+      geom_label_repel(data=opt_kmod, aes(itr, max_dist / 1e3, label=round(max_dist / 1e3)),
+                       size=base_size * 0.28) +
+      annotate('text', x=Inf, y=Inf, label='Variogram Max Distance', hjust=1.05, vjust=1.5,
+               size=base_size * 0.35) +
+      labs(x='Nlopt Iteration', y='Distance (km)', color=NULL) + p_theme
     p1 <-
       ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, n_pairs), color='darkorange', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, n_pairs), color='darkorange', size=3) +
+      geom_path(aes(itr, n_pairs), color='firebrick', linewidth=1) +
+      geom_point(data=opt_kmod, aes(itr, n_pairs), color='firebrick', size=3) +
       geom_label_repel(data=opt_kmod, aes(itr, n_pairs, label=round(n_pairs)),
                        size=base_size * 0.28) +
       annotate('text', x=Inf, y=Inf, label='Variogram Pairs', hjust=1.05, vjust=1.5,
                size=base_size * 0.35) +
-      labs(x=NULL, y='Pairs', color=NULL) + p_theme
+      labs(x='Nlopt Iteration', y='Pairs', color=NULL) + p_theme
     p2 <-
       ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, cutoff), color='forestgreen', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, cutoff), color='forestgreen', size=3) +
+      geom_path(aes(itr, cutoff), color='orchid4', linewidth=1) +
+      geom_point(data=opt_kmod, aes(itr, cutoff), color='orchid4', size=3) +
       geom_label_repel(data=opt_kmod, aes(itr, cutoff, label=round(cutoff)),
                        size=base_size * 0.28) +
       annotate('text', x=Inf, y=Inf, label='Variogram Cutoff', hjust=1.05, vjust=1.5,
                size=base_size * 0.35) +
-      labs(x=NULL, y='Cutoff', color=NULL) + p_theme
+      labs(x='Nlopt Iteration', y='Cutoff', color=NULL) + p_theme
     p3 <-
       ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, n_lags), color='orchid4', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, n_lags), color='orchid4', size=3) +
+      geom_path(aes(itr, n_lags), color='saddlebrown', linewidth=1) +
+      geom_point(data=opt_kmod, aes(itr, n_lags), color='saddlebrown', size=3) +
       geom_label_repel(data=opt_kmod, aes(itr, n_lags, label=round(n_lags)),
                        size=base_size * 0.28) +
       annotate('text', x=Inf, y=Inf, label='Variogram Lags', hjust=1.05, vjust=1.5,
                size=base_size * 0.35) +
-      labs(x=NULL, y='Lags', color=NULL) + p_theme
+      labs(x='Nlopt Iteration', y='Lags', color=NULL) + p_theme
     p4 <-
       ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, vgrm_cost), color='firebrick', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, vgrm_cost), color='firebrick', size=3) +
+      geom_path(aes(itr, vgrm_cost), color='darkorange', linewidth=1) +
+      geom_point(data=opt_kmod, aes(itr, vgrm_cost), color='darkorange', size=3) +
       geom_label_repel(data=opt_kmod, aes(itr, vgrm_cost, label=round(vgrm_cost, 3)),
                        size=base_size * 0.28) +
       geom_path(aes(itr, cv_cost), color='navy', linewidth=1) +
@@ -935,7 +980,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=18) {
                        size=base_size * 0.28) +
       annotate('text', x=Inf, y=Inf, label='Cost Function', hjust=1.05, vjust=1.5,
                size=base_size * 0.35) +
-      labs(x='Iteration', y='Cost', color=NULL) + p_theme
+      labs(x='Nlopt Iteration', y='Cost', color=NULL) + p_theme
     p5 <- 
       ggplot(ev) +
       geom_point(aes(x=dist / 1e3, y=sqrt(gamma)), shape=20) +
@@ -943,14 +988,129 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=18) {
       annotate('text', x=Inf, y=-Inf, label=paste0('Optimal model (', opt_kmod$v_mod, ')'),
                hjust=1.05, vjust=-0.5, size=base_size * 0.35) +
       labs(x='Lag Distance (km)', y=bquote('Variance'~(mWm^-2))) + p_theme
-    p6 <- p1 / p2/ p3 / p4 / p5 +
+    p6 <- (p0 + p1) / (p2 + p3) / (p4 + p5) +
       plot_annotation(
         title=paste0('Kriging Optimization: ', unique(nlopt_itr$short_name)),
-        theme=theme(plot.title=element_text(size=base_size * 1.2, hjust=0.63))) +
+        theme=theme(plot.title=element_text(size=base_size * 1.2, hjust=0.5))) +
       plot_layout(widths=1, heights=1) &
       theme(plot.tag = element_text(size=base_size * 1.5))
-    ggsave(file=fig_path, plot=p6, width=6.5, height=13, dpi=300, bg='white')
+    ggsave(file=fig_path, plot=p6, width=13, height=10, dpi=300, bg='white')
   }, error=function(e) {
     cat('\nAn error occurred in plot_optimal_variogram:\n', conditionMessage(e))
+  })
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot interp accuracy summary !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
+  if (is.null(submap_zone)) {stop('\nMissing submap zone!')}
+  fig_dir <- 'figs/summary/'
+  data_path <- 'assets/nlopt_data/interpolation-summary.RData'
+  if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
+  if (!exists('interp_accuracy_summary', envir=.GlobalEnv)) {
+    stop('\nMissing nlopt summary data! Use "load(path/to/interpolation-summary.RData)"')
+  }
+  f <- function(x, y) {
+    if (file.exists(y)) {
+      cat('\n', y, ' already exists ...', sep='')
+      return(invisible())
+    }
+    tryCatch({
+      cat('\nPlotting:', y)
+      p_theme <- list(
+        theme_bw(base_size=14),
+        theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+              axis.text.x=element_text(angle=40, hjust=1), legend.position='bottom',
+              plot.title=element_text(hjust=0.5)))
+      outliers_diff <-
+        interp_diff_summary$short_name[which(interp_diff_summary$mean + 2 *
+                                             interp_diff_summary$sigma > 300)]
+      outliers_acc <-
+        interp_accuracy_summary$short_name[which(interp_accuracy_summary$rmse_obs_sim > 300 |
+                                                 interp_accuracy_summary$rmse_obs_krg > 300)]
+      outliers <- unique(c(outliers_diff, outliers_acc))
+      p1 <-
+        interp_diff_summary %>%
+        left_join(select(nlopt_summary, short_name, n_obs), by='short_name') %>%
+        filter(short_name %in% x & !(short_name %in% outliers)) %>%
+        ggplot() +
+        geom_hline(yintercept=0) +
+        geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma, ymax=mean + 2 * sigma)) +
+        labs(x=NULL, y=bquote('Difference'~(mWm^-2))) +
+        ggtitle('Point-by-Point Interpolation Differences') + p_theme
+      p2 <-
+        interp_accuracy_summary %>%
+        filter(!is.na(rmse_obs_krg)) %>%
+        pivot_longer(-c(short_name)) %>%
+        mutate(method=ifelse(str_detect(name, 'sim'), 'sim', 'krg'),
+               name=str_split(name, '_', simplify=T)[,1],
+               zone=str_sub(short_name, 1, 3)) %>%
+        rename(metric=name) %>%
+        filter(zone == submap_zone) %>%
+        filter(short_name %in% x & !(short_name %in% outliers)) %>%
+        mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige')) %>%
+        group_by(method) %>%
+        filter(metric == 'rmse') %>%
+        ggplot() +
+        geom_col(aes(short_name, value, fill=method), color='black', position='dodge') +
+        scale_fill_manual(values=c('Krige'='darkorange', 'Similarity'='navy')) +
+        labs(x=NULL, y=bquote('RMSE'~(mWm^-2)), fill='Method') +
+        ggtitle('Interpolation Accuracies') + p_theme
+      p3 <- p1 / p2
+      ggsave(file=y, plot=p3, width=13, height=6.5, dpi=300, bg='white')
+    }, error=function(e) {
+      cat('\nAn error occurred in plot_interp_accuracy_summary:\n', conditionMessage(e))
+    })
+  }
+  x <- nlopt_summary$short_name[str_detect(nlopt_summary$short_name, submap_zone)]
+  if (submap_zone %in% c('SAM', 'SEA')) {
+    midpoint <- length(x) %/% 2
+    walk2(list(x[1:midpoint], x[(midpoint + 1):length(x)]), c(1, 2), ~{
+      f(.x, paste0(fig_dir, submap_zone, '-interpolation-accuracy-summary', .y, '.png'))
+    })
+  } else {
+    f(x, paste0(fig_dir, submap_zone, '-interpolation-accuracy-summary.png'))
+  }
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot nlopt summary !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_nlopt_summary <- function(base_size=14) {
+  fig_dir <- 'figs/summary/'
+  fig_path <- paste0(fig_dir, 'nlopt-summary.png')
+  data_path <- 'assets/nlopt_data/interpolation-summary.RData'
+  if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
+  if (!exists('nlopt_summary', envir=.GlobalEnv)) {
+    stop('\nMissing nlopt summary data! Use "load(path/to/interpolation-summary.RData)"')
+  }
+  tryCatch({
+    cat('\nPlotting:', fig_path)
+    outliers_diff <-
+      interp_diff_summary$short_name[which(interp_diff_summary$mean + 2 *
+                                           interp_diff_summary$sigma > 300)]
+    outliers_acc <-
+      interp_accuracy_summary$short_name[which(interp_accuracy_summary$rmse_obs_sim > 300 |
+                                               interp_accuracy_summary$rmse_obs_krg > 300)]
+    outliers <- unique(c(outliers_diff, outliers_acc))
+    p1 <-
+      nlopt_summary %>%
+      filter(!(short_name %in% outliers)) %>%
+      mutate(zone=str_sub(short_name, 1, 3)) %>%
+      select(-c(vgrm_wt, vgrm_cost, vgrm_rmse, cv_wt, cv_cost, cv_rmse)) %>%
+      pivot_longer(-c(short_name, zone, v_mod, cost)) %>%
+      ggplot() +
+      geom_point(aes(value, cost, fill=zone), shape=21, color='black') +
+      labs(x=NULL, y='Cost', color='Zone') +
+      scale_fill_manual(values=c('NPA'='darkorange', 'SAM'='navy', 'SEA'='darkred',
+                                 'SWP'='forestgreen')) +
+      facet_wrap(~name, scales='free_x') +
+      theme_bw(base_size=14) +
+      theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+            strip.background=element_blank())
+    ggsave(file=fig_path, plot=p1, width=6.5, height=4, dpi=300, bg='white')
+  }, error=function(e) {
+    cat('\nAn error occurred in plot_nlopt_summary:\n', conditionMessage(e))
   })
 }
