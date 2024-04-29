@@ -83,6 +83,9 @@ suppressWarnings({suppressMessages({
            alphad, dz, dz1, n, n1, tau, tau1)
 })})
 
+# Plot global base map
+plot_ghfdb_base()
+
 # Clean up environment
 rm(list=lsf.str())
 rm(ct, prj, wgs)
