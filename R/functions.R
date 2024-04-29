@@ -358,6 +358,10 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
       cat('\nAn error occurred in fit.variogram:\n', conditionMessage(e))
       return(3)
     })
+    if (fv$range < 0) {
+      cat('\nVariogram range is negative:', fv$range)
+      return(3)
+    }
     tryCatch({
       k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, maxdist=max_dist, nfold=n_fold)
     }, error=function(e) {
@@ -406,9 +410,7 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
   cat('\nInt cost:', interp_cost)
   cat('\nCost:', vgrm_cost + interp_cost)
   cat('\nVgrm model:', v_mod)
-  cat('\n')
-  print(fv)
-  cat(rep('+', 30), sep='')
+  cat('\n', rep('+', 30), sep='')
   cat('\n', rep('-', 40), sep='')
   sink()
   vgrm_cost + interp_cost
@@ -447,15 +449,22 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
   nlopt_dir <- 'assets/nlopt_data/nlopt_transects'
   nlopt_id <- paste0('opt-', trans_id, '-', v_mod) 
   nlopt_path <- paste0(nlopt_dir, '/', nlopt_id, '.RData')
-  if (file.exists(nlopt_path)) {
+  nlopt_itr_path <- paste0('assets/nlopt_data/nlopt_itr/nlopt-out-', trans_id, '-', v_mod)
+  if (file.exists(nlopt_path) & file.exists(nlopt_itr_path)) {
     cat('\nOptimized', v_mod, 'kriging model found for submap transect:', trans_id)
+    return(invisible())
+  }
+  if (!file.exists(nlopt_path) & file.exists(nlopt_itr_path)) {
+    cat('\nOptimized', v_mod, 'kriging model failed for submap transect:', trans_id)
+    cat('\nRemove', nlopt_itr_path, 'and run "make nlopt" again ...')
     return(invisible())
   }
   if (!dir.exists(nlopt_dir)) {dir.create(nlopt_dir, recursive=T, showWarnings=F)}
   x0 <- c(3, 50, 10, 1e5) # Initial values (cutoff, n_lags, n_max, max_dist)
   lb <- c(1, 30, 2, 5e4) # Lower bound (cutoff, n_lags, n_max, max_dist)
   ub <- c(12, 100, 50, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
-  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-10)
+  opts <-
+    list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-10)
   x <- compile_transect_data(trans_id)
   obs <- x$ghfdb_large_buff[[1]]
   nlopt_fun <- function(x) {
@@ -464,12 +473,22 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
   tryCatch({
     cat('\nOptimizing', v_mod, 'kriging model for submap transect:', trans_id)
     opt <- nloptr(x0, nlopt_fun, lb=lb, ub=ub, opts=opts)
-    opt_decoded <- decode_opt(obs, v_mod, opt)
-    assign(str_replace_all(nlopt_id, '-', '_'), opt_decoded)
-    save(list=str_replace_all(nlopt_id, '-', '_'), file=nlopt_path)
   }, error=function(e) {
     cat('\nAn error occurred in nlopt_krige:\n', conditionMessage(e))
   })
+  if (opt$status != 0) {
+    cat('\n', rep('+', 60), sep='')
+    cat('\nNlopt failed to converge:')
+    cat('\n', rep('-', 60), sep='')
+    cat('\nNloptr status:', opt$status)
+    cat('\nNloptr iterations:', opt$iterations)
+    cat('\nNloptr message:\n', opt$message)
+    cat('\n', rep('+', 60), sep='')
+    return(invisible())
+  }
+  opt_decoded <- decode_opt(obs, v_mod, opt)
+  assign(str_replace_all(nlopt_id, '-', '_'), opt_decoded)
+  save(list=str_replace_all(nlopt_id, '-', '_'), file=nlopt_path)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -527,26 +546,32 @@ get_optimal_krige_model <- function(trans_id=NULL) {
   if (is.null(trans_id)) {stop('\nMissing submap transect id!')}
   nlopt_dir <- 'assets/nlopt_data/'
   nlopt_itr_dir <- paste0(nlopt_dir, 'nlopt_itr')
-  trans_dir <- paste0(nlopt_dir, 'nlopt_transects')
+  nlopt_trans_dir <- paste0(nlopt_dir, 'nlopt_transects')
   nlopt_itr_paths <- list.files(nlopt_itr_dir, pattern=trans_id, full.names=T)
+  nlopt_trans_paths <- list.files(nlopt_trans_dir, pattern=trans_id, full.names=T)
   if (length(nlopt_itr_paths) < 1) {
     cat('\nNo nlopt itr files found for:', trans_id)
     return(NULL)
+  }
+  if (length(nlopt_itr_paths) != length(nlopt_trans_paths)) {
+    itr_mods <- str_sub(nlopt_itr_paths, start=-3)
+    trans_mods <- str_extract(nlopt_trans_paths, ".{3}(?=\\.RData)")
+    nlopt_itr_paths <-
+      nlopt_itr_paths[str_detect(nlopt_itr_paths, paste(trans_mods, collapse="|"))]
+  }
+  nlopt_itr <- map_df(nlopt_itr_paths, read_nloptr_itr)
+  k_mod <- slice_min(nlopt_itr, cost)
+  if (nrow(k_mod) > 1) {k_mod <- slice(k_mod, nrow(k_mod))}
+  nlopt_path <- paste0(nlopt_trans_dir, '/opt-', trans_id, '-', k_mod$v_mod, '.RData')
+  if (file.exists(nlopt_path)) {
+    load(nlopt_path)
+    opt_decoded <- get(paste0('opt_', trans_id, '_', k_mod$v_mod))
+    list('nlopt_itr'=nlopt_itr, 'opt_krige_mod_summary'=k_mod,
+         'experimental_vgrm'=opt_decoded$experimental_vgrm,
+         'fitted_vgrm'=opt_decoded$fitted_vgrm)
   } else {
-    nlopt_itr <- map_df(nlopt_itr_paths, read_nloptr_itr)
-    k_mod <- slice_min(nlopt_itr, cost)
-    if (nrow(k_mod) > 1) {k_mod <- slice(k_mod, nrow(k_mod))}
-    nlopt_path <- paste0(trans_dir, '/opt-', trans_id, '-', k_mod$v_mod, '.RData')
-    if (file.exists(nlopt_path)) {
-      load(nlopt_path)
-      opt_decoded <- get(paste0('opt_', trans_id, '_', k_mod$v_mod))
-      list('nlopt_itr'=nlopt_itr, 'opt_krige_mod_summary'=k_mod,
-           'experimental_vgrm'=opt_decoded$experimental_vgrm,
-           'fitted_vgrm'=opt_decoded$fitted_vgrm)
-    } else {
-      cat('\nNo nlopt RData found for:', trans_id)
-      return(NULL)
-    }
+    cat('\nNo nlopt RData found for:', trans_id)
+    return(NULL)
   }
 }
 
@@ -755,7 +780,7 @@ plot_transect <- function(trans_id, base_size=20) {
     comps_sim <- get_closest_interp_obs(trans_id)
     comps_krg <- get_closest_interp_obs(trans_id, fv=fv, np=np)
     hf_pt_size <- 3
-    comps_pt_size <- 3.5
+    pt_stroke <- 0.8
     map_theme <- list(
       theme_bw(base_size=base_size),
       theme(plot.margin=margin(5, 5, 5, 5),
@@ -827,7 +852,7 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
         geom_sf(data=x$sim_large_buff[[1]], aes(color=est_sim), shape=20, size=hf_pt_size) +
         geom_sf(data=comps_sim[!is.na(comps_sim$est_sim),], aes(fill=est_sim), shape=21,
-                size=comps_pt_size, stroke=1, color='white') +
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
         ggtitle('Similarity Interpolation') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
@@ -866,7 +891,7 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
         geom_sf(data=x$krg_large_buff[[1]], aes(color=est_krg), shape=20, size=hf_pt_size) +
         geom_sf(data=comps_krg[!is.na(comps_krg$est_krg),], aes(fill=est_krg), shape=21,
-                size=comps_pt_size, stroke=1, color='white') +
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
         ggtitle('Krige Interpolation') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
