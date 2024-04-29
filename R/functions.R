@@ -464,31 +464,38 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
   lb <- c(1, 30, 2, 5e4) # Lower bound (cutoff, n_lags, n_max, max_dist)
   ub <- c(12, 100, 50, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
   opts <-
-    list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-10)
+    list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-15)
   x <- compile_transect_data(trans_id)
   obs <- x$ghfdb_large_buff[[1]]
   nlopt_fun <- function(x) {
     cost_function(obs, x[1], x[2], x[3], x[4], v_mod, n_fold, iwt, vwt, trans_id)
   }
   tryCatch({
+    cat('\n', rep('-', 60), sep='')
     cat('\nOptimizing', v_mod, 'kriging model for submap transect:', trans_id)
     opt <- nloptr(x0, nlopt_fun, lb=lb, ub=ub, opts=opts)
   }, error=function(e) {
     cat('\nAn error occurred in nlopt_krige:\n', conditionMessage(e))
   })
-  if (opt$status != 0) {
+  if (opt$status < 0 | opt$status == 5 | opt$iterations < 10) {
     cat('\n', rep('+', 60), sep='')
     cat('\nNlopt failed to converge:')
-    cat('\n', rep('-', 60), sep='')
     cat('\nNloptr status:', opt$status)
     cat('\nNloptr iterations:', opt$iterations)
     cat('\nNloptr message:\n', opt$message)
-    cat('\n', rep('+', 60), sep='')
+    cat('\n', rep('-', 60), sep='')
     return(invisible())
+  } else {
+    cat('\n', rep('+', 60), sep='')
+    cat('\nNlopt converged:')
+    cat('\nNloptr status:', opt$status)
+    cat('\nNloptr iterations:', opt$iterations)
+    cat('\nNloptr message:\n', opt$message)
+    cat('\n', rep('-', 60), sep='')
+    opt_decoded <- decode_opt(obs, v_mod, opt)
+    assign(str_replace_all(nlopt_id, '-', '_'), opt_decoded)
+    save(list=str_replace_all(nlopt_id, '-', '_'), file=nlopt_path)
   }
-  opt_decoded <- decode_opt(obs, v_mod, opt)
-  assign(str_replace_all(nlopt_id, '-', '_'), opt_decoded)
-  save(list=str_replace_all(nlopt_id, '-', '_'), file=nlopt_path)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -957,69 +964,71 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
                  plot.margin=margin(5, 5, 5, 5),
                  plot.title=element_text(vjust=0, hjust=0.5, margin=margin(10, 10, 10, 10)),
                  legend.position='none'))
-    p0 <-
-      ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, max_dist / 1e3), color='forestgreen', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, max_dist / 1e3), color='forestgreen', size=3) +
-      geom_label_repel(data=opt_kmod, aes(itr, max_dist / 1e3, label=round(max_dist / 1e3)),
-                       size=base_size * 0.28) +
-      annotate('text', x=Inf, y=Inf, label='Variogram Max Distance', hjust=1.05, vjust=1.5,
-               size=base_size * 0.35) +
-      labs(x='Nlopt Iteration', y='Distance (km)', color=NULL) + p_theme
-    p1 <-
-      ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, n_pairs), color='firebrick', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, n_pairs), color='firebrick', size=3) +
-      geom_label_repel(data=opt_kmod, aes(itr, n_pairs, label=round(n_pairs)),
-                       size=base_size * 0.28) +
-      annotate('text', x=Inf, y=Inf, label='Variogram Pairs', hjust=1.05, vjust=1.5,
-               size=base_size * 0.35) +
-      labs(x='Nlopt Iteration', y='Pairs', color=NULL) + p_theme
-    p2 <-
-      ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, cutoff), color='orchid4', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, cutoff), color='orchid4', size=3) +
-      geom_label_repel(data=opt_kmod, aes(itr, cutoff, label=round(cutoff)),
-                       size=base_size * 0.28) +
-      annotate('text', x=Inf, y=Inf, label='Variogram Cutoff', hjust=1.05, vjust=1.5,
-               size=base_size * 0.35) +
-      labs(x='Nlopt Iteration', y='Cutoff', color=NULL) + p_theme
-    p3 <-
-      ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, n_lags), color='saddlebrown', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, n_lags), color='saddlebrown', size=3) +
-      geom_label_repel(data=opt_kmod, aes(itr, n_lags, label=round(n_lags)),
-                       size=base_size * 0.28) +
-      annotate('text', x=Inf, y=Inf, label='Variogram Lags', hjust=1.05, vjust=1.5,
-               size=base_size * 0.35) +
-      labs(x='Nlopt Iteration', y='Lags', color=NULL) + p_theme
-    p4 <-
-      ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-      geom_path(aes(itr, vgrm_cost), color='darkorange', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, vgrm_cost), color='darkorange', size=3) +
-      geom_label_repel(data=opt_kmod, aes(itr, vgrm_cost, label=round(vgrm_cost, 3)),
-                       size=base_size * 0.28) +
-      geom_path(aes(itr, cv_cost), color='navy', linewidth=1) +
-      geom_point(data=opt_kmod, aes(itr, cv_cost), color='navy', shape=20, size=5) +
-      geom_label_repel(data=opt_kmod, aes(itr, cv_cost, label=paste0(round(cv_cost, 3))),
-                       size=base_size * 0.28) +
-      annotate('text', x=Inf, y=Inf, label='Cost Function', hjust=1.05, vjust=1.5,
-               size=base_size * 0.35) +
-      labs(x='Nlopt Iteration', y='Cost', color=NULL) + p_theme
-    p5 <- 
-      ggplot(ev) +
-      geom_point(aes(x=dist / 1e3, y=sqrt(gamma)), shape=20) +
-      geom_line(data=fv_line, aes(x=dist / 1e3, y=sqrt(gamma)), linewidth=1) +
-      annotate('text', x=Inf, y=-Inf, label=paste0('Optimal model (', opt_kmod$v_mod, ')'),
-               hjust=1.05, vjust=-0.5, size=base_size * 0.35) +
-      labs(x='Lag Distance (km)', y=bquote('Variance'~(mWm^-2))) + p_theme
-    p6 <- (p0 + p1) / (p2 + p3) / (p4 + p5) +
-      plot_annotation(
-        title=paste0('Kriging Optimization: ', unique(nlopt_itr$short_name)),
-        theme=theme(plot.title=element_text(size=base_size * 1.2, hjust=0.5))) +
-      plot_layout(widths=1, heights=1) &
-      theme(plot.tag = element_text(size=base_size * 1.5))
-    ggsave(file=fig_path, plot=p6, width=13, height=10, dpi=300, bg='white')
+    suppressWarnings({suppressMessages({
+      p0 <-
+        ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
+        geom_path(aes(itr, max_dist / 1e3), color='forestgreen', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, max_dist / 1e3), color='forestgreen', size=3) +
+        geom_label_repel(data=opt_kmod, size=base_size * 0.28,
+                         aes(itr, max_dist / 1e3, label=round(max_dist / 1e3))) +
+        annotate('text', x=Inf, y=Inf, label='Variogram Max Distance', hjust=1.05, vjust=1.5,
+                 size=base_size * 0.35) +
+        labs(x='Nlopt Iteration', y='Distance (km)', color=NULL) + p_theme
+      p1 <-
+        ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
+        geom_path(aes(itr, n_pairs), color='firebrick', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, n_pairs), color='firebrick', size=3) +
+        geom_label_repel(data=opt_kmod, aes(itr, n_pairs, label=round(n_pairs)),
+                         size=base_size * 0.28) +
+        annotate('text', x=Inf, y=Inf, label='Variogram Pairs', hjust=1.05, vjust=1.5,
+                 size=base_size * 0.35) +
+        labs(x='Nlopt Iteration', y='Pairs', color=NULL) + p_theme
+      p2 <-
+        ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
+        geom_path(aes(itr, cutoff), color='orchid4', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, cutoff), color='orchid4', size=3) +
+        geom_label_repel(data=opt_kmod, aes(itr, cutoff, label=round(cutoff)),
+                         size=base_size * 0.28) +
+        annotate('text', x=Inf, y=Inf, label='Variogram Cutoff', hjust=1.05, vjust=1.5,
+                 size=base_size * 0.35) +
+        labs(x='Nlopt Iteration', y='Cutoff', color=NULL) + p_theme
+      p3 <-
+        ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
+        geom_path(aes(itr, n_lags), color='saddlebrown', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, n_lags), color='saddlebrown', size=3) +
+        geom_label_repel(data=opt_kmod, aes(itr, n_lags, label=round(n_lags)),
+                         size=base_size * 0.28) +
+        annotate('text', x=Inf, y=Inf, label='Variogram Lags', hjust=1.05, vjust=1.5,
+                 size=base_size * 0.35) +
+        labs(x='Nlopt Iteration', y='Lags', color=NULL) + p_theme
+      p4 <-
+        ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
+        geom_path(aes(itr, vgrm_cost), color='darkorange', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, vgrm_cost), color='darkorange', size=3) +
+        geom_label_repel(data=opt_kmod, aes(itr, vgrm_cost, label=round(vgrm_cost, 3)),
+                         size=base_size * 0.28) +
+        geom_path(aes(itr, cv_cost), color='navy', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, cv_cost), color='navy', shape=20, size=5) +
+        geom_label_repel(data=opt_kmod, aes(itr, cv_cost, label=paste0(round(cv_cost, 3))),
+                         size=base_size * 0.28) +
+        annotate('text', x=Inf, y=Inf, label='Cost Function', hjust=1.05, vjust=1.5,
+                 size=base_size * 0.35) +
+        labs(x='Nlopt Iteration', y='Cost', color=NULL) + p_theme
+      p5 <- 
+        ggplot(ev) +
+        geom_point(aes(x=dist / 1e3, y=sqrt(gamma)), shape=20) +
+        geom_line(data=fv_line, aes(x=dist / 1e3, y=sqrt(gamma)), linewidth=1) +
+        annotate('text', x=Inf, y=-Inf, label=paste0('Optimal model (', opt_kmod$v_mod, ')'),
+                 hjust=1.05, vjust=-0.5, size=base_size * 0.35) +
+        labs(x='Lag Distance (km)', y=bquote('Variance'~(mWm^-2))) + p_theme
+      p6 <- (p0 + p1) / (p2 + p3) / (p4 + p5) +
+        plot_annotation(
+          title=paste0('Kriging Optimization: ', unique(nlopt_itr$short_name)),
+          theme=theme(plot.title=element_text(size=base_size * 1.2, hjust=0.5))) +
+        plot_layout(widths=1, heights=1) &
+        theme(plot.tag = element_text(size=base_size * 1.5))
+      ggsave(file=fig_path, plot=p6, width=13, height=10, dpi=300, bg='white')
+    })})
   }, error=function(e) {
     cat('\nAn error occurred in plot_optimal_variogram:\n', conditionMessage(e))
   })
@@ -1055,35 +1064,38 @@ plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
         interp_accuracy_summary$short_name[which(interp_accuracy_summary$rmse_obs_sim > 300 |
                                                  interp_accuracy_summary$rmse_obs_krg > 300)]
       outliers <- unique(c(outliers_diff, outliers_acc))
-      p1 <-
-        interp_diff_summary %>%
-        left_join(select(nlopt_summary, short_name, n_obs), by='short_name') %>%
-        filter(short_name %in% x & !(short_name %in% outliers)) %>%
-        ggplot() +
-        geom_hline(yintercept=0) +
-        geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma, ymax=mean + 2 * sigma)) +
-        labs(x=NULL, y=bquote('Difference'~(mWm^-2))) +
-        ggtitle('Point-by-Point Interpolation Differences') + p_theme
-      p2 <-
-        interp_accuracy_summary %>%
-        filter(!is.na(rmse_obs_krg)) %>%
-        pivot_longer(-c(short_name)) %>%
-        mutate(method=ifelse(str_detect(name, 'sim'), 'sim', 'krg'),
-               name=str_split(name, '_', simplify=T)[,1],
-               zone=str_sub(short_name, 1, 3)) %>%
-        rename(metric=name) %>%
-        filter(zone == submap_zone) %>%
-        filter(short_name %in% x & !(short_name %in% outliers)) %>%
-        mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige')) %>%
-        group_by(method) %>%
-        filter(metric == 'rmse') %>%
-        ggplot() +
-        geom_col(aes(short_name, value, fill=method), color='black', position='dodge') +
-        scale_fill_manual(values=c('Krige'='darkorange', 'Similarity'='navy')) +
-        labs(x=NULL, y=bquote('RMSE'~(mWm^-2)), fill='Method') +
-        ggtitle('Interpolation Accuracies') + p_theme
-      p3 <- p1 / p2
-      ggsave(file=y, plot=p3, width=13, height=6.5, dpi=300, bg='white')
+      suppressWarnings({suppressMessages({
+        p1 <-
+          interp_diff_summary %>%
+          left_join(select(nlopt_summary, short_name, n_obs), by='short_name') %>%
+          filter(short_name %in% x & !(short_name %in% outliers)) %>%
+          ggplot() +
+          geom_hline(yintercept=0) +
+          geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma,
+                            ymax=mean + 2 * sigma)) +
+          labs(x=NULL, y=bquote('Difference'~(mWm^-2))) +
+          ggtitle('Point-by-Point Interpolation Differences') + p_theme
+        p2 <-
+          interp_accuracy_summary %>%
+          filter(!is.na(rmse_obs_krg)) %>%
+          pivot_longer(-c(short_name)) %>%
+          mutate(method=ifelse(str_detect(name, 'sim'), 'sim', 'krg'),
+                 name=str_split(name, '_', simplify=T)[,1],
+                 zone=str_sub(short_name, 1, 3)) %>%
+          rename(metric=name) %>%
+          filter(zone == submap_zone) %>%
+          filter(short_name %in% x & !(short_name %in% outliers)) %>%
+          mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige')) %>%
+          group_by(method) %>%
+          filter(metric == 'rmse') %>%
+          ggplot() +
+          geom_col(aes(short_name, value, fill=method), color='black', position='dodge') +
+          scale_fill_manual(values=c('Krige'='darkorange', 'Similarity'='navy')) +
+          labs(x=NULL, y=bquote('RMSE'~(mWm^-2)), fill='Method') +
+          ggtitle('Interpolation Accuracies') + p_theme
+        p3 <- p1 / p2
+        ggsave(file=y, plot=p3, width=13, height=6.5, dpi=300, bg='white')
+      })})
     }, error=function(e) {
       cat('\nAn error occurred in plot_interp_accuracy_summary:\n', conditionMessage(e))
     })
@@ -1119,22 +1131,24 @@ plot_nlopt_summary <- function(base_size=14) {
       interp_accuracy_summary$short_name[which(interp_accuracy_summary$rmse_obs_sim > 300 |
                                                interp_accuracy_summary$rmse_obs_krg > 300)]
     outliers <- unique(c(outliers_diff, outliers_acc))
-    p1 <-
-      nlopt_summary %>%
-      filter(!(short_name %in% outliers)) %>%
-      mutate(zone=str_sub(short_name, 1, 3)) %>%
-      select(-c(vgrm_wt, vgrm_cost, vgrm_rmse, cv_wt, cv_cost, cv_rmse)) %>%
-      pivot_longer(-c(short_name, zone, v_mod, cost)) %>%
-      ggplot() +
-      geom_point(aes(value, cost, fill=zone), shape=21, color='black') +
-      labs(x=NULL, y='Cost', color='Zone') +
-      scale_fill_manual(values=c('NPA'='darkorange', 'SAM'='navy', 'SEA'='darkred',
-                                 'SWP'='forestgreen')) +
-      facet_wrap(~name, scales='free_x') +
-      theme_bw(base_size=14) +
-      theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
-            strip.background=element_blank())
-    ggsave(file=fig_path, plot=p1, width=6.5, height=4, dpi=300, bg='white')
+    suppressWarnings({suppressMessages({
+      p1 <-
+        nlopt_summary %>%
+        filter(!(short_name %in% outliers)) %>%
+        mutate(zone=str_sub(short_name, 1, 3)) %>%
+        select(-c(vgrm_wt, vgrm_cost, vgrm_rmse, cv_wt, cv_cost, cv_rmse)) %>%
+        pivot_longer(-c(short_name, zone, v_mod, cost)) %>%
+        ggplot() +
+        geom_point(aes(value, cost, fill=zone), shape=21, color='black') +
+        labs(x=NULL, y='Cost', color='Zone') +
+        scale_fill_manual(values=c('NPA'='darkorange', 'SAM'='navy', 'SEA'='darkred',
+                                   'SWP'='forestgreen')) +
+        facet_wrap(~name, scales='free_x') +
+        theme_bw(base_size=14) +
+        theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+              strip.background=element_blank())
+      ggsave(file=fig_path, plot=p1, width=6.5, height=4, dpi=300, bg='white')
+    })})
   }, error=function(e) {
     cat('\nAn error occurred in plot_nlopt_summary:\n', conditionMessage(e))
   })

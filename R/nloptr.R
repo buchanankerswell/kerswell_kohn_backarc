@@ -10,7 +10,7 @@ fpath <- 'assets/nlopt_data/interpolation-summary.RData'
 if (!file.exists(fpath)) {
   v_mods <- c('Sph', 'Exp', 'Lin', 'Bes')
   alg <- 'NLOPT_LN_NELDERMEAD'
-  ids <- shp_submap$short_name[1:5]
+  ids <- shp_submap$short_name
 
   cat('\nOptimizing krige models after Li et al. (2018) ...\n')
   nlopt_transects(ids, v_mods, alg)
