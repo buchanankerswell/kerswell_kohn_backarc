@@ -349,31 +349,31 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
       ev <- experimental_vgrm(shp_hf, cutoff, n_lags)
     }, error=function(e) {
       cat('\nAn error occurred in experimental_vgrm:\n', conditionMessage(e))
-      return(3)
+      return(runif(1, 1, 1.5))
     })
-    if (nrow(ev) < 2) {return(3)}
+    if (nrow(ev) < 2) {return(runif(1, 1, 1.5))}
     tryCatch({
       fv <- fit.variogram(ev, vgm(model=v_mod), fit.method=6)
     }, error=function(e) {
       cat('\nAn error occurred in fit.variogram:\n', conditionMessage(e))
-      return(3)
+      return(runif(1, 1, 1.5))
     })
     if (fv$range < 0) {
       cat('\nVariogram range is negative:', fv$range)
-      return(3)
+      return(runif(1, 1, 1.5))
     }
     tryCatch({
       k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, maxdist=max_dist, nfold=n_fold)
     }, error=function(e) {
       cat('\nAn error occurred in krige.cv:\n', conditionMessage(e))
-      return(3)
+      return(runif(1, 1, 1.5))
     })
     na_sum <- sum(is.na(k_cv$residual))
     na_thresh <- nrow(k_cv) / 8
     if (na_sum != 0) {
       if (na_sum >= na_thresh) {
         cat('\nToo many NAs in krige.cv:', na_sum, '/', na_thresh)
-        return(3)
+        return(runif(1, 1, 1.5))
       }
     }
     tryCatch({
@@ -386,7 +386,7 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
       interp_cost <- interp_weight * interp_rmse / interp_sd
     }, error=function(e) {
       cat('\nAn error occurred in cost_function:\n', conditionMessage(e))
-      return(3)
+      return(runif(1, 1, 1.5))
     })
   })
   log_dir <- 'assets/nlopt_data/nlopt_itr'
@@ -473,6 +473,16 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
   tryCatch({
     cat('\n', rep('-', 60), sep='')
     cat('\nOptimizing', v_mod, 'kriging model for submap transect:', trans_id)
+    cat('\n', rep('+', 60), sep='')
+    cat('\nNlopt algorithm:    ', alg)
+    cat('\nMaximum evaluations:', max_eval)
+    cat('\nNumber of k-folds:  ', n_fold)
+    cat('\nKrige weight:       ', iwt)
+    cat('\nVariogram weight:   ', vwt)
+    cat('\n                     (cutoff, n_lags, n_max, max_dist)')
+    cat('\nInitial parameters: ', x0)
+    cat('\nLower bounds:       ', lb)
+    cat('\nUpper bounds:       ', ub)
     opt <- nloptr(x0, nlopt_fun, lb=lb, ub=ub, opts=opts)
   }, error=function(e) {
     cat('\nAn error occurred in nlopt_krige:\n', conditionMessage(e))
@@ -562,9 +572,9 @@ get_optimal_krige_model <- function(trans_id=NULL) {
   }
   if (length(nlopt_itr_paths) != length(nlopt_trans_paths)) {
     itr_mods <- str_sub(nlopt_itr_paths, start=-3)
-    trans_mods <- str_extract(nlopt_trans_paths, ".{3}(?=\\.RData)")
+    trans_mods <- str_extract(nlopt_trans_paths, '.{3}(?=\\.RData)')
     nlopt_itr_paths <-
-      nlopt_itr_paths[str_detect(nlopt_itr_paths, paste(trans_mods, collapse="|"))]
+      nlopt_itr_paths[str_detect(nlopt_itr_paths, paste(trans_mods, collapse='|'))]
   }
   nlopt_itr <- map_df(nlopt_itr_paths, read_nloptr_itr)
   k_mod <- slice_min(nlopt_itr, cost)
@@ -834,7 +844,7 @@ plot_transect <- function(trans_id, base_size=20) {
           ggplot(x$ghfdb_projected[[1]]) +
           geom_smooth(aes(projected_distances, obs), method='gam', color='black') +
           geom_point(aes(projected_distances, obs), shape=20, color='grey20', size=3) +
-          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc"))
+          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, 'npc'))
       }
       p2 <- p2 +
         labs(x='Normalized Distance', y=NULL) +
@@ -873,7 +883,7 @@ plot_transect <- function(trans_id, base_size=20) {
           ggplot(x$sim_projected[[1]]) +
           geom_smooth(aes(projected_distances, obs), method='gam', color='black') +
           geom_point(aes(projected_distances, obs), shape=20, color='grey20', size=3) +
-          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc"))
+          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, 'npc'))
       }
       p4 <- p4 +
         labs(x='Normalized Distance', y=NULL) +
@@ -912,7 +922,7 @@ plot_transect <- function(trans_id, base_size=20) {
           ggplot(x$krg_projected[[1]]) +
           geom_smooth(aes(projected_distances, obs), method='gam', color='black') +
           geom_point(aes(projected_distances, obs), shape=20, color='grey20', size=3) +
-          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, "npc"))
+          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, 'npc'))
       }
       p6 <- p6 +
         labs(x='Normalized Distance', y=NULL) +
@@ -1064,18 +1074,7 @@ plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
         interp_accuracy_summary$short_name[which(interp_accuracy_summary$rmse_obs_sim > 300 |
                                                  interp_accuracy_summary$rmse_obs_krg > 300)]
       outliers <- unique(c(outliers_diff, outliers_acc))
-      suppressWarnings({suppressMessages({
-        p1 <-
-          interp_diff_summary %>%
-          left_join(select(nlopt_summary, short_name, n_obs), by='short_name') %>%
-          filter(short_name %in% x & !(short_name %in% outliers)) %>%
-          ggplot() +
-          geom_hline(yintercept=0) +
-          geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma,
-                            ymax=mean + 2 * sigma)) +
-          labs(x=NULL, y=bquote('Difference'~(mWm^-2))) +
-          ggtitle('Point-by-Point Interpolation Differences') + p_theme
-        p2 <-
+      df_acc <-
           interp_accuracy_summary %>%
           filter(!is.na(rmse_obs_krg)) %>%
           pivot_longer(-c(short_name)) %>%
@@ -1085,11 +1084,30 @@ plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
           rename(metric=name) %>%
           filter(zone == submap_zone) %>%
           filter(short_name %in% x & !(short_name %in% outliers)) %>%
-          mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige')) %>%
-          group_by(method) %>%
-          filter(metric == 'rmse') %>%
+          mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige'))
+      df_acc_ns <- filter(df_acc, metric == 'n')
+      df_acc_rmse <- filter(df_acc, metric == 'rmse') %>% mutate(n=df_acc_ns$value)
+      suppressWarnings({suppressMessages({
+        p1 <-
+          interp_diff_summary %>%
+          filter(short_name %in% x & !(short_name %in% outliers)) %>%
           ggplot() +
+          geom_hline(yintercept=0) +
+          geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma, ymax=mean + 2 * sigma)) +
+          geom_text(aes(short_name, -Inf, label=n, fontface='bold.italic'), angle=40,
+                    hjust=0, vjust=-0.65) +
+          scale_y_continuous(expand=expansion(mult=c(0.25, 0.05))) +
+          labs(x=NULL, y=bquote('Difference'~(mWm^-2))) +
+          ggtitle('Point-by-Point Interpolation Differences') + p_theme
+        p2 <-
+          df_acc_rmse %>%
+          ggplot() +
+          geom_hline(yintercept=0) +
           geom_col(aes(short_name, value, fill=method), color='black', position='dodge') +
+          geom_text(data=filter(df_acc_rmse, method == 'Krige'),
+                    aes(short_name, -Inf, label=n, group=method, fontface='bold.italic'),
+                    angle=40, hjust=0, vjust=-0.65 ) +
+          scale_y_continuous(expand=expansion(mult=c(0.25, 0.05))) +
           scale_fill_manual(values=c('Krige'='darkorange', 'Similarity'='navy')) +
           labs(x=NULL, y=bquote('RMSE'~(mWm^-2)), fill='Method') +
           ggtitle('Interpolation Accuracies') + p_theme
