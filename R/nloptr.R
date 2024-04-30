@@ -26,6 +26,7 @@ if (!file.exists(fpath)) {
   # Visualize nlopt results
   walk(ids, plot_transect)
   walk(ids, plot_optimal_krige_model)
+  plot_nlopt_summary()
 
 } else {
   cat('\nOptimal krige model summary found at:\n', fpath, '\n', sep='')
