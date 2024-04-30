@@ -369,7 +369,7 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
       return(runif(1, 1, 1.5))
     })
     na_sum <- sum(is.na(k_cv$residual))
-    na_thresh <- nrow(k_cv) / 8
+    na_thresh <- nrow(k_cv) / 2
     if (na_sum != 0) {
       if (na_sum >= na_thresh) {
         cat('\nToo many NAs in krige.cv:', na_sum, '/', na_thresh)
@@ -454,9 +454,12 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
     cat('\nOptimized', v_mod, 'kriging model found for submap transect:', trans_id)
     return(invisible())
   }
-  if (!file.exists(nlopt_path) & file.exists(nlopt_itr_path)) {
+  if ((!file.exists(nlopt_path) & file.exists(nlopt_itr_path)) |
+      (file.exists(nlopt_path) & !file.exists(nlopt_itr_path))) {
     cat('\nOptimized', v_mod, 'kriging model failed for submap transect:', trans_id)
-    cat('\nRemove', nlopt_itr_path, 'and run "make nlopt" again ...')
+    cat('\n    Remove', nlopt_path, 'and ...')
+    cat('\n    Remove', nlopt_itr_path, 'and ...')
+    cat('\n    Run "make nlopt" again ...')
     return(invisible())
   }
   if (!dir.exists(nlopt_dir)) {dir.create(nlopt_dir, recursive=T, showWarnings=F)}
@@ -517,6 +520,7 @@ nlopt_transects <- function(trans_ids=NULL, v_mods=c('Sph', 'Exp', 'Lin', 'Bes')
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
   if (length(list.files('assets/map_data/relief')) < length(trans_ids)) {parallel <- F}
   x <- expand.grid(id=trans_ids, vm=v_mods, stringsAsFactors=F) %>% arrange(id, vm)
+  cat('\nOptimizing krige models after Li et al. (2018) ...\n')
   if (parallel) {
     plan(multicore, workers=availableCores() - 2)
     future_walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, n_fold, iwt, vwt),
@@ -645,6 +649,7 @@ interp_diff <- function(shp_krg=NULL, shp_sim=NULL) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 summarize_optimal_krige_models <- function(trans_ids, parallel=T) {
   f <- function(x) {get_optimal_krige_model(x)$opt_krige_mod_summary}
+  cat('\nSummarizing optimal krige models ...\n')
   if (parallel) {
     plan(multicore, workers=availableCores() - 2)
     as_tibble(future_map_dfr(trans_ids, f, .options=furrr_options(seed=42), .progress=T))
@@ -673,6 +678,7 @@ summarize_interpolation_differences <- function(trans_ids, parallel=T) {
       return(NULL)
     })
   }
+  cat('\nSummarizing interpolation differences ...\n')
   if (parallel) {
     as_tibble(future_map_dfr(ids, f, .options=furrr_options(seed=42), .progress=T))
   } else {
@@ -713,6 +719,7 @@ summarize_interpolation_accuracy <- function(trans_ids, parallel=T) {
       return(NULL)
     })
   }
+  cat('\nSummarizing interpolation accuracies ...\n')
   if (parallel) {
     as_tibble(future_map_dfr(ids, f, .options=furrr_options(seed=42), .progress=T))
   } else {
