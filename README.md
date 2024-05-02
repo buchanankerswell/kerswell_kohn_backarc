@@ -1,23 +1,21 @@
 ![](draft/assets/images/repo-banner.png)
 
-***Figure:*** *Similarity and Kriging interpolations for Vanuatu. While (a) Similarity predicts more-or-less uniformly-high surface heat flow within the region defined by many microplates, (b) excellent observational coverage allows Kriging to distinguish the most northern microplate from the New Hebrides Plate (NHP), Balmoral Reef (BR), and Conway Reef (CWR) microplates to the S. The geologic proxy datasets used to construct Similarity interpolations are apparently too coarse to resolve microplate-size features in this case. Segment boundary (bold white line) and volcanoes (gold diamonds) defined by Syracuse & Abers ([2006](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2005gc001045)). Similarity interpolation from Lucazeau ([2019](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2019GC008389)). Plate boundaries (bold black lines) defined by Lawver et al. ([2018](https://repositories.lib.utexas.edu/handle/2152/65415)).*
+***Figure:*** *Global heat flow data compared to (a) Similarity (b) and Kriging (c) interpolations for near Japan. Volcanoes (white triangles) defined by Syracuse & Abers ([2006](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2005gc001045)). Global heat flow data from the International Heat Flow Commission 2024 release (Global Heat Flow Data Assessment Group, [2024](https://doi.org/10.5880/fidgeo.2024.014)). Similarity interpolation from Lucazeau ([2019](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2019GC008389)). Plate boundaries (thick white lines) defined by Lawver et al. ([2018](https://repositories.lib.utexas.edu/handle/2152/65415)). Transect is from Submap Lallemand & Heuret ([2017](https://submap.gm.umontpellier.fr)).*
 
-# Kerswell & Kohn (2023; G3)
+# Kerswell & Kohn (2024; in prep)
 
-This work investigates methods for interpolating surface heat flow data near subduction zones. We applied two different interpolations methods, *Similarity* and *Kriging* to the [ThermoGlobe](http://heatflow.org) dataset (Jennings et al., 2021), and compared the results. Interpolations show that surface heat flow is complex and often discontinuous along strike near subduction zones, thus implying that the deep thermal structure and/or near-surface modifications are also discontinuous.
-
-The [manuscript](https://buchanankerswell.com/assets/dissertation/dissertation-ebook.html#chpt3) is in preparation for *Geochemistry, Geophysics, Geosystems*. You can find the preprint [here](https://buchanankerswell.com/assets/pdf/kerswell-kohn-backarc-g3-2023.pdf).
+This work investigates the spatial continuity of surface heat flow near subduction zones. We compared two different interpolations methods, *Similarity* and *Kriging* to the 2024 release of the Global Heat Flow Database (Global Heat Flow Data Assessment Group, [2024](https://doi.org/10.5880/fidgeo.2024.014)). Interpolations show that surface heat flow is complex and often discontinuous along strike near subduction zones, thus implying that the deep thermal structure and/or near-surface modifications are also discontinuous.
 
 ## Repository
 
-This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2023; G3).
+This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2024; in prep).
 
 This repository includes:
 
 - All datasets required to compile the study
 - R scripts to reproduce all results and figures
-- A Makefile to compile the study
-- The complete manuscript written in Rmarkdown
+- A Makefile to run the study
+- A manuscript written in Rmarkdown
 
 This repository is self-contained but requires the following software (all open-source).
 
@@ -57,7 +55,7 @@ make
 
 This will check for required R packages and try to install missing packages automatically.
 
-If all packages are found and available it will proceed to run the study with some initial prompts from the user. The study takes about ??? to run on my MacBook Air (M1 8GB, 2020) setting a maximum of 30 optimization iterations that use the [NLOPT_LN_SBPLX](https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/)  leave-one-out cross validation for computing the cost function and 8 cores computing in parallel. The study takes about ??? minutes to with 1 optimization step (i.e. Kriging with an initial guess without optimization).
+If all packages are found and available it will proceed to run the study with some initial prompts from the user. The study takes 10+ hours to run on my MacBook Pro (M2 16GB, 2022) with 8 cores computing in parallel.
 
 ## Coauthors
 
@@ -65,7 +63,7 @@ If all packages are found and available it will proceed to run the study with so
 
 ## Acknowledgement
 
-We gratefully acknowledge high-performance computing support of the Borah compute cluster (DOI: [10.18122/oit/3/boisestate](10.18122/oit/3/boisestate)) provided by Boise State University’s Research Computing Department. We thank D. Hasterok for providing the NGHF references and guidance on citing. This work was supported by the National Science Foundation grant OISE 1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
+We thank the Global Heat Flow Data Assessment Group for their tremendous efforts assessing the Global Heat Flow Database and providing it as open-access. We also thank the authors who freely provided other geospatial datasets, including volcanoes (Syracuse & Abers, 2006), plate boundaries (Lawver et al., 2018), interpolations (Lucazeau, 2019), and transects (Lallemand & Heuret, 2017). This work was supported by the National Science Foundation grant OISE 1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
 
 ## Open Research
 
