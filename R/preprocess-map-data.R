@@ -33,8 +33,8 @@ cat('\nhttps://doi.org/10.1029/2005GC001045\n')
 ct <- c('ddddddddddddccf')
 shp_volc <- 
   bind_rows(
-    read_table('assets/map_data/segments/volcanoes.txt', col_type=ct, na='NULL'),
-    read_table('assets/map_data/segments/volcanoes_nospread.txt', col_type=ct, na='NULL')
+    read_table('assets/map_data/volcanoes/volcanoes.txt', col_type=ct, na='NULL'),
+    read_table('assets/map_data/volcanoes/volcanoes_nospread.txt', col_type=ct, na='NULL')
   ) %>%
   st_as_sf(coords=c('Lon', 'Lat'), crs=wgs) %>%
   reproject_center_pacific()
