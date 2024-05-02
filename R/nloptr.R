@@ -24,9 +24,11 @@ if (!file.exists(fpath)) {
   save(list=c('nlopt_summary', 'interp_diff_summary', 'interp_accuracy_summary'), file=fpath)
 
   # Visualize nlopt results
+  plot_nlopt_summary()
+  plot_control_point_summary()
   walk(ids, plot_transect)
   walk(ids, plot_optimal_krige_model)
-  plot_nlopt_summary()
+  walk(c('NPA', 'SAM', 'SEA', 'SWP'), plot_interp_accuracy_summary)
 
 } else {
   cat('\nOptimal krige model summary found at:\n', fpath, '\n', sep='')

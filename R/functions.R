@@ -493,17 +493,17 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
   if (opt$status < 0 | opt$status == 5 | opt$iterations < 10) {
     cat('\n', rep('+', 60), sep='')
     cat('\nNlopt failed to converge:')
-    cat('\nNloptr status:', opt$status)
-    cat('\nNloptr iterations:', opt$iterations)
-    cat('\nNloptr message:\n', opt$message)
+    cat('\nNlopt status:', opt$status)
+    cat('\nNlopt iterations:', opt$iterations)
+    cat('\nNlopt message:\n', opt$message)
     cat('\n', rep('-', 60), sep='')
     return(invisible())
   } else {
     cat('\n', rep('+', 60), sep='')
     cat('\nNlopt converged:')
-    cat('\nNloptr status:', opt$status)
-    cat('\nNloptr iterations:', opt$iterations)
-    cat('\nNloptr message:\n', opt$message)
+    cat('\nNlopt status:', opt$status)
+    cat('\nNlopt iterations:', opt$iterations)
+    cat('\nNlopt message:\n', opt$message)
     cat('\n', rep('-', 60), sep='')
     opt_decoded <- decode_opt(obs, v_mod, opt)
     assign(str_replace_all(nlopt_id, '-', '_'), opt_decoded)
@@ -669,10 +669,11 @@ summarize_interpolation_differences <- function(trans_ids, parallel=T) {
       np <- km$opt_krige_mod_summary$n_pairs
       compile_transect_data(x, fv=fv, np=np)$dff_large_buff[[1]] %>%
         st_set_geometry(NULL) %>%
-        summarise(short_name=x, n=sum(!is.na(est_dff)), rmse=sqrt(mean(est_dff^2, na.rm=T)),
-                  min=min(est_dff, na.rm=T), max=max(est_dff, na.rm=T),
-                  med=median(est_dff, na.rm=T), iqr=IQR(est_dff, na.rm=T),
-                  mean=mean(est_dff, na.rm=T), sigma=sd(est_dff, na.rm=T))
+        summarise(short_name=x, n_grid=n(), n=sum(!is.na(est_dff)),
+                  rmse=sqrt(mean(est_dff^2, na.rm=T)), min=min(est_dff, na.rm=T),
+                  max=max(est_dff, na.rm=T), med=median(est_dff, na.rm=T),
+                  iqr=IQR(est_dff, na.rm=T), mean=mean(est_dff, na.rm=T),
+                  sigma=sd(est_dff, na.rm=T))
     }, error=function(e) {
       cat('\nAn error occurred in interp_diff_summary:\n', conditionMessage(e))
       return(NULL)
@@ -1081,45 +1082,70 @@ plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
         interp_accuracy_summary$short_name[which(interp_accuracy_summary$rmse_obs_sim > 300 |
                                                  interp_accuracy_summary$rmse_obs_krg > 300)]
       outliers <- unique(c(outliers_diff, outliers_acc))
-      df_acc <-
-          interp_accuracy_summary %>%
-          filter(!is.na(rmse_obs_krg)) %>%
-          pivot_longer(-c(short_name)) %>%
-          mutate(method=ifelse(str_detect(name, 'sim'), 'sim', 'krg'),
-                 name=str_split(name, '_', simplify=T)[,1],
-                 zone=str_sub(short_name, 1, 3)) %>%
-          rename(metric=name) %>%
-          filter(zone == submap_zone) %>%
-          filter(short_name %in% x & !(short_name %in% outliers)) %>%
-          mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige'))
-      df_acc_ns <- filter(df_acc, metric == 'n')
-      df_acc_rmse <- filter(df_acc, metric == 'rmse') %>% mutate(n=df_acc_ns$value)
+      df_acc_rmse <-
+        interp_accuracy_summary %>%
+        filter(!is.na(rmse_obs_krg)) %>%
+        pivot_longer(-c(short_name)) %>%
+        mutate(method=ifelse(str_detect(name, 'sim'), 'sim', 'krg'),
+               name=str_split(name, '_', simplify=T)[,1],
+               zone=str_sub(short_name, 1, 3)) %>%
+        rename(metric=name) %>% filter(zone == submap_zone) %>%
+        filter(short_name %in% x & !(short_name %in% outliers)) %>%
+        mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige')) %>%
+        filter(metric == 'rmse') %>% rename(rmse=value) %>% select(-metric) %>%
+        left_join(select(nlopt_summary, short_name, n_obs), by='short_name') %>%
+        left_join(select(interp_accuracy_summary, short_name, n_krg), by='short_name') %>%
+        rename(n_control=n_krg) %>%
+        left_join(select(interp_diff_summary, short_name, n_grid), by='short_name') %>%
+        left_join(select(interp_diff_summary, short_name, n), by='short_name') %>%
+        mutate(n=ifelse(method == 'Similarity', n_grid, n)) %>%
+        rename(n_itp=n) %>% mutate(coverage=n_itp / n_grid * 100)
       suppressWarnings({suppressMessages({
+        p0 <-
+          nlopt_summary %>%
+          filter(short_name %in% x & !(short_name %in% outliers)) %>%
+          ggplot() +
+          geom_col(aes(short_name, n_obs, fill='Observation'), color='black') +
+          geom_col(data=filter(df_acc_rmse, method == 'Krige'),
+                   aes(short_name, n_control, fill='Control point'), color='black') +
+          scale_fill_manual(values=c('Observation'='forestgreen',
+                                     'Control point'='darkred')) +
+          labs(x=NULL, y='N', color=NULL, fill='Observation type') +
+          ggtitle('Heat flow observations') + p_theme +
+          theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
         p1 <-
           interp_diff_summary %>%
           filter(short_name %in% x & !(short_name %in% outliers)) %>%
           ggplot() +
           geom_hline(yintercept=0) +
-          geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma, ymax=mean + 2 * sigma)) +
-          geom_text(aes(short_name, -Inf, label=n, fontface='bold.italic'), angle=40,
-                    hjust=0, vjust=-0.65) +
-          scale_y_continuous(expand=expansion(mult=c(0.25, 0.05))) +
-          labs(x=NULL, y=bquote('Difference'~(mWm^-2))) +
-          ggtitle('Point-by-Point Interpolation Differences') + p_theme
+          geom_crossbar(aes(short_name, mean, ymin=mean - 2 * sigma,
+                            ymax=mean + 2 * sigma)) +
+          labs(x=NULL, y=bquote('Difference'~(mWm^-2)), color=NULL) +
+          ggtitle('Point-by-Point Interpolation Differences') + p_theme +
+          theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
         p2 <-
+          interp_diff_summary %>%
+          filter(short_name %in% x & !(short_name %in% outliers)) %>%
+          ggplot() +
+          geom_col(aes(short_name, 100, fill='Similarity'), color='black') +
+          geom_col(aes(short_name, n / n_grid * 100, fill='Krige'), color='black') +
+          scale_fill_manual(values=c('Krige'='darkorange', 'Similarity'='navy'),
+                            guide='none') +
+          labs(x=NULL, y='Coverage (%)', fill='Method') +
+          ggtitle('Spatial Coverage') + p_theme +
+          theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+                legend.position='none')
+        p3 <-
           df_acc_rmse %>%
           ggplot() +
           geom_hline(yintercept=0) +
-          geom_col(aes(short_name, value, fill=method), color='black', position='dodge') +
-          geom_text(data=filter(df_acc_rmse, method == 'Krige'),
-                    aes(short_name, -Inf, label=n, group=method, fontface='bold.italic'),
-                    angle=40, hjust=0, vjust=-0.65 ) +
-          scale_y_continuous(expand=expansion(mult=c(0.25, 0.05))) +
+          geom_col(aes(short_name, rmse, fill=method), color='black', position='identity') +
           scale_fill_manual(values=c('Krige'='darkorange', 'Similarity'='navy')) +
           labs(x=NULL, y=bquote('RMSE'~(mWm^-2)), fill='Method') +
           ggtitle('Interpolation Accuracies') + p_theme
-        p3 <- p1 / p2
-        ggsave(file=y, plot=p3, width=13, height=6.5, dpi=300, bg='white')
+        p4 <- p0 / p1 / p2 / p3 + plot_layout(guides='collect') &
+          theme(legend.position='bottom')
+        ggsave(file=y, plot=p4, width=13, height=10, dpi=300, bg='white')
       })})
     }, error=function(e) {
       cat('\nAn error occurred in plot_interp_accuracy_summary:\n', conditionMessage(e))
@@ -1176,5 +1202,68 @@ plot_nlopt_summary <- function(base_size=14) {
     })})
   }, error=function(e) {
     cat('\nAn error occurred in plot_nlopt_summary:\n', conditionMessage(e))
+  })
+}
+
+plot_control_point_summary <- function(base_size=14) {
+  fig_dir <- 'figs/summary/'
+  fig_path <- paste0(fig_dir, 'control-point-summary.png')
+  data_path <- 'assets/nlopt_data/interpolation-summary.RData'
+  if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
+  if (!exists('interp_accuracy_summary', envir=.GlobalEnv)) {
+    stop('\nMissing nlopt summary data! Use "load(path/to/interpolation-summary.RData)"')
+  }
+  p_theme <- list(
+    theme_bw(base_size=14),
+    theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+          plot.title=element_text(hjust=0.5)))
+  df <-
+    interp_accuracy_summary %>%
+    filter(!is.na(rmse_obs_krg)) %>%
+    pivot_longer(-c(short_name)) %>%
+    mutate(method=ifelse(str_detect(name, 'sim'), 'sim', 'krg'),
+           name=str_split(name, '_', simplify=T)[,1],
+           zone=str_sub(short_name, 1, 3)) %>%
+    rename(metric=name) %>%
+    mutate(method=ifelse(method == 'sim', 'Similarity', 'Krige')) %>%
+    filter(metric == 'rmse') %>% rename(rmse=value) %>% select(-metric) %>%
+    left_join(select(nlopt_summary, short_name, n_obs), by='short_name') %>%
+    left_join(select(interp_accuracy_summary, short_name, n_krg), by='short_name') %>%
+    rename(n_control=n_krg) %>%
+    left_join(select(interp_diff_summary, short_name, n_grid), by='short_name') %>%
+    left_join(select(interp_diff_summary, short_name, n), by='short_name') %>%
+    mutate(n=ifelse(method == 'Similarity', n_grid, n)) %>%
+    rename(n_itp=n) %>% mutate(coverage=n_control / n_grid * 100)
+  tryCatch({
+    cat('\nPlotting:', fig_path)
+    suppressWarnings({suppressMessages({
+      p1 <-
+        ggplot(df) +
+        geom_point(aes(coverage, rmse, fill=zone), shape=21, color='black') +
+        scale_fill_manual(values=c('NPA'='darkorange', 'SAM'='navy', 'SEA'='darkred',
+                                   'SWP'='forestgreen')) +
+        facet_wrap(~method, scales='free_x') +
+        labs(x='Control coverage (%)', y='RMSE', fill='Zone') + p_theme +
+        theme(axis.title.x=element_blank())
+      p2 <-
+        ggplot(filter(df, coverage <= 20)) +
+        geom_point(aes(coverage, rmse, fill=zone), shape=21, color='black') +
+        scale_fill_manual(values=c('NPA'='darkorange', 'SAM'='navy', 'SEA'='darkred',
+                                   'SWP'='forestgreen'), guide='none') +
+        facet_wrap(~method, scales='free_x') +
+        labs(x='Control coverage (%)', y='RMSE', fill='Zone') + p_theme +
+        theme(axis.title.x=element_blank())
+      p3 <-
+        ggplot(filter(df, coverage <= 5)) +
+        geom_point(aes(coverage, rmse, fill=zone), shape=21, color='black') +
+        scale_fill_manual(values=c('NPA'='darkorange', 'SAM'='navy', 'SEA'='darkred',
+                                   'SWP'='forestgreen'), guide='none') +
+        facet_wrap(~method, scales='free_x') +
+        labs(x='Control coverage (%)', y='RMSE', fill='Zone') + p_theme
+      p4 <- p1 / p2 / p3 + plot_layout(guides='collect')
+      ggsave(file=fig_path, plot=p4, width=6.5, height=8, dpi=300, bg='white')
+    })})
+  }, error=function(e) {
+    cat('\nAn error occurred in plot_control_point_summary:\n', conditionMessage(e))
   })
 }
