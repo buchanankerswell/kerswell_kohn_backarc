@@ -23,7 +23,8 @@ rm(package_list, sshhh)
 sf_use_s2(F)
 
 # Set seed
-set.seed(42)
+seed <- 42
+set.seed(seed)
 
 # Set map projections
 wgs <- '+proj=longlat +datum=WGS84 +ellps=WGS84 +no_defs'
@@ -235,7 +236,8 @@ project_obs_to_transect <- function(transect, shp_obs) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compile transect data !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=5e4, fv=NULL, np=NULL) {
+compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1.5e5),
+                                  fv=NULL, np=NULL) {
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
   if (!exists('shp_submap', envir=.GlobalEnv)) {
     stop('\nMissing map data! Use "load(path/to/map-data.RData)"')
@@ -254,7 +256,9 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=5e4, fv=NULL,
     df <-
       x %>% rowwise() %>%
       mutate(large_buffer=st_buffer(transect, lbuff, endCapStyle='ROUND')) %>%
-      mutate(small_buffer=st_buffer(transect, sbuff, endCapStyle='FLAT')) %>%
+      mutate(small_buffer1=st_buffer(transect, sbuff[1], endCapStyle='FLAT')) %>%
+      mutate(small_buffer2=st_buffer(transect, sbuff[2], endCapStyle='FLAT')) %>%
+      mutate(small_buffer3=st_buffer(transect, sbuff[3], endCapStyle='FLAT')) %>%
       mutate(bbox=bbox_extend(st_bbox(large_buffer), square=T)) %>%
       mutate(ridge=crop_feature(shp_ridge, bbox)) %>%
       mutate(trench=crop_feature(shp_trench, bbox)) %>%
@@ -262,22 +266,38 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=5e4, fv=NULL,
       mutate(volcano=crop_feature(select(shp_volc, geometry), bbox)) %>%
       mutate(grid=list(crop_feature(shp_grid, large_buffer, T, T))) %>%
       mutate(ghfdb_large_buff=list(crop_feature(shp_ghfdb, large_buffer, T, T))) %>%
-      mutate(ghfdb_small_buff=list(crop_feature(shp_ghfdb, small_buffer, T, T))) %>%
-      mutate(ghfdb_projected=list(project_obs_to_transect(transect, ghfdb_small_buff))) %>%
+      mutate(ghfdb_small_buff1=list(crop_feature(shp_ghfdb, small_buffer1, T, T))) %>%
+      mutate(ghfdb_small_buff2=list(crop_feature(shp_ghfdb, small_buffer2, T, T))) %>%
+      mutate(ghfdb_small_buff3=list(crop_feature(shp_ghfdb, small_buffer3, T, T))) %>%
+      mutate(ghfdb_projected1=list(project_obs_to_transect(transect, ghfdb_small_buff1))) %>%
+      mutate(ghfdb_projected2=list(project_obs_to_transect(transect, ghfdb_small_buff2))) %>%
+      mutate(ghfdb_projected3=list(project_obs_to_transect(transect, ghfdb_small_buff3))) %>%
       mutate(sim_large_buff=list(crop_feature(shp_sim, large_buffer, T, T))) %>%
-      mutate(sim_small_buff=list(crop_feature(shp_sim, small_buffer, T, T))) %>%
-      mutate(sim_projected=list(project_obs_to_transect(transect, sim_small_buff))) %>%
+      mutate(sim_small_buff1=list(crop_feature(shp_sim, small_buffer1, T, T))) %>%
+      mutate(sim_small_buff2=list(crop_feature(shp_sim, small_buffer2, T, T))) %>%
+      mutate(sim_small_buff3=list(crop_feature(shp_sim, small_buffer3, T, T))) %>%
+      mutate(sim_projected1=list(project_obs_to_transect(transect, sim_small_buff1))) %>%
+      mutate(sim_projected2=list(project_obs_to_transect(transect, sim_small_buff2))) %>%
+      mutate(sim_projected3=list(project_obs_to_transect(transect, sim_small_buff3))) %>%
       mutate(bathy=list(get_seg_bathy(bbox)))
   })})
   if (!is.null(fv) && !is.null(np)) {
     shp_krg <- Krige(df$ghfdb_large_buff[[1]], fv, df$grid[[1]], np)
     df %>%
       mutate(krg_large_buff=list(crop_feature(shp_krg, large_buffer, T, T))) %>%
-      mutate(krg_small_buff=list(crop_feature(shp_krg, small_buffer, T, T))) %>%
-      mutate(krg_projected=list(project_obs_to_transect(transect, krg_small_buff))) %>%
+      mutate(krg_small_buff1=list(crop_feature(shp_krg, small_buffer1, T, T))) %>%
+      mutate(krg_small_buff2=list(crop_feature(shp_krg, small_buffer2, T, T))) %>%
+      mutate(krg_small_buff3=list(crop_feature(shp_krg, small_buffer3, T, T))) %>%
+      mutate(krg_projected1=list(project_obs_to_transect(transect, krg_small_buff1))) %>%
+      mutate(krg_projected2=list(project_obs_to_transect(transect, krg_small_buff2))) %>%
+      mutate(krg_projected3=list(project_obs_to_transect(transect, krg_small_buff3))) %>%
       mutate(dff_large_buff=list(interp_diff(krg_large_buff, sim_large_buff))) %>%
-      mutate(dff_small_buff=list(interp_diff(krg_small_buff, sim_small_buff))) %>%
-      mutate(dff_projected=list(interp_diff(krg_projected, sim_projected))) %>%
+      mutate(dff_small_buff1=list(interp_diff(krg_small_buff1, sim_small_buff1))) %>%
+      mutate(dff_small_buff2=list(interp_diff(krg_small_buff2, sim_small_buff2))) %>%
+      mutate(dff_small_buff3=list(interp_diff(krg_small_buff3, sim_small_buff3))) %>%
+      mutate(dff_projected1=list(interp_diff(krg_projected1, sim_projected1))) %>%
+      mutate(dff_projected2=list(interp_diff(krg_projected2, sim_projected2))) %>%
+      mutate(dff_projected3=list(interp_diff(krg_projected3, sim_projected3))) %>%
       ungroup()
   } else {
     ungroup(df)
@@ -336,14 +356,25 @@ experimental_vgrm <- function(shp_hf=NULL, cutoff=3, n_lags=30) {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# sample and shuffle equal nfolds !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sample_and_shuffle_equal_nfolds <- function(nrow_data, nfold=10) {
+  if (is.null(nrow_data)) {stop('\nMissing nrow data!')}
+  if (is.null(nfold)) {nfold <- 10}
+  fold_size <- nrow_data %/% nfold
+  remainder <- nrow_data %% nfold
+  fold <- rep(1:nfold, each=fold_size)
+  if (remainder > 0) {fold <- c(fold, sample(1:nfold, remainder))}
+  sample(fold)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # cost function !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1e5,
-                          v_mod='Sph', n_fold=NULL, interp_weight=0.5, vgrm_weight=0.5,
-                          trans_id=NULL) {
+                          v_mod='Sph', interp_weight=0.5, vgrm_weight=0.5, trans_id=NULL,
+                          nfold=NULL) {
   if (is.null(shp_hf)) {stop('\nMissing heat flow data model!')}
-  if (is.null(n_fold)) {n_fold <- nrow(shp_hf)}
-  if (!is.null(n_fold)) {if (n_fold > 0 & n_fold <= 1) {n_fold <- nrow(shp_hf) * n_fold}}
   suppressWarnings({
     tryCatch({
       ev <- experimental_vgrm(shp_hf, cutoff, n_lags)
@@ -363,7 +394,7 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
       return(runif(1, 1, 1.5))
     }
     tryCatch({
-      k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, maxdist=max_dist, nfold=n_fold)
+      k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, maxdist=max_dist, nfold=nfold)
     }, error=function(e) {
       cat('\nAn error occurred in krige.cv:\n', conditionMessage(e))
       return(runif(1, 1, 1.5))
@@ -443,8 +474,8 @@ decode_opt <- function(shp_hf=NULL, v_mod=NULL, opt=NULL) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # nlopt krige !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_eval=500,
-                        n_fold=10, iwt=0.5, vwt=0.5) {
+nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_NELDERMEAD', max_eval=500,
+                        iwt=0.5, vwt=0.5) {
   if (is.null(trans_id)) {stop('\nMissing submap transect id!')}
   nlopt_dir <- 'assets/nlopt_data/nlopt_transects'
   nlopt_id <- paste0('opt-', trans_id, '-', v_mod) 
@@ -463,15 +494,16 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
     return(invisible())
   }
   if (!dir.exists(nlopt_dir)) {dir.create(nlopt_dir, recursive=T, showWarnings=F)}
-  x0 <- c(3, 50, 10, 1e5) # Initial values (cutoff, n_lags, n_max, max_dist)
+  x0 <- c(3, 50, 5, 1e5) # Initial values (cutoff, n_lags, n_max, max_dist)
   lb <- c(1, 30, 2, 5e4) # Lower bound (cutoff, n_lags, n_max, max_dist)
-  ub <- c(12, 100, 50, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
+  ub <- c(12, 100, 30, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
   opts <-
     list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-15)
   x <- compile_transect_data(trans_id)
   obs <- x$ghfdb_large_buff[[1]]
+  folds <- sample_and_shuffle_equal_nfolds(nrow(obs))
   nlopt_fun <- function(x) {
-    cost_function(obs, x[1], x[2], x[3], x[4], v_mod, n_fold, iwt, vwt, trans_id)
+    cost_function(obs, x[1], x[2], x[3], x[4], v_mod, iwt, vwt, trans_id, folds)
   }
   tryCatch({
     cat('\n', rep('-', 60), sep='')
@@ -479,7 +511,6 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
     cat('\n', rep('+', 60), sep='')
     cat('\nNlopt algorithm:    ', alg)
     cat('\nMaximum evaluations:', max_eval)
-    cat('\nNumber of k-folds:  ', n_fold)
     cat('\nKrige weight:       ', iwt)
     cat('\nVariogram weight:   ', vwt)
     cat('\n                     (cutoff, n_lags, n_max, max_dist)')
@@ -515,18 +546,18 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
 # nlopt transects !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 nlopt_transects <- function(trans_ids=NULL, v_mods=c('Sph', 'Exp', 'Lin', 'Bes'),
-                            alg='NLOPT_LN_COBYLA', max_eval=500, n_fold=10,
-                            iwt=0.5, vwt=0.5, parallel=T) {
+                            alg='NLOPT_LN_NELDERMEAD', max_eval=500, iwt=0.5, vwt=0.5,
+                            parallel=T) {
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
   if (length(list.files('assets/map_data/relief')) < length(trans_ids)) {parallel <- F}
   x <- expand.grid(id=trans_ids, vm=v_mods, stringsAsFactors=F) %>% arrange(id, vm)
   cat('\nOptimizing krige models after Li et al. (2018) ...\n')
   if (parallel) {
     plan(multicore, workers=availableCores() - 2)
-    future_walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, n_fold, iwt, vwt),
-                 .options=furrr_options(seed=42), .progress=T)
+    future_walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, iwt, vwt),
+                 .options=furrr_options(seed=seed), .progress=T)
   } else {
-    walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, n_fold, iwt, vwt))
+    walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, iwt, vwt))
   }
 }
 
@@ -652,7 +683,7 @@ summarize_optimal_krige_models <- function(trans_ids, parallel=T) {
   cat('\nSummarizing optimal krige models ...\n')
   if (parallel) {
     plan(multicore, workers=availableCores() - 2)
-    as_tibble(future_map_dfr(trans_ids, f, .options=furrr_options(seed=42), .progress=T))
+    as_tibble(future_map_dfr(trans_ids, f, .options=furrr_options(seed=seed), .progress=T))
   } else {
     map_df(trans_ids, f)
   }
@@ -681,7 +712,7 @@ summarize_interpolation_differences <- function(trans_ids, parallel=T) {
   }
   cat('\nSummarizing interpolation differences ...\n')
   if (parallel) {
-    as_tibble(future_map_dfr(ids, f, .options=furrr_options(seed=42), .progress=T))
+    as_tibble(future_map_dfr(ids, f, .options=furrr_options(seed=seed), .progress=T))
   } else {
     map_df(ids, f)
   }
@@ -722,7 +753,7 @@ summarize_interpolation_accuracy <- function(trans_ids, parallel=T) {
   }
   cat('\nSummarizing interpolation accuracies ...\n')
   if (parallel) {
-    as_tibble(future_map_dfr(ids, f, .options=furrr_options(seed=42), .progress=T))
+    as_tibble(future_map_dfr(ids, f, .options=furrr_options(seed=seed), .progress=T))
   } else {
     map_df(ids, f)
   }
@@ -786,18 +817,28 @@ plot_ghfdb_base <- function() {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# plot transect !!
+# plot transect buff comp !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_transect <- function(trans_id, base_size=20) {
-  fig_dir <- 'figs/transect/'
-  fig_path <- paste0(fig_dir, trans_id, '-transect.png')
+plot_transect_buff_comp <- function(trans_id, base_size=20) {
+  fig_dir <- 'figs/transect_buff/'
+  fig_path1 <- paste0(fig_dir, trans_id, '-transect-buff-ghfdb.png')
+  fig_path2 <- paste0(fig_dir, trans_id, '-transect-buff-sim.png')
+  fig_path3 <- paste0(fig_dir, trans_id, '-transect-buff-krg.png')
+  fig_path_comp <- paste0(fig_dir, trans_id, '-transect-buff-comp.png')
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
-  if (file.exists(fig_path)) {
-    cat('\n', fig_path, ' already exists ...', sep='')
+  if (file.exists(fig_path_comp) & file.exists(fig_path1) & file.exists(fig_path2) &
+      file.exists(fig_path3)) {
+    cat('\n', fig_path1, ' already exists ...', sep='')
+    cat('\n', fig_path2, ' already exists ...', sep='')
+    cat('\n', fig_path3, ' already exists ...', sep='')
+    cat('\n', fig_path_comp, ' already exists ...', sep='')
     return(invisible())
   }
   tryCatch({
-    cat('\nPlotting:', fig_path)
+    cat('\nPlotting: ', fig_path1, ' ...', sep='')
+    cat('\nPlotting: ', fig_path2, ' ...', sep='')
+    cat('\nPlotting: ', fig_path3, ' ...', sep='')
+    cat('\nPlotting: ', fig_path_comp, ' ...', sep='')
     km <- get_optimal_krige_model(trans_id)
     fv <- km$fitted_vgrm
     np <- km$opt_krige_mod_summary$n_pairs
@@ -806,6 +847,7 @@ plot_transect <- function(trans_id, base_size=20) {
     comps_krg <- get_closest_interp_obs(trans_id, fv=fv, np=np)
     hf_pt_size <- 3
     pt_stroke <- 0.8
+    p_title <- paste0('Submap Transect: ', trans_id, ' ', x$trench_name)
     map_theme <- list(
       theme_bw(base_size=base_size),
       theme(plot.margin=margin(5, 5, 5, 5),
@@ -834,25 +876,38 @@ plot_transect <- function(trans_id, base_size=20) {
         scale_color_etopo(guide='none') +
         new_scale_color() +
         geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
-        geom_sf(aes(geometry=small_buffer), fill=NA, linewidth=0.5) +
         geom_sf(aes(geometry=ridge), color='white') +
         geom_sf(aes(geometry=transform), color='white') +
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
         geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
         geom_sf(data=x$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
         ggtitle('Global HF Observations') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
-      if (is.null(x$ghfdb_projected[[1]])) {
+      if (is.null(x$ghfdb_projected1[[1]])) {
         p2 <- ggplot(data=data.frame(), aes())
       } else {
         p2 <-
-          ggplot(x$ghfdb_projected[[1]]) +
-          geom_smooth(aes(projected_distances, obs), method='gam', color='black') +
-          geom_point(aes(projected_distances, obs), shape=20, color='grey20', size=3) +
-          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, 'npc'))
+          ggplot() +
+          geom_point(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
       }
       p2 <- p2 +
         labs(x='Normalized Distance', y=NULL) +
@@ -863,13 +918,15 @@ plot_transect <- function(trans_id, base_size=20) {
                                                    ticks.colour='black')) +
         scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
         scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p <- (p1 / p2) + plot_layout(widths=1, heights=c(1.5, 1)) &
+        theme(plot.title=element_text(size=base_size * 1.5, margin=margin()))
+      ggsave(file=fig_path1, plot=p, width=6.5, height=10, dpi=300, bg='white')
       p3 <-
         ggplot(x) +
         geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
         scale_color_etopo(guide='none') +
         new_scale_color() +
         geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
-        geom_sf(aes(geometry=small_buffer), fill=NA, linewidth=0.5) +
         geom_sf(aes(geometry=ridge), color='white') +
         geom_sf(aes(geometry=transform), color='white') +
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
@@ -878,20 +935,34 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(data=x$sim_large_buff[[1]], aes(color=est_sim), shape=20, size=hf_pt_size) +
         geom_sf(data=comps_sim[!is.na(comps_sim$est_sim),], aes(fill=est_sim), shape=21,
                 size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
         ggtitle('Similarity Interpolation') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
-      if (is.null(x$sim_projected[[1]])) {
+      if (is.null(x$sim_projected1[[1]])) {
         p4 <- ggplot(data=data.frame(), aes())
       } else {
         p4 <-
-          ggplot(x$sim_projected[[1]]) +
-          geom_smooth(aes(projected_distances, obs), method='gam', color='black') +
-          geom_point(aes(projected_distances, obs), shape=20, color='grey20', size=3) +
-          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, 'npc'))
+          ggplot() +
+          geom_point(data=x$sim_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$sim_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=x$sim_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$sim_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$sim_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=x$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
       }
       p4 <- p4 +
         labs(x='Normalized Distance', y=NULL) +
@@ -902,13 +973,15 @@ plot_transect <- function(trans_id, base_size=20) {
                                                    ticks.colour='black')) +
         scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
         scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p <- (p3 / p4) + plot_layout(widths=1, heights=c(1.5, 1)) &
+        theme(plot.title=element_text(size=base_size * 1.5, margin=margin()))
+      ggsave(file=fig_path2, plot=p, width=6.5, height=10, dpi=300, bg='white')
       p5 <-
         ggplot(x) +
         geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
         scale_color_etopo(guide='none') +
         new_scale_color() +
         geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
-        geom_sf(aes(geometry=small_buffer), fill=NA, linewidth=0.5) +
         geom_sf(aes(geometry=ridge), color='white') +
         geom_sf(aes(geometry=transform), color='white') +
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
@@ -917,20 +990,34 @@ plot_transect <- function(trans_id, base_size=20) {
         geom_sf(data=x$krg_large_buff[[1]], aes(color=est_krg), shape=20, size=hf_pt_size) +
         geom_sf(data=comps_krg[!is.na(comps_krg$est_krg),], aes(fill=est_krg), shape=21,
                 size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
         ggtitle('Krige Interpolation') +
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
-      if (is.null(x$krg_projected[[1]])) {
+      if (is.null(x$krg_projected1[[1]])) {
         p6 <- ggplot(data=data.frame(), aes())
       } else {
         p6 <-
-          ggplot(x$krg_projected[[1]]) +
-          geom_smooth(aes(projected_distances, obs), method='gam', color='black') +
-          geom_point(aes(projected_distances, obs), shape=20, color='grey20', size=3) +
-          geom_rug(aes(projected_distances, obs, color=obs), length=unit(0.06, 'npc'))
+          ggplot() +
+          geom_point(data=x$krg_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$krg_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=x$krg_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$krg_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$krg_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=x$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
       }
       p6 <- p6 +
         labs(x='Normalized Distance', y=NULL) +
@@ -941,15 +1028,574 @@ plot_transect <- function(trans_id, base_size=20) {
                                                    ticks.colour='black')) +
         scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
         scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
-      p_title <- paste0('Submap Transect: ', trans_id, ' ', x$trench_name)
+      p <- (p5 / p6) + plot_layout(widths=1, heights=c(1.5, 1)) &
+        theme(plot.title=element_text(size=base_size * 1.5, margin=margin()))
+      ggsave(file=fig_path3, plot=p, width=6.5, height=10, dpi=300, bg='white')
       p7 <-
         (p1 + p5 + p3) / (p2 + p6 + p4) +
         plot_layout(widths=1, heights=c(1.5, 1)) +
-        plot_annotation(title=p_title, tag_levels = list(c('a)', 'b)', 'c)', '', '', '')),
+        plot_annotation(title=p_title,
+                        tag_levels=list(c('a)', 'b)', 'c)', '  ', '  ', '  ')),
                         theme=theme(plot.title=element_text(size=base_size * 1.5,
                                                             margin=margin()))) &
-        theme(plot.tag=element_text(size=base_size * 1.5, margin=margin(0, 0, -45, 0)))
-      ggsave(file=fig_path, plot=p7, width=19.5, height=11, dpi=300, bg='white')
+        theme(plot.tag=element_text(size=base_size * 1.5, margin=margin(0, 0, -10, 0)))
+      ggsave(file=fig_path_comp, plot=p7, width=19.5, height=11, dpi=300, bg='white')
+    })})
+  }, error=function(e) {
+    cat('\nAn error occurred in plot_transect:\n', conditionMessage(e))
+  })
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot transect neighbors comp !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
+  fig_dir <- 'figs/transect_neighbors/'
+  zone_id <- str_extract(trans_ids[1], '^.{3}')
+  trans_id <- paste0(zone_id, '-',
+                     str_sub(trans_ids[1], -2), '-',
+                     str_sub(trans_ids[2], -2), '-',
+                     str_sub(trans_ids[3], -2))
+  fig_path1 <- paste0(fig_dir, trans_id, '-transect-neighbors-ghfdb.png')
+  fig_path2 <- paste0(fig_dir, trans_id, '-transect-neighbors-sim.png')
+  fig_path3 <- paste0(fig_dir, trans_id, '-transect-neighbors-krg.png')
+  if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
+  if (file.exists(fig_path1) & file.exists(fig_path2) & file.exists(fig_path3)) {
+    cat('\n', fig_path1, ' already exists ...', sep='')
+    cat('\n', fig_path2, ' already exists ...', sep='')
+    cat('\n', fig_path3, ' already exists ...', sep='')
+    return(invisible())
+  }
+  tryCatch({
+    cat('\nPlotting: ', fig_path1, ' ...', sep='')
+    cat('\nPlotting: ', fig_path2, ' ...', sep='')
+    cat('\nPlotting: ', fig_path3, ' ...', sep='')
+    kmx <- get_optimal_krige_model(trans_ids[1])
+    kmy <- get_optimal_krige_model(trans_ids[2])
+    kmz <- get_optimal_krige_model(trans_ids[3])
+    fvx <- kmx$fitted_vgrm
+    fvy <- kmy$fitted_vgrm
+    fvz <- kmz$fitted_vgrm
+    npx <- kmx$opt_krige_mod_summary$n_pairs
+    npy <- kmy$opt_krige_mod_summary$n_pairs
+    npz <- kmz$opt_krige_mod_summary$n_pairs
+    x <- compile_transect_data(trans_ids[1], fv=fvx, np=npx)
+    y <- compile_transect_data(trans_ids[2], fv=fvy, np=npy)
+    z <- compile_transect_data(trans_ids[3], fv=fvz, np=npz)
+    comps_sim_x <- get_closest_interp_obs(trans_ids[1])
+    comps_sim_y <- get_closest_interp_obs(trans_ids[2])
+    comps_sim_z <- get_closest_interp_obs(trans_ids[3])
+    comps_krg_x <- get_closest_interp_obs(trans_ids[1], fv=fvx, np=npx)
+    comps_krg_y <- get_closest_interp_obs(trans_ids[2], fv=fvy, np=npy)
+    comps_krg_z <- get_closest_interp_obs(trans_ids[3], fv=fvz, np=npz)
+    hf_pt_size <- 3
+    pt_stroke <- 0.8
+    p_title <- paste0('Submap Transect: ', trans_id, ' ', x$trench_name)
+    map_theme <- list(
+      theme_bw(base_size=base_size),
+      theme(plot.margin=margin(5, 5, 5, 5),
+            plot.title=element_text(vjust=0, hjust=0.5, margin=margin(0, 5, 10, 5))),
+      annotation_scale(location='bl', width_hint=0.33, text_cex=1.6, style='ticks',
+                       line_width=4, text_face='bold'),
+      annotation_north_arrow(location='bl', which_north='true', pad_x=unit(0.0, 'cm'),
+                             height=unit(2, 'cm'), width=unit(2, 'cm'),
+                             pad_y=unit(0.5, 'cm'), style=north_arrow_fancy_orienteering)
+    )
+    profile_theme <-
+      list(
+        theme_bw(base_size=base_size),
+        theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+              plot.margin=margin(5, 5, 5, 5),
+              legend.justification='right', legend.position=c(0.92, 0.85),
+              legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
+              legend.key.width=unit(1, 'cm'), legend.box.margin=margin(2, 2, 2, 2),
+              legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size),
+              legend.background=element_blank())
+      )
+    suppressWarnings({suppressMessages({
+      p1x <-
+        ggplot(x) +
+        geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=x$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Global HF Observations') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(x$ghfdb_projected1[[1]])) {
+        p2x <- ggplot(data=data.frame(), aes())
+      } else {
+        p2x <-
+          ggplot() +
+          geom_point(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p2x <- p2x +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p1y <-
+        ggplot(y) +
+        geom_sf(data=y$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=y$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Global HF Observations') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(y$ghfdb_projected1[[1]])) {
+        p2y <- ggplot(data=data.frame(), aes())
+      } else {
+        p2y <-
+          ggplot() +
+          geom_point(data=y$ghfdb_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=y$ghfdb_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=y$ghfdb_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=y$ghfdb_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p2y <- p2y +
+        labs(y='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p1z <-
+        ggplot(z) +
+        geom_sf(data=z$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=z$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Global HF Observations') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(z$ghfdb_projected1[[1]])) {
+        p2z <- ggplot(data=data.frame(), aes())
+      } else {
+        p2z <-
+          ggplot() +
+          geom_point(data=z$ghfdb_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=z$ghfdb_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=z$ghfdb_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=z$ghfdb_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p2z <- p2z +
+        labs(y='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p1 <-
+        (p1x + p1y + p1z) / (p2x + p2y + p2z) +
+        plot_layout(widths=1, heights=c(1.5, 1)) +
+        plot_annotation(title=p_title,
+                        tag_levels=list(c('a)', 'b)', 'c)', '  ', '  ', '  ')),
+                        theme=theme(plot.title=element_text(size=base_size * 1.5,
+                                                            margin=margin()))) &
+        theme(plot.tag=element_text(size=base_size * 1.5, margin=margin(0, 0, -10, 0)))
+      ggsave(file=fig_path1, plot=p1, width=19.5, height=11, dpi=300, bg='white')
+      p3x <-
+        ggplot(x) +
+        geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=x$sim_large_buff[[1]], aes(color=est_sim), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_sim_x[!is.na(comps_sim_x$est_sim),], aes(fill=est_sim), shape=21,
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Similarity Interpolation') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(x$sim_projected1[[1]])) {
+        p4x <- ggplot(data=data.frame(), aes())
+      } else {
+        p4x <-
+          ggplot() +
+          geom_point(data=x$sim_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$sim_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=x$sim_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$sim_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$sim_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=x$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p4x <- p4x +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p3y <-
+        ggplot(y) +
+        geom_sf(data=y$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=y$sim_large_buff[[1]], aes(color=est_sim), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_sim_y[!is.na(comps_sim_y$est_sim),], aes(fill=est_sim), shape=21,
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Similarity Interpolation') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(y$sim_projected1[[1]])) {
+        p4y <- ggplot(data=data.frame(), aes())
+      } else {
+        p4y <-
+          ggplot() +
+          geom_point(data=y$sim_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=y$sim_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=y$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=y$sim_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=y$sim_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=y$sim_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=y$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p4y <- p4y +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p3z <-
+        ggplot(z) +
+        geom_sf(data=z$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=z$sim_large_buff[[1]], aes(color=est_sim), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_sim_z[!is.na(comps_sim_z$est_sim),], aes(fill=est_sim), shape=21,
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Similarity Interpolation') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(z$sim_projected1[[1]])) {
+        p4z <- ggplot(data=data.frame(), aes())
+      } else {
+        p4z <-
+          ggplot() +
+          geom_point(data=z$sim_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=z$sim_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=z$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=z$sim_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=z$sim_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=z$sim_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=z$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p4z <- p4z +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p2 <-
+        (p3x + p3y + p3z) / (p4x + p4y + p4z) +
+        plot_layout(widths=1, heights=c(1.5, 1)) +
+        plot_annotation(title=p_title,
+                        tag_levels=list(c('a)', 'b)', 'c)', '  ', '  ', '  ')),
+                        theme=theme(plot.title=element_text(size=base_size * 1.5,
+                                                            margin=margin()))) &
+        theme(plot.tag=element_text(size=base_size * 1.5, margin=margin(0, 0, -10, 0)))
+      ggsave(file=fig_path2, plot=p2, width=19.5, height=11, dpi=300, bg='white')
+      p5x <-
+        ggplot(x) +
+        geom_sf(data=x$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=x$krg_large_buff[[1]], aes(color=est_krg), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_krg_x[!is.na(comps_krg_x$est_krg),], aes(fill=est_krg), shape=21,
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Krige Interpolation') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(x$krg_projected1[[1]])) {
+        p6x <- ggplot(data=data.frame(), aes())
+      } else {
+        p6x <-
+          ggplot() +
+          geom_point(data=x$krg_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$krg_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=x$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=x$krg_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$krg_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=x$krg_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=x$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p6x <- p6x +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p5y <-
+        ggplot(y) +
+        geom_sf(data=y$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=y$krg_large_buff[[1]], aes(color=est_krg), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_krg_y[!is.na(comps_krg_y$est_krg),], aes(fill=est_krg), shape=21,
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Krige Interpolation') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(y$krg_projected1[[1]])) {
+        p6y <- ggplot(data=data.frame(), aes())
+      } else {
+        p6y <-
+          ggplot() +
+          geom_point(data=y$krg_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=y$krg_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=y$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=y$krg_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=y$krg_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=y$krg_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=y$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p6y <- p6y +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p5z <-
+        ggplot(z) +
+        geom_sf(data=z$bathy[[1]], aes(color=elev), size=0.5, shape=15) +
+        scale_color_etopo(guide='none') +
+        new_scale_color() +
+        geom_sf(aes(geometry=large_buffer), fill=NA, linewidth=0.5) +
+        geom_sf(aes(geometry=ridge), color='white') +
+        geom_sf(aes(geometry=transform), color='white') +
+        geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
+        geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
+        geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
+        geom_sf(data=z$krg_large_buff[[1]], aes(color=est_krg), shape=20, size=hf_pt_size) +
+        geom_sf(data=comps_krg_z[!is.na(comps_krg_z$est_krg),], aes(fill=est_krg), shape=21,
+                size=hf_pt_size, stroke=pt_stroke, color='white') +
+        geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
+        geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
+        ggtitle('Krige Interpolation') +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        scale_fill_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+        coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
+      if (is.null(z$krg_projected1[[1]])) {
+        p6z <- ggplot(data=data.frame(), aes())
+      } else {
+        p6z <-
+          ggplot() +
+          geom_point(data=z$krg_projected1[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=z$krg_projected2[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_point(data=z$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
+                     color='grey20', size=2) +
+          geom_smooth(data=z$krg_projected1[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=z$krg_projected2[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_smooth(data=z$krg_projected3[[1]], aes(projected_distances, obs),
+                      method='loess', span=0.65, color='black') +
+          geom_rug(data=z$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
+                   length=unit(0.06, 'npc'))
+      }
+      p6z <- p6z +
+        labs(x='Normalized Distance', y=NULL) +
+        scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                              breaks=c(0, 125, 250), na.value='transparent',
+                              guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                                   frame.colour='black',
+                                                   ticks.colour='black')) +
+        scale_y_continuous(limits=c(0, 250), breaks=seq(0, 250, 50)) +
+        scale_x_continuous(limits=c(0, 1), breaks=c(0, 0.5, 1)) + profile_theme
+      p3 <-
+        (p5x + p5y + p5z) / (p6x + p6y + p6z) +
+        plot_layout(widths=1, heights=c(1.5, 1)) +
+        plot_annotation(title=p_title,
+                        tag_levels=list(c('a)', 'b)', 'c)', '  ', '  ', '  ')),
+                        theme=theme(plot.title=element_text(size=base_size * 1.5,
+                                                            margin=margin()))) &
+        theme(plot.tag=element_text(size=base_size * 1.5, margin=margin(0, 0, -10, 0)))
+      ggsave(file=fig_path3, plot=p3, width=19.5, height=11, dpi=300, bg='white')
     })})
   }, error=function(e) {
     cat('\nAn error occurred in plot_transect:\n', conditionMessage(e))
@@ -1021,13 +1667,9 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
         labs(x='Nlopt Iteration', y='Lags', color=NULL) + p_theme
       p4 <-
         ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
-        geom_path(aes(itr, vgrm_cost), color='darkorange', linewidth=1) +
-        geom_point(data=opt_kmod, aes(itr, vgrm_cost), color='darkorange', size=3) +
-        geom_label_repel(data=opt_kmod, aes(itr, vgrm_cost, label=round(vgrm_cost, 3)),
-                         size=base_size * 0.28) +
-        geom_path(aes(itr, cv_cost), color='navy', linewidth=1) +
-        geom_point(data=opt_kmod, aes(itr, cv_cost), color='navy', shape=20, size=5) +
-        geom_label_repel(data=opt_kmod, aes(itr, cv_cost, label=paste0(round(cv_cost, 3))),
+        geom_path(aes(itr, cost), color='black', linewidth=1) +
+        geom_point(data=opt_kmod, aes(itr, cost), color='black', shape=20, size=5) +
+        geom_label_repel(data=opt_kmod, aes(itr, cost, label=paste0(round(cost, 3))),
                          size=base_size * 0.28) +
         annotate('text', x=Inf, y=Inf, label='Cost Function', hjust=1.05, vjust=1.5,
                  size=base_size * 0.35) +
