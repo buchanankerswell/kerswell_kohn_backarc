@@ -30,6 +30,7 @@ main <- function() {
   if (file.exists(fpath)) {
     cat('\nVisualizing interpolations ...')
     ids <- c(ids[1:3], ids[12:14], ids[43:45])
+    id_comb <- combn(ids, 2, simplify=F)
     plot_nlopt_summary()
     plot_control_point_summary()
     future_walk(ids, plot_transect_buff_comp, .options=furrr_options(seed=seed))
@@ -40,6 +41,8 @@ main <- function() {
     plot_transect_neighbors_comp(ids[7:9])
     plot_transect_neighbors_comp(ids[c(2, 5, 8)])
     plot_transect_strip_comp(ids, 'comp')
+    future_walk(id_comb, ~plot_cross_correlation(.x[1], .x[2]),
+                .options=furrr_options(seed=seed))
   } else {
     cat('\nNo summary data found at:', fpath)
   }
