@@ -1243,9 +1243,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1288,9 +1288,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1395,9 +1395,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=y$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=y$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1444,9 +1444,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=z$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=z$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1551,9 +1551,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=y$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=y$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=y$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1600,9 +1600,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=z$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=z$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=z$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
