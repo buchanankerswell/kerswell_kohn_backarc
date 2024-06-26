@@ -20,7 +20,7 @@ sapply(package_list, sshhh)
 rm(package_list, sshhh)
 
 # Turn off S2 geometry
-sf_use_s2(F)
+suppressMessages(sf_use_s2(F))
 
 # Set seed
 seed <- 42
@@ -33,16 +33,6 @@ prj <- '+proj=eck3 +lon_0=-180 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m 
 #######################################################
 ## .1.         General Helper Functions          !!! ##
 #######################################################
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# get RData object !!
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-extract_RData_object <- function(file, object) {
-  E <- new.env()
-  load(file=file, envir=E)
-  return(get(object, envir=E, inherits=F))
-}
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # combine json to df !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -132,7 +122,7 @@ get_world_bathy <- function(res=15, path='assets/map_data/relief/') {
         reproject_center_pacific()
     })})
   }, error=function(e) {
-    cat('\nAn error occurred in get_world_bathy:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in get_world_bathy:\n!!', conditionMessage(e))
     return(NULL)
   })
 }
@@ -149,7 +139,7 @@ get_seg_bathy <- function(shp, res=2, path='assets/map_data/relief/', tol=1) {
       as.SpatialGridDataFrame() %>% st_as_sf(crs=wgs) %>% st_make_valid() %>%
       st_transform(prj) %>% rename(elev=layer)
   }, error=function(e) {
-    cat('\nAn error occurred in get_seg_bathy:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in get_seg_bathy:\n!!', conditionMessage(e))
     return(NULL)
   })
 }
@@ -234,14 +224,70 @@ project_obs_to_transect <- function(transect, shp_obs) {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# fit loess to projected obs !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fit_loess_to_projected_obs <- function(df, n=1e3, span=0.65) {
+  df <- df %>% st_set_geometry(NULL)
+  if (nrow(df) < 5) {
+    cat('\n   Less than 5 projected obs! Returning average obs instead of loess smooth!')
+    avg_obs <- mean(df$obs, na.rm=T)
+    smooth <- tibble(projected_distances=df$projected_distances,
+                     obs=rep(avg_obs, nrow(df)))
+  } else {
+    mod <- NULL
+    while (span <= 0.9 && is.null(mod)) {
+      mod <- tryCatch({
+        loess(obs~projected_distances, data=df, span=span)
+      }, error=function(e) {
+        span <- span + 0.05
+        cat('\n   Loess failed with', nrow(df), ' obs! Increasing span to ', span)
+        NULL
+      })
+    }
+    if (is.null(mod)) {
+      avg_obs <- mean(df$obs, na.rm=T)
+      smooth <- tibble(projected_distances=df$projected_distances,
+                       obs=rep(avg_obs, nrow(df)))
+      cat('\n   Loess failed! Returning average obs instead of loess smooth!')
+    } else {
+      dist <- seq(min(df$projected_distances, na.rm=T),
+                  max(df$projected_distances, na.rm=T), length.out=n)
+      mod <- loess(obs~projected_distances, data=df, span=span)
+      loess <- predict(mod, newdata=dist)
+      smooth <- tibble(projected_distances=dist, obs=loess)
+      return(smooth)
+    }
+  }
+  return(smooth)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# load map data !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+load_map_data <- function(fpath) {
+  load(fpath, envir=parent.frame())
+  if (!exists('shp_submap', envir=parent.frame())) {
+    stop('\nMissing map data! Use "load(path/to/map-data.RData)"')
+  }
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# load nlopt interpolation data !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+load_nlopt_interpolation_data <- function(fpath) {
+  load(fpath, envir=parent.frame())
+  if (!exists('nlopt_summary', envir=parent.frame())) {
+    stop('\nMissing nlopt data! Use "load(path/to/interpolation-summary.RData)"')
+  }
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compile transect data !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1.5e5),
                                   fv=NULL, np=NULL) {
+  load_map_data('assets/map_data/map-data.RData')
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
-  if (!exists('shp_submap', envir=.GlobalEnv)) {
-    stop('\nMissing map data! Use "load(path/to/map-data.RData)"')
-  }
   if (is.numeric(trans_ids) && all(trans_ids >= 1) && all(trans_ids <= nrow(shp_submap))) {
     x <- slice(shp_submap, trans_ids)
   } else if (is.character(trans_ids) && all(trans_ids %in% shp_submap$short_name)) {
@@ -272,6 +318,9 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1
       mutate(ghfdb_projected1=list(project_obs_to_transect(transect, ghfdb_small_buff1))) %>%
       mutate(ghfdb_projected2=list(project_obs_to_transect(transect, ghfdb_small_buff2))) %>%
       mutate(ghfdb_projected3=list(project_obs_to_transect(transect, ghfdb_small_buff3))) %>%
+      mutate(ghfdb_loess1=list(fit_loess_to_projected_obs(ghfdb_projected1))) %>%
+      mutate(ghfdb_loess2=list(fit_loess_to_projected_obs(ghfdb_projected2))) %>%
+      mutate(ghfdb_loess3=list(fit_loess_to_projected_obs(ghfdb_projected3))) %>%
       mutate(sim_large_buff=list(crop_feature(shp_sim, large_buffer, T, T))) %>%
       mutate(sim_small_buff1=list(crop_feature(shp_sim, small_buffer1, T, T))) %>%
       mutate(sim_small_buff2=list(crop_feature(shp_sim, small_buffer2, T, T))) %>%
@@ -279,6 +328,9 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1
       mutate(sim_projected1=list(project_obs_to_transect(transect, sim_small_buff1))) %>%
       mutate(sim_projected2=list(project_obs_to_transect(transect, sim_small_buff2))) %>%
       mutate(sim_projected3=list(project_obs_to_transect(transect, sim_small_buff3))) %>%
+      mutate(sim_loess1=list(fit_loess_to_projected_obs(sim_projected1))) %>%
+      mutate(sim_loess2=list(fit_loess_to_projected_obs(sim_projected2))) %>%
+      mutate(sim_loess3=list(fit_loess_to_projected_obs(sim_projected3))) %>%
       mutate(bathy=list(get_seg_bathy(bbox)))
   })})
   if (!is.null(fv) && !is.null(np)) {
@@ -291,6 +343,9 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1
       mutate(krg_projected1=list(project_obs_to_transect(transect, krg_small_buff1))) %>%
       mutate(krg_projected2=list(project_obs_to_transect(transect, krg_small_buff2))) %>%
       mutate(krg_projected3=list(project_obs_to_transect(transect, krg_small_buff3))) %>%
+      mutate(krg_loess1=list(fit_loess_to_projected_obs(krg_projected1))) %>%
+      mutate(krg_loess2=list(fit_loess_to_projected_obs(krg_projected2))) %>%
+      mutate(krg_loess3=list(fit_loess_to_projected_obs(krg_projected3))) %>%
       mutate(dff_large_buff=list(interp_diff(krg_large_buff, sim_large_buff))) %>%
       mutate(dff_small_buff1=list(interp_diff(krg_small_buff1, sim_small_buff1))) %>%
       mutate(dff_small_buff2=list(interp_diff(krg_small_buff2, sim_small_buff2))) %>%
@@ -379,14 +434,14 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
     tryCatch({
       ev <- experimental_vgrm(shp_hf, cutoff, n_lags)
     }, error=function(e) {
-      cat('\nAn error occurred in experimental_vgrm:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in experimental_vgrm:\n!!', conditionMessage(e))
       return(runif(1, 1, 1.5))
     })
     if (nrow(ev) < 2) {return(runif(1, 1, 1.5))}
     tryCatch({
       fv <- fit.variogram(ev, vgm(model=v_mod), fit.method=6)
     }, error=function(e) {
-      cat('\nAn error occurred in fit.variogram:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in fit.variogram:\n!!', conditionMessage(e))
       return(runif(1, 1, 1.5))
     })
     if (fv$range < 0) {
@@ -396,7 +451,7 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
     tryCatch({
       k_cv <- krige.cv(obs~1, shp_hf, model=fv, nmax=n_max, maxdist=max_dist, nfold=nfold)
     }, error=function(e) {
-      cat('\nAn error occurred in krige.cv:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in krige.cv:\n!!', conditionMessage(e))
       return(runif(1, 1, 1.5))
     })
     na_sum <- sum(is.na(k_cv$residual))
@@ -416,7 +471,7 @@ cost_function <- function(shp_hf=NULL, cutoff=3, n_lags=50, n_max=10, max_dist=1
       interp_sd <- sd(k_cv$var1.pred, na.rm=T)
       interp_cost <- interp_weight * interp_rmse / interp_sd
     }, error=function(e) {
-      cat('\nAn error occurred in cost_function:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in cost_function:\n!!', conditionMessage(e))
       return(runif(1, 1, 1.5))
     })
   })
@@ -458,14 +513,14 @@ decode_opt <- function(shp_hf=NULL, v_mod=NULL, opt=NULL) {
     tryCatch({
       ev <- experimental_vgrm(shp_hf, opt$solution[1], opt$solution[2])
     }, error=function(e) {
-      stop('\nAn error occurred in experimental_vgrm:\n', conditionMessage(e))
+      stop('\n!! ERROR occurred in experimental_vgrm:\n!!', conditionMessage(e))
     })
     if (nrow(ev) < 2) {stop('\nExperimental variogram has less than two lags!')}
     if (any(class(ev) == 'try-error')) {stop('\nExperimental variogram error!')}
     tryCatch({
       fv <- fit.variogram(ev, vgm(model=v_mod), fit.method=6)
     }, error=function(e) {
-      stop('\nAn error occurred in fit.variogram:\n', conditionMessage(e))
+      stop('\n!! ERROR occurred in fit.variogram:\n!!', conditionMessage(e))
     })
   })
   return(list('experimental_vgrm'=as_tibble(ev), 'fitted_vgrm'=fv))
@@ -474,7 +529,7 @@ decode_opt <- function(shp_hf=NULL, v_mod=NULL, opt=NULL) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # nlopt krige !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_NELDERMEAD', max_eval=500,
+nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_eval=500,
                         iwt=0.5, vwt=0.5) {
   if (is.null(trans_id)) {stop('\nMissing submap transect id!')}
   nlopt_dir <- 'assets/nlopt_data/nlopt_transects'
@@ -487,18 +542,17 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_NELDERMEAD', m
   }
   if ((!file.exists(nlopt_path) & file.exists(nlopt_itr_path)) |
       (file.exists(nlopt_path) & !file.exists(nlopt_itr_path))) {
-    cat('\nOptimized', v_mod, 'kriging model failed for submap transect:', trans_id)
-    cat('\n    Remove', nlopt_path, 'and ...')
-    cat('\n    Remove', nlopt_itr_path, 'and ...')
-    cat('\n    Run "make nlopt" again ...')
+    cat('\n!!Optimized', v_mod, 'kriging model failed for submap transect:', trans_id, '!!')
+    cat('\n     Remove', nlopt_path, 'and ...')
+    cat('\n     Remove', nlopt_itr_path, 'and ...')
+    cat('\n     Run "make nlopt" again ...')
     return(invisible())
   }
   if (!dir.exists(nlopt_dir)) {dir.create(nlopt_dir, recursive=T, showWarnings=F)}
   x0 <- c(3, 50, 5, 1e5) # Initial values (cutoff, n_lags, n_max, max_dist)
   lb <- c(1, 30, 2, 5e4) # Lower bound (cutoff, n_lags, n_max, max_dist)
   ub <- c(12, 100, 30, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
-  opts <-
-    list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-15, ftol_rel=1e-15)
+  opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-8, ftol_rel=1e-8)
   x <- compile_transect_data(trans_id)
   obs <- x$ghfdb_large_buff[[1]]
   folds <- sample_and_shuffle_equal_nfolds(nrow(obs))
@@ -509,32 +563,32 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_NELDERMEAD', m
     cat('\n', rep('-', 60), sep='')
     cat('\nOptimizing', v_mod, 'kriging model for submap transect:', trans_id)
     cat('\n', rep('+', 60), sep='')
-    cat('\nNlopt algorithm:    ', alg)
+    cat('\nNLopt algorithm:    ', alg)
     cat('\nMaximum evaluations:', max_eval)
     cat('\nKrige weight:       ', iwt)
     cat('\nVariogram weight:   ', vwt)
-    cat('\n                     (cutoff, n_lags, n_max, max_dist)')
+    cat('\n                    (cutoff, n_lags, n_max, max_dist)')
     cat('\nInitial parameters: ', x0)
     cat('\nLower bounds:       ', lb)
     cat('\nUpper bounds:       ', ub)
     opt <- nloptr(x0, nlopt_fun, lb=lb, ub=ub, opts=opts)
   }, error=function(e) {
-    cat('\nAn error occurred in nlopt_krige:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in nlopt_krige:\n!!', conditionMessage(e))
   })
   if (opt$status < 0 | opt$status == 5 | opt$iterations < 10) {
     cat('\n', rep('+', 60), sep='')
-    cat('\nNlopt failed to converge:')
-    cat('\nNlopt status:', opt$status)
-    cat('\nNlopt iterations:', opt$iterations)
-    cat('\nNlopt message:\n', opt$message)
+    cat('\nNLopt failed to converge:')
+    cat('\n   NLopt status:', opt$status)
+    cat('\n   NLopt iterations:', opt$iterations)
+    cat('\n   ', opt$message)
     cat('\n', rep('-', 60), sep='')
     return(invisible())
   } else {
     cat('\n', rep('+', 60), sep='')
-    cat('\nNlopt converged:')
-    cat('\nNlopt status:', opt$status)
-    cat('\nNlopt iterations:', opt$iterations)
-    cat('\nNlopt message:\n', opt$message)
+    cat('\nNLopt converged:')
+    cat('\n   NLopt status:', opt$status)
+    cat('\n   NLopt iterations:', opt$iterations)
+    cat('\n   ', opt$message)
     cat('\n', rep('-', 60), sep='')
     opt_decoded <- decode_opt(obs, v_mod, opt)
     assign(str_replace_all(nlopt_id, '-', '_'), opt_decoded)
@@ -545,15 +599,15 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_NELDERMEAD', m
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # nlopt transects !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-nlopt_transects <- function(trans_ids=NULL, v_mods=c('Sph', 'Exp', 'Lin', 'Bes'),
-                            alg='NLOPT_LN_NELDERMEAD', max_eval=500, iwt=0.5, vwt=0.5,
+nlopt_transects <- function(trans_ids=NULL, v_mods=c('Sph', 'Exp', 'Lin'),
+                            alg='NLOPT_LN_COBYLA', max_eval=500, iwt=0.5, vwt=0.5,
                             parallel=T) {
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
   if (length(list.files('assets/map_data/relief')) < length(trans_ids)) {parallel <- F}
   x <- expand.grid(id=trans_ids, vm=v_mods, stringsAsFactors=F) %>% arrange(id, vm)
-  cat('\nOptimizing krige models after Li et al. (2018) ...\n')
+  cat('Optimizing krige models after Li et al. (2018) ...\n')
   if (parallel) {
-    plan(multicore, workers=availableCores() - 2)
+    plan(multisession, workers=availableCores() - 2)
     future_walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, iwt, vwt),
                  .options=furrr_options(seed=seed), .progress=T)
   } else {
@@ -602,12 +656,20 @@ get_optimal_krige_model <- function(trans_id=NULL) {
   nlopt_itr_paths <- list.files(nlopt_itr_dir, pattern=trans_id, full.names=T)
   nlopt_trans_paths <- list.files(nlopt_trans_dir, pattern=trans_id, full.names=T)
   if (length(nlopt_itr_paths) < 1) {
-    cat('\nNo nlopt itr files found for:', trans_id)
+    cat('\n   No nlopt itr files found for:', trans_id)
+    return(NULL)
+  }
+  if (length(nlopt_trans_paths) < 1) {
+    cat('\n   No nlopt itr files found for:', trans_id)
     return(NULL)
   }
   if (length(nlopt_itr_paths) != length(nlopt_trans_paths)) {
     itr_mods <- str_sub(nlopt_itr_paths, start=-3)
     trans_mods <- str_extract(nlopt_trans_paths, '.{3}(?=\\.RData)')
+    if (length(trans_mods) < 1) {
+      cat('\n   No nlopt transect RData found for:', trans_id)
+      return(NULL)
+    }
     nlopt_itr_paths <-
       nlopt_itr_paths[str_detect(nlopt_itr_paths, paste(trans_mods, collapse='|'))]
   }
@@ -622,7 +684,7 @@ get_optimal_krige_model <- function(trans_id=NULL) {
          'experimental_vgrm'=opt_decoded$experimental_vgrm,
          'fitted_vgrm'=opt_decoded$fitted_vgrm)
   } else {
-    cat('\nNo nlopt RData found for:', trans_id)
+    cat('\n   No nlopt RData found for:', trans_id)
     return(NULL)
   }
 }
@@ -645,7 +707,7 @@ Krige <- function(shp_hf=NULL, fv=NULL, shp_grid=NULL, n_max=10, max_dist=1e5) {
         mutate(est_krg=ifelse(est_krg > 0 & est_krg <= 250, est_krg, NA),
                var_krg=ifelse(est_krg > 0 & est_krg <= 250, est_krg, NA))
     }, error=function(e) {
-      cat('\nAn error occurred in Krige:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in Krige:\n!!', conditionMessage(e))
     })
   })
 }
@@ -682,7 +744,7 @@ summarize_optimal_krige_models <- function(trans_ids, parallel=T) {
   f <- function(x) {get_optimal_krige_model(x)$opt_krige_mod_summary}
   cat('\nSummarizing optimal krige models ...\n')
   if (parallel) {
-    plan(multicore, workers=availableCores() - 2)
+    plan(multisession, workers=availableCores() - 2)
     as_tibble(future_map_dfr(trans_ids, f, .options=furrr_options(seed=seed), .progress=T))
   } else {
     map_df(trans_ids, f)
@@ -692,7 +754,7 @@ summarize_optimal_krige_models <- function(trans_ids, parallel=T) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # summarize interpolation differences !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-summarize_interpolation_differences <- function(trans_ids, parallel=T) {
+summarize_interp_differences <- function(trans_ids, parallel=T) {
   f <- function(x) {
     tryCatch({
       km <- get_optimal_krige_model(x)
@@ -706,7 +768,7 @@ summarize_interpolation_differences <- function(trans_ids, parallel=T) {
                   iqr=IQR(est_dff, na.rm=T), mean=mean(est_dff, na.rm=T),
                   sigma=sd(est_dff, na.rm=T))
     }, error=function(e) {
-      cat('\nAn error occurred in interp_diff_summary:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in summarize_interp_differences:\n!!', conditionMessage(e))
       return(NULL)
     })
   }
@@ -721,35 +783,37 @@ summarize_interpolation_differences <- function(trans_ids, parallel=T) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # summarize interpolation accuracy !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-summarize_interpolation_accuracy <- function(trans_ids, parallel=T) {
+summarize_interp_accuracy <- function(trans_ids, parallel=T) {
   f <- function(x) {
-    tryCatch({
-      km <- get_optimal_krige_model(x)
-      fv <- km$fitted_vgrm
-      np <- km$opt_krige_mod_summary$n_pairs
-      comps_sim <- get_closest_interp_obs(x)
-      comps_krg <- get_closest_interp_obs(x, fv=fv, np=np)
-      tibble(short_name=x,
-             n_sim=nrow(comps_sim[!is.na(comps_sim$est_sim),]),
-             min_obs_sim=min(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-             max_obs_sim=max(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-             mean_obs_sim=mean(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-             sd_obs_sim=sd(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-             med_obs_sim=median(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-             iqr_obs_sim=IQR(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-             rmse_obs_sim=sqrt(mean((comps_sim$est_sim - comps_sim$obs_ghfdb)^2, na.rm=T)),
-             n_krg=nrow(comps_krg[!is.na(comps_krg$est_krg),]),
-             min_obs_krg=min(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-             max_obs_krg=max(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-             mean_obs_krg=mean(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-             sd_obs_krg=sd(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-             med_obs_krg=median(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-             iqr_obs_krg=IQR(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-             rmse_obs_krg=sqrt(mean((comps_krg$est_krg - comps_krg$obs_ghfdb)^2, na.rm=T)))
-    }, error=function(e) {
-      cat('\nAn error occurred in interp_accuracy_summary:\n', conditionMessage(e))
-      return(NULL)
-    })
+    suppressWarnings({suppressMessages({
+      tryCatch({
+        km <- get_optimal_krige_model(x)
+        fv <- km$fitted_vgrm
+        np <- km$opt_krige_mod_summary$n_pairs
+        comps_sim <- get_closest_interp_obs(x)
+        comps_krg <- get_closest_interp_obs(x, fv=fv, np=np)
+        tibble(short_name=x,
+               n_sim=nrow(comps_sim[!is.na(comps_sim$est_sim),]),
+               min_obs_sim=min(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
+               max_obs_sim=max(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
+               mean_obs_sim=mean(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
+               sd_obs_sim=sd(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
+               med_obs_sim=median(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
+               iqr_obs_sim=IQR(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
+               rmse_obs_sim=sqrt(mean((comps_sim$est_sim - comps_sim$obs_ghfdb)^2, na.rm=T)),
+               n_krg=nrow(comps_krg[!is.na(comps_krg$est_krg),]),
+               min_obs_krg=min(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
+               max_obs_krg=max(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
+               mean_obs_krg=mean(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
+               sd_obs_krg=sd(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
+               med_obs_krg=median(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
+               iqr_obs_krg=IQR(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
+               rmse_obs_krg=sqrt(mean((comps_krg$est_krg - comps_krg$obs_ghfdb)^2, na.rm=T)))
+      }, error=function(e) {
+        cat('\n!! ERROR occurred in summarize_interp_accuracy:\n!!', conditionMessage(e))
+        return(NULL)
+      })
+    })})
   }
   cat('\nSummarizing interpolation accuracies ...\n')
   if (parallel) {
@@ -766,14 +830,15 @@ summarize_interpolation_accuracy <- function(trans_ids, parallel=T) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot ghfdb !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_ghfdb_base <- function() {
+plot_ghfdb <- function() {
+  load_map_data('assets/map_data/map-data.RData')
   fig_path <- 'figs/ghfdb.png'
   if (!dir.exists('figs')) {dir.create('figs', recursive=T, showWarnings=F)}
   if (file.exists(fig_path)) {
-    cat('\n', fig_path, ' already exists ...', sep='')
+    cat('\n   ', fig_path, ' already exists ...', sep='')
     return(invisible())
   }
-  cat('\nPlotting:', fig_path)
+  cat('\n   Plotting:', fig_path)
   suppressWarnings({suppressMessages({
     p1 <-
       ggplot() +
@@ -828,17 +893,17 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
   if (file.exists(fig_path_comp) & file.exists(fig_path1) & file.exists(fig_path2) &
       file.exists(fig_path3)) {
-    cat('\n', fig_path1, ' already exists ...', sep='')
-    cat('\n', fig_path2, ' already exists ...', sep='')
-    cat('\n', fig_path3, ' already exists ...', sep='')
-    cat('\n', fig_path_comp, ' already exists ...', sep='')
+    cat('\n   ', fig_path1, ' already exists ...', sep='')
+    cat('\n   ', fig_path2, ' already exists ...', sep='')
+    cat('\n   ', fig_path3, ' already exists ...', sep='')
+    cat('\n   ', fig_path_comp, ' already exists ...', sep='')
     return(invisible())
   }
   tryCatch({
-    cat('\nPlotting: ', fig_path1, ' ...', sep='')
-    cat('\nPlotting: ', fig_path2, ' ...', sep='')
-    cat('\nPlotting: ', fig_path3, ' ...', sep='')
-    cat('\nPlotting: ', fig_path_comp, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path1, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path2, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path3, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path_comp, ' ...', sep='')
     km <- get_optimal_krige_model(trans_id)
     fv <- km$fitted_vgrm
     np <- km$opt_krige_mod_summary$n_pairs
@@ -863,10 +928,11 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
         theme_bw(base_size=base_size),
         theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
               plot.margin=margin(5, 5, 5, 5),
-              legend.justification='right', legend.position=c(0.92, 0.85),
-              legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
-              legend.key.width=unit(1, 'cm'), legend.box.margin=margin(2, 2, 2, 2),
-              legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size),
+              legend.justification='right', legend.position='inside',
+              legend.position.inside=c(0.92, 0.85), legend.direction='horizontal',
+              legend.key.height=unit(0.5, 'cm'), legend.key.width=unit(1, 'cm'),
+              legend.box.margin=margin(2, 2, 2, 2), legend.margin=margin(),
+              legend.title=element_text(vjust=0, size=base_size),
               legend.background=element_blank())
       )
     suppressWarnings({suppressMessages({
@@ -900,12 +966,9 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -955,12 +1018,9 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=x$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=x$sim_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$sim_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$sim_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=x$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1010,12 +1070,9 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=x$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=x$krg_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$krg_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$krg_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=x$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1042,7 +1099,7 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
       ggsave(file=fig_path_comp, plot=p7, width=19.5, height=11, dpi=300, bg='white')
     })})
   }, error=function(e) {
-    cat('\nAn error occurred in plot_transect:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in plot_transect:\n!!', conditionMessage(e))
   })
 }
 
@@ -1050,26 +1107,23 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
 # plot transect neighbors comp !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
+  if (length(trans_ids) < 3) {stop('\nNeed at least 3 transect ids!')}
   fig_dir <- 'figs/transect_neighbors/'
-  zone_id <- str_extract(trans_ids[1], '^.{3}')
-  trans_id <- paste0(zone_id, '-',
-                     str_sub(trans_ids[1], -2), '-',
-                     str_sub(trans_ids[2], -2), '-',
-                     str_sub(trans_ids[3], -2))
+  trans_id <- paste0(trans_ids[1], '-', trans_ids[2], '-', trans_ids[3])
   fig_path1 <- paste0(fig_dir, trans_id, '-transect-neighbors-ghfdb.png')
   fig_path2 <- paste0(fig_dir, trans_id, '-transect-neighbors-sim.png')
   fig_path3 <- paste0(fig_dir, trans_id, '-transect-neighbors-krg.png')
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
   if (file.exists(fig_path1) & file.exists(fig_path2) & file.exists(fig_path3)) {
-    cat('\n', fig_path1, ' already exists ...', sep='')
-    cat('\n', fig_path2, ' already exists ...', sep='')
-    cat('\n', fig_path3, ' already exists ...', sep='')
+    cat('\n   ', fig_path1, ' already exists ...', sep='')
+    cat('\n   ', fig_path2, ' already exists ...', sep='')
+    cat('\n   ', fig_path3, ' already exists ...', sep='')
     return(invisible())
   }
   tryCatch({
-    cat('\nPlotting: ', fig_path1, ' ...', sep='')
-    cat('\nPlotting: ', fig_path2, ' ...', sep='')
-    cat('\nPlotting: ', fig_path3, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path1, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path2, ' ...', sep='')
+    cat('\n   Plotting: ', fig_path3, ' ...', sep='')
     kmx <- get_optimal_krige_model(trans_ids[1])
     kmy <- get_optimal_krige_model(trans_ids[2])
     kmz <- get_optimal_krige_model(trans_ids[3])
@@ -1106,10 +1160,11 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
         theme_bw(base_size=base_size),
         theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
               plot.margin=margin(5, 5, 5, 5),
-              legend.justification='right', legend.position=c(0.92, 0.85),
-              legend.direction='horizontal', legend.key.height=unit(0.5, 'cm'),
-              legend.key.width=unit(1, 'cm'), legend.box.margin=margin(2, 2, 2, 2),
-              legend.margin=margin(), legend.title=element_text(vjust=0, size=base_size),
+              legend.justification='right', legend.position='inside',
+              legend.position.inside=c(0.92, 0.85), legend.direction='horizontal',
+              legend.key.height=unit(0.5, 'cm'), legend.key.width=unit(1, 'cm'),
+              legend.box.margin=margin(2, 2, 2, 2), legend.margin=margin(),
+              legend.title=element_text(vjust=0, size=base_size),
               legend.background=element_blank())
       )
     suppressWarnings({suppressMessages({
@@ -1143,12 +1198,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1191,12 +1243,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=y$ghfdb_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=y$ghfdb_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=y$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1239,12 +1288,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=z$ghfdb_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=z$ghfdb_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=z$ghfdb_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1300,12 +1346,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=x$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=x$sim_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$sim_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$sim_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=x$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1352,12 +1395,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=y$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=y$sim_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=y$sim_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=y$sim_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=y$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1404,12 +1444,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=z$sim_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=z$sim_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=z$sim_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=z$sim_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$sim_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$sim_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=z$sim_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1465,12 +1502,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=x$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=x$krg_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$krg_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=x$krg_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=x$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1517,12 +1551,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=y$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=y$krg_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=y$krg_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=y$krg_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=y$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1569,12 +1600,9 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                      color='grey20', size=2) +
           geom_point(data=z$krg_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_smooth(data=z$krg_projected1[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=z$krg_projected2[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
-          geom_smooth(data=z$krg_projected3[[1]], aes(projected_distances, obs),
-                      method='loess', span=0.65, color='black') +
+          geom_path(data=x$krg_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$krg_loess3[[1]], aes(projected_distances, obs), color='black') +
           geom_rug(data=z$krg_projected3[[1]], aes(projected_distances, obs, color=obs),
                    length=unit(0.06, 'npc'))
       }
@@ -1598,7 +1626,69 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
       ggsave(file=fig_path3, plot=p3, width=19.5, height=11, dpi=300, bg='white')
     })})
   }, error=function(e) {
-    cat('\nAn error occurred in plot_transect:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in plot_transect:\n!!', conditionMessage(e))
+  })
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot transect strip comp !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+plot_transect_strip_comp <- function(trans_ids=NULL, fname=NULL, buff=1, base_size=14) {
+  if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
+  if (is.null(fname)) {fname <- 'test'}
+  if (buff == 1) {
+    select_cols <- c('short_name', 'ghfdb_loess1', 'krg_loess1', 'sim_loess1')
+  } else if (buff == 2) {
+    select_cols <- c('short_name', 'ghfdb_loess2', 'krg_loess2', 'sim_loess2')
+  } else if (buff == 3) {
+    select_cols <- c('short_name', 'ghfdb_loess3', 'krg_loess3', 'sim_loess3')
+  } else {
+    select_cols <- c('short_name', 'ghfdb_loess1', 'krg_loess1', 'sim_loess1')
+  }
+  fig_dir <- 'figs/summary/'
+  if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
+  fig_path <- paste0(fig_dir, 'strip-', fname, '.png')
+  if (file.exists(fig_path)) {
+    cat('\n   ', fig_path, ' already exists ...', sep='')
+    return(invisible())
+  }
+  tryCatch({
+    cat('\n   Plotting: ', fig_path, ' ...', sep='')
+    f <- function(x) {
+      km <- get_optimal_krige_model(x)
+      fv <- km$fitted_vgrm
+      np <- km$opt_krige_mod_summary$n_pairs
+      compile_transect_data(x, fv=fv, np=np)
+    }
+    plan(multisession, workers=availableCores() - 2)
+    df <-
+      future_map(trans_ids, f, .options=furrr_options(seed=seed)) %>%
+      reduce(rbind) %>%
+      st_set_geometry(NULL) %>%
+      select(all_of(select_cols)) %>%
+      pivot_longer(-c(short_name)) %>%
+      unnest(value)
+    p <-
+      ggplot(df) +
+      geom_vline(aes(xintercept=projected_distances, color=obs)) +
+      scale_x_continuous(breaks=c(0, 1)) +
+      labs(x='Normalized Distance', y=NULL) +
+      facet_grid(vars(short_name), vars(name)) +
+      scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
+                            breaks=c(0, 125, 250), na.value='transparent', guide='none') +
+      theme_bw(base_size=base_size) +
+      theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
+            plot.margin=margin(5, 5, 5, 5),
+            legend.justification='right', legend.position='inside',
+            legend.position.inside=c(0.92, 0.85), legend.direction='horizontal',
+            legend.key.height=unit(0.5, 'cm'), legend.key.width=unit(1, 'cm'),
+            legend.box.margin=margin(2, 2, 2, 2), legend.margin=margin(),
+            legend.title=element_text(vjust=0, size=base_size),
+            legend.background=element_blank())
+    ggsave(file=fig_path, plot=p, width=6.5, height=length(trans_ids) * 0.75, dpi=300,
+           bg='white')
+  }, error=function(e) {
+    cat('\n!! ERROR occurred in plot_transect_strip_comp:\n!!', conditionMessage(e))
   })
 }
 
@@ -1611,11 +1701,11 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
   fig_path <- paste0(fig_dir, trans_id, '-opt-krige.png')
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
   if (file.exists(fig_path)) {
-    cat('\n', fig_path, ' already exists ...', sep='')
+    cat('\n   ', fig_path, ' already exists ...', sep='')
     return(invisible())
   }
   tryCatch({
-    cat('\nPlotting:', fig_path)
+    cat('\n   Plotting:', fig_path)
     opt_krige_mod <- get_optimal_krige_model(trans_id)
     opt_kmod <- opt_krige_mod$opt_krige_mod_summary
     nlopt_itr <- opt_krige_mod$nlopt_itr
@@ -1637,7 +1727,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
                          aes(itr, max_dist / 1e3, label=round(max_dist / 1e3))) +
         annotate('text', x=Inf, y=Inf, label='Variogram Max Distance', hjust=1.05, vjust=1.5,
                  size=base_size * 0.35) +
-        labs(x='Nlopt Iteration', y='Distance (km)', color=NULL) + p_theme
+        labs(x='NLopt Iteration', y='Distance (km)', color=NULL) + p_theme
       p1 <-
         ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
         geom_path(aes(itr, n_pairs), color='firebrick', linewidth=1) +
@@ -1646,7 +1736,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
                          size=base_size * 0.28) +
         annotate('text', x=Inf, y=Inf, label='Variogram Pairs', hjust=1.05, vjust=1.5,
                  size=base_size * 0.35) +
-        labs(x='Nlopt Iteration', y='Pairs', color=NULL) + p_theme
+        labs(x='NLopt Iteration', y='Pairs', color=NULL) + p_theme
       p2 <-
         ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
         geom_path(aes(itr, cutoff), color='orchid4', linewidth=1) +
@@ -1655,7 +1745,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
                          size=base_size * 0.28) +
         annotate('text', x=Inf, y=Inf, label='Variogram Cutoff', hjust=1.05, vjust=1.5,
                  size=base_size * 0.35) +
-        labs(x='Nlopt Iteration', y='Cutoff', color=NULL) + p_theme
+        labs(x='NLopt Iteration', y='Cutoff', color=NULL) + p_theme
       p3 <-
         ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
         geom_path(aes(itr, n_lags), color='saddlebrown', linewidth=1) +
@@ -1664,7 +1754,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
                          size=base_size * 0.28) +
         annotate('text', x=Inf, y=Inf, label='Variogram Lags', hjust=1.05, vjust=1.5,
                  size=base_size * 0.35) +
-        labs(x='Nlopt Iteration', y='Lags', color=NULL) + p_theme
+        labs(x='NLopt Iteration', y='Lags', color=NULL) + p_theme
       p4 <-
         ggplot(filter(nlopt_itr, v_mod == opt_kmod$v_mod)) +
         geom_path(aes(itr, cost), color='black', linewidth=1) +
@@ -1673,7 +1763,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
                          size=base_size * 0.28) +
         annotate('text', x=Inf, y=Inf, label='Cost Function', hjust=1.05, vjust=1.5,
                  size=base_size * 0.35) +
-        labs(x='Nlopt Iteration', y='Cost', color=NULL) + p_theme
+        labs(x='NLopt Iteration', y='Cost', color=NULL) + p_theme
       p5 <- 
         ggplot(ev) +
         geom_point(aes(x=dist / 1e3, y=sqrt(gamma)), shape=20) +
@@ -1690,7 +1780,7 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
       ggsave(file=fig_path, plot=p6, width=13, height=10, dpi=300, bg='white')
     })})
   }, error=function(e) {
-    cat('\nAn error occurred in plot_optimal_variogram:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in plot_optimal_variogram:\n!!', conditionMessage(e))
   })
 }
 
@@ -1698,20 +1788,17 @@ plot_optimal_krige_model <- function(trans_id=NULL, base_size=22) {
 # plot interp accuracy summary !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
+  load_nlopt_interpolation_data('assets/nlopt_data/interpolation-summary.RData')
   if (is.null(submap_zone)) {stop('\nMissing submap zone!')}
   fig_dir <- 'figs/summary/'
-  data_path <- 'assets/nlopt_data/interpolation-summary.RData'
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
-  if (!exists('interp_accuracy_summary', envir=.GlobalEnv)) {
-    stop('\nMissing nlopt summary data! Use "load(path/to/interpolation-summary.RData)"')
-  }
   f <- function(x, y) {
     if (file.exists(y)) {
-      cat('\n', y, ' already exists ...', sep='')
+      cat('\n   ', y, ' already exists ...', sep='')
       return(invisible())
     }
     tryCatch({
-      cat('\nPlotting:', y)
+      cat('\n   Plotting:', y)
       p_theme <- list(
         theme_bw(base_size=14),
         theme(panel.grid=element_blank(), panel.background=element_rect(fill='grey90'),
@@ -1790,7 +1877,7 @@ plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
         ggsave(file=y, plot=p4, width=13, height=10, dpi=300, bg='white')
       })})
     }, error=function(e) {
-      cat('\nAn error occurred in plot_interp_accuracy_summary:\n', conditionMessage(e))
+      cat('\n!! ERROR occurred in plot_interp_accuracy_summary:\n!!', conditionMessage(e))
     })
   }
   x <- nlopt_summary$short_name[str_detect(nlopt_summary$short_name, submap_zone)]
@@ -1808,15 +1895,16 @@ plot_interp_accuracy_summary <- function(submap_zone=NULL, base_size=22) {
 # plot nlopt summary !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_nlopt_summary <- function(base_size=14) {
+  load_nlopt_interpolation_data('assets/nlopt_data/interpolation-summary.RData')
   fig_dir <- 'figs/summary/'
   fig_path <- paste0(fig_dir, 'nlopt-summary.png')
-  data_path <- 'assets/nlopt_data/interpolation-summary.RData'
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
-  if (!exists('nlopt_summary', envir=.GlobalEnv)) {
-    stop('\nMissing nlopt summary data! Use "load(path/to/interpolation-summary.RData)"')
+  if (file.exists(fig_path)) {
+    cat('\n   ', fig_path, ' already exists ...', sep='')
+    return(invisible())
   }
   tryCatch({
-    cat('\nPlotting:', fig_path)
+    cat('\n   Plotting:', fig_path)
     outliers_diff <-
       interp_diff_summary$short_name[which(interp_diff_summary$mean + 2 *
                                            interp_diff_summary$sigma > 300)]
@@ -1843,17 +1931,21 @@ plot_nlopt_summary <- function(base_size=14) {
       ggsave(file=fig_path, plot=p1, width=6.5, height=4, dpi=300, bg='white')
     })})
   }, error=function(e) {
-    cat('\nAn error occurred in plot_nlopt_summary:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in plot_nlopt_summary:\n!!', conditionMessage(e))
   })
 }
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# plot control point summary !!
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_control_point_summary <- function(base_size=14) {
+  load_nlopt_interpolation_data('assets/nlopt_data/interpolation-summary.RData')
   fig_dir <- 'figs/summary/'
   fig_path <- paste0(fig_dir, 'control-point-summary.png')
-  data_path <- 'assets/nlopt_data/interpolation-summary.RData'
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
-  if (!exists('interp_accuracy_summary', envir=.GlobalEnv)) {
-    stop('\nMissing nlopt summary data! Use "load(path/to/interpolation-summary.RData)"')
+  if (file.exists(fig_path)) {
+    cat('\n   ', fig_path, ' already exists ...', sep='')
+    return(invisible())
   }
   p_theme <- list(
     theme_bw(base_size=14),
@@ -1877,7 +1969,7 @@ plot_control_point_summary <- function(base_size=14) {
     mutate(n=ifelse(method == 'Similarity', n_grid, n)) %>%
     rename(n_itp=n) %>% mutate(coverage=n_control / n_grid * 100)
   tryCatch({
-    cat('\nPlotting:', fig_path)
+    cat('\n   Plotting:', fig_path)
     suppressWarnings({suppressMessages({
       p1 <-
         ggplot(df) +
@@ -1906,6 +1998,6 @@ plot_control_point_summary <- function(base_size=14) {
       ggsave(file=fig_path, plot=p4, width=6.5, height=8, dpi=300, bg='white')
     })})
   }, error=function(e) {
-    cat('\nAn error occurred in plot_control_point_summary:\n', conditionMessage(e))
+    cat('\n!! ERROR occurred in plot_control_point_summary:\n!!', conditionMessage(e))
   })
 }
