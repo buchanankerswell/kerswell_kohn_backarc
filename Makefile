@@ -3,14 +3,11 @@ DATE = $(shell date +"%d-%m-%Y")
 LOGFILE := log/log-$(DATE)
 LOG := 2>&1 | tee -a $(LOGFILE)
 # R scripts
-R = \
+R = R/nloptr.R \
 		R/check-packages.R \
-		R/preprocess-map-data.R \
-		R/nloptr.R \
-		R/interpolation-plots.R \
-		R/summary-plots.R \
+		R/download-assets.R \
 		R/goutorbe-analysis.R \
-		R/download-assets.R
+		R/preprocess-map-data.R
 # Directories with data and scripts
 DATADIR = assets
 # Cleanup directories
@@ -18,34 +15,22 @@ DATAPURGE = log
 DATACLEAN = $(DATADIR)
 FIGSPURGE = figs
 
-all: krige
+all: nlopt
+
+test: preprocess
+	@R/test.R $(LOG)
 
 nlopt: preprocess
 	@R/nloptr.R $(LOG)
-	@echo "=============================================" $(LOG)
 
 preprocess: $(DATADIR)
-	@if [ ! -e "$(DATADIR)/map_data/map-data.RData" ]; then \
-		R/preprocess-map-data.R $(LOG); \
-		echo "=============================================" $(LOG); \
-	else \
-		echo "Preprocessed map data found!" $(LOG); \
-		echo "=============================================" $(LOG); \
-	fi
+	@R/preprocess-map-data.R $(LOG)
 
 $(DATADIR): check_packages
-	@if [ ! -d "$(DATADIR)" ]; then \
-		R/download-assets.R $(LOG); \
-		echo "=============================================" $(LOG); \
-	else \
-		echo "Data assets found!" $(LOG); \
-		echo "=============================================" $(LOG); \
-	fi
+	@R/download-assets.R $(LOG);
 
 check_packages: $(LOGFILE) $(R)
-	@echo "=============================================" $(LOG)
 	@R/check-packages.R $(LOG)
-	@echo "=============================================" $(LOG)
 
 $(LOGFILE):
 	@if [ ! -e "$(LOGFILE)" ]; then \
@@ -59,4 +44,4 @@ purge:
 clean: purge
 	@rm -rf $(DATACLEAN)
 
-.PHONY: clean purge check_packages preprocess all
+.PHONY: clean purge check_packages preprocess nlopt test all
