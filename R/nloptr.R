@@ -38,6 +38,7 @@ main <- function() {
     plot_transect_neighbors_comp(ids[1:3])
     plot_transect_neighbors_comp(ids[4:6])
     plot_transect_neighbors_comp(ids[7:9])
+    plot_transect_neighbors_comp(ids[c(2, 5, 8)])
     plot_transect_strip_comp(ids, 'comp')
   } else {
     cat('\nNo summary data found at:', fpath)
