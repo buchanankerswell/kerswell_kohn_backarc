@@ -208,7 +208,7 @@ project_obs_to_transect <- function(transect, shp_obs) {
   if (!any(names(shp_obs) %in% c('obs', 'est_sim', 'est_krg'))) {
     stop('\nUnrecognized sf object passed to project_obs_to_transect() !')
   }
-  if (any(names(shp_obs) == 'ghfdb')) {
+  if (any(names(shp_obs) == 'ghf')) {
     obs <- shp_obs$obs
     sigma <- NA
   } else if (any(names(shp_obs) == 'similarity')) {
@@ -246,8 +246,8 @@ fit_loess_to_projected_obs <- function(df, n=1e3, nmin=10, span=0.65) {
       cat('\n   Loess failed!')
       return(NULL)
     } else {
-      new_dist <- seq(0, 1, length.out = n)
-      original_range <- range(df$projected_distances, na.rm = TRUE)
+      new_dist <- seq(0, 1, length.out=n)
+      original_range <- range(df$projected_distances, na.rm=TRUE)
       loess_pred <- predict(mod, newdata=new_dist)
       loess_pred[new_dist < original_range[1] | new_dist > original_range[2]] <- NA
       smooth <- tibble(projected_distances=new_dist, obs=loess_pred)
@@ -330,16 +330,16 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1
       mutate(transform=crop_feature(shp_transform, bbox)) %>%
       mutate(volcano=crop_feature(select(shp_volc, geometry), bbox)) %>%
       mutate(grid=list(crop_feature(shp_grid, large_buffer, T, T))) %>%
-      mutate(ghfdb_large_buff=list(crop_feature(shp_ghfdb, large_buffer, T, T))) %>%
-      mutate(ghfdb_small_buff1=list(crop_feature(shp_ghfdb, small_buffer1, T, T))) %>%
-      mutate(ghfdb_small_buff2=list(crop_feature(shp_ghfdb, small_buffer2, T, T))) %>%
-      mutate(ghfdb_small_buff3=list(crop_feature(shp_ghfdb, small_buffer3, T, T))) %>%
-      mutate(ghfdb_projected1=list(project_obs_to_transect(transect, ghfdb_small_buff1))) %>%
-      mutate(ghfdb_projected2=list(project_obs_to_transect(transect, ghfdb_small_buff2))) %>%
-      mutate(ghfdb_projected3=list(project_obs_to_transect(transect, ghfdb_small_buff3))) %>%
-      mutate(ghfdb_loess1=list(fit_loess_to_projected_obs(ghfdb_projected1))) %>%
-      mutate(ghfdb_loess2=list(fit_loess_to_projected_obs(ghfdb_projected2))) %>%
-      mutate(ghfdb_loess3=list(fit_loess_to_projected_obs(ghfdb_projected3))) %>%
+      mutate(ghf_large_buff=list(crop_feature(shp_ghf, large_buffer, T, T))) %>%
+      mutate(ghf_small_buff1=list(crop_feature(shp_ghf, small_buffer1, T, T))) %>%
+      mutate(ghf_small_buff2=list(crop_feature(shp_ghf, small_buffer2, T, T))) %>%
+      mutate(ghf_small_buff3=list(crop_feature(shp_ghf, small_buffer3, T, T))) %>%
+      mutate(ghf_projected1=list(project_obs_to_transect(transect, ghf_small_buff1))) %>%
+      mutate(ghf_projected2=list(project_obs_to_transect(transect, ghf_small_buff2))) %>%
+      mutate(ghf_projected3=list(project_obs_to_transect(transect, ghf_small_buff3))) %>%
+      mutate(ghf_loess1=list(fit_loess_to_projected_obs(ghf_projected1))) %>%
+      mutate(ghf_loess2=list(fit_loess_to_projected_obs(ghf_projected2))) %>%
+      mutate(ghf_loess3=list(fit_loess_to_projected_obs(ghf_projected3))) %>%
       mutate(sim_large_buff=list(crop_feature(shp_sim, large_buffer, T, T))) %>%
       mutate(sim_small_buff1=list(crop_feature(shp_sim, small_buffer1, T, T))) %>%
       mutate(sim_small_buff2=list(crop_feature(shp_sim, small_buffer2, T, T))) %>%
@@ -353,7 +353,7 @@ compile_transect_data <- function(trans_ids=NULL, lbuff=5e5, sbuff=c(5e4, 1e5, 1
       mutate(bathy=list(get_seg_bathy(bbox)))
   })})
   if (!is.null(fv) && !is.null(np)) {
-    shp_krg <- Krige(df$ghfdb_large_buff[[1]], fv, df$grid[[1]], np)
+    shp_krg <- Krige(df$ghf_large_buff[[1]], fv, df$grid[[1]], np)
     df %>%
       mutate(krg_large_buff=list(crop_feature(shp_krg, large_buffer, T, T))) %>%
       mutate(krg_small_buff1=list(crop_feature(shp_krg, small_buffer1, T, T))) %>%
@@ -391,7 +391,7 @@ get_closest_interp_obs <- function(trans_id=NULL, fv=NULL, np=NULL, thresh=1e4) 
     itp <- x$sim_large_buff[[1]]
   }
   grid <- x$grid[[1]]
-  obs <- x$ghfdb_large_buff[[1]]
+  obs <- x$ghf_large_buff[[1]]
   nearest_obs <- st_nearest_feature(grid, obs)
   nearest_itp <- st_nearest_feature(obs, grid)
   dt_obs <- st_distance(grid, obs[nearest_obs,], by_element=T) < set_units(thresh, 'm')
@@ -400,13 +400,13 @@ get_closest_interp_obs <- function(trans_id=NULL, fv=NULL, np=NULL, thresh=1e4) 
   itp_n <- itp[nearest_itp,][dt_itp,]
   if (any(names(itp_n) %in% c('est_sim', 'similarity'))) {
     itp_n %>%
-      mutate(obs_ghfdb=obs_n[st_nearest_feature(itp_n, obs_n),]$obs,
-             ghfdb=obs_n[st_nearest_feature(itp_n, obs_n),]$ghfdb, .before=similarity) %>%
+      mutate(obs_ghf=obs_n[st_nearest_feature(itp_n, obs_n),]$obs,
+             ghf=obs_n[st_nearest_feature(itp_n, obs_n),]$ghf, .before=similarity) %>%
       select(-c(sigma_sim, obs_sim))
   } else if (any(names(itp_n) %in% c('est_krg', 'krige'))) {
     itp_n %>%
-      mutate(obs_ghfdb=obs_n[st_nearest_feature(itp_n, obs_n),]$obs,
-             ghfdb=obs_n[st_nearest_feature(itp_n, obs_n),]$ghfdb, .before=krige) %>%
+      mutate(obs_ghf=obs_n[st_nearest_feature(itp_n, obs_n),]$obs,
+             ghf=obs_n[st_nearest_feature(itp_n, obs_n),]$ghf, .before=krige) %>%
       select(-c(sigma_krg, var_krg))
   } else {
     NULL
@@ -573,7 +573,7 @@ nlopt_krige <- function(trans_id=NULL, v_mod='Sph', alg='NLOPT_LN_COBYLA', max_e
   ub <- c(12, 100, 30, 5e5) # Upper bound (cutoff, n_lags, n_max, max_dist)
   opts <- list(print_level=0, maxeval=max_eval, algorithm=alg, xtol_rel=1e-8, ftol_rel=1e-8)
   x <- compile_transect_data(trans_id)
-  obs <- x$ghfdb_large_buff[[1]]
+  obs <- x$ghf_large_buff[[1]]
   folds <- sample_and_shuffle_equal_nfolds(nrow(obs))
   nlopt_fun <- function(x) {
     cost_function(obs, x[1], x[2], x[3], x[4], v_mod, iwt, vwt, trans_id, folds)
@@ -813,21 +813,21 @@ summarize_interp_accuracy <- function(trans_ids, parallel=T) {
         comps_krg <- get_closest_interp_obs(x, fv=fv, np=np)
         tibble(short_name=x,
                n_sim=nrow(comps_sim[!is.na(comps_sim$est_sim),]),
-               min_obs_sim=min(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-               max_obs_sim=max(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-               mean_obs_sim=mean(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-               sd_obs_sim=sd(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-               med_obs_sim=median(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-               iqr_obs_sim=IQR(comps_sim$est_sim - comps_sim$obs_ghfdb, na.rm=T),
-               rmse_obs_sim=sqrt(mean((comps_sim$est_sim - comps_sim$obs_ghfdb)^2, na.rm=T)),
+               min_obs_sim=min(comps_sim$est_sim - comps_sim$obs_ghf, na.rm=T),
+               max_obs_sim=max(comps_sim$est_sim - comps_sim$obs_ghf, na.rm=T),
+               mean_obs_sim=mean(comps_sim$est_sim - comps_sim$obs_ghf, na.rm=T),
+               sd_obs_sim=sd(comps_sim$est_sim - comps_sim$obs_ghf, na.rm=T),
+               med_obs_sim=median(comps_sim$est_sim - comps_sim$obs_ghf, na.rm=T),
+               iqr_obs_sim=IQR(comps_sim$est_sim - comps_sim$obs_ghf, na.rm=T),
+               rmse_obs_sim=sqrt(mean((comps_sim$est_sim - comps_sim$obs_ghf)^2, na.rm=T)),
                n_krg=nrow(comps_krg[!is.na(comps_krg$est_krg),]),
-               min_obs_krg=min(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-               max_obs_krg=max(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-               mean_obs_krg=mean(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-               sd_obs_krg=sd(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-               med_obs_krg=median(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-               iqr_obs_krg=IQR(comps_krg$est_krg - comps_krg$obs_ghfdb, na.rm=T),
-               rmse_obs_krg=sqrt(mean((comps_krg$est_krg - comps_krg$obs_ghfdb)^2, na.rm=T)))
+               min_obs_krg=min(comps_krg$est_krg - comps_krg$obs_ghf, na.rm=T),
+               max_obs_krg=max(comps_krg$est_krg - comps_krg$obs_ghf, na.rm=T),
+               mean_obs_krg=mean(comps_krg$est_krg - comps_krg$obs_ghf, na.rm=T),
+               sd_obs_krg=sd(comps_krg$est_krg - comps_krg$obs_ghf, na.rm=T),
+               med_obs_krg=median(comps_krg$est_krg - comps_krg$obs_ghf, na.rm=T),
+               iqr_obs_krg=IQR(comps_krg$est_krg - comps_krg$obs_ghf, na.rm=T),
+               rmse_obs_krg=sqrt(mean((comps_krg$est_krg - comps_krg$obs_ghf)^2, na.rm=T)))
       }, error=function(e) {
         cat('\n!! ERROR occurred in summarize_interp_accuracy:\n!!', conditionMessage(e))
         return(NULL)
@@ -847,11 +847,11 @@ summarize_interp_accuracy <- function(trans_ids, parallel=T) {
 #######################################################
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# plot ghfdb !!
+# plot ghf !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_ghfdb <- function() {
+plot_ghf <- function() {
   load_map_data('assets/map_data/map-data.RData')
-  fig_path <- 'figs/ghfdb.png'
+  fig_path <- 'figs/ghf.png'
   if (!dir.exists('figs')) {dir.create('figs', recursive=T, showWarnings=F)}
   if (file.exists(fig_path)) {
     cat('\n   ', fig_path, ' already exists ...', sep='')
@@ -878,7 +878,7 @@ plot_ghfdb <- function() {
       geom_sf(data=shp_ridge, linewidth=0.3, color='white') +
       geom_sf(data=shp_transform, linewidth=0.3, color='white') +
       geom_sf(data=shp_trench, linewidth=0.3, color='white') +
-      geom_sf(data=shp_ghfdb, aes(color=obs), size=0.1, shape=20) +
+      geom_sf(data=shp_ghf, aes(color=obs), size=0.1, shape=20) +
       scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)),
                             limits=c(0, 250), breaks=c(0, 125, 250), na.value='transparent',
                             guide=guide_colorbar(title.vjust=1, show.limits=T,
@@ -905,7 +905,7 @@ plot_ghfdb <- function() {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 plot_transect_buff_comp <- function(trans_id, base_size=20) {
   fig_dir <- 'figs/transect_buff/'
-  fig_path1 <- paste0(fig_dir, trans_id, '-transect-buff-ghfdb.png')
+  fig_path1 <- paste0(fig_dir, trans_id, '-transect-buff-ghf.png')
   fig_path2 <- paste0(fig_dir, trans_id, '-transect-buff-sim.png')
   fig_path3 <- paste0(fig_dir, trans_id, '-transect-buff-krg.png')
   fig_path_comp <- paste0(fig_dir, trans_id, '-transect-buff-comp.png')
@@ -966,7 +966,7 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
         geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
         geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
         geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-        geom_sf(data=x$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
+        geom_sf(data=x$ghf_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
         geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
         geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
         geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
@@ -974,21 +974,21 @@ plot_transect_buff_comp <- function(trans_id, base_size=20) {
         scale_color_viridis_c(option='magma', name=bquote('Q'~(mWm^-2)), limits=c(0, 250),
                               breaks=c(0, 125, 250), na.value='transparent', guide='none') +
         coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
-      if (is.null(x$ghfdb_projected1[[1]])) {
+      if (is.null(x$ghf_projected1[[1]])) {
         p2 <- ggplot(data=data.frame(), aes())
       } else {
         p2 <-
           ggplot() +
-          geom_point(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs), shape=20,
+          geom_point(data=x$ghf_projected1[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_point(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs), shape=20,
+          geom_point(data=x$ghf_projected2[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_point(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
+          geom_point(data=x$ghf_projected3[[1]], aes(projected_distances, obs), shape=20,
                      color='grey20', size=2) +
-          geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs), color='black') +
-          geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs), color='black') +
-          geom_rug(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs, color=obs),
+          geom_path(data=x$ghf_loess1[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghf_loess2[[1]], aes(projected_distances, obs), color='black') +
+          geom_path(data=x$ghf_loess3[[1]], aes(projected_distances, obs), color='black') +
+          geom_rug(data=x$ghf_loess3[[1]], aes(projected_distances, obs, color=obs),
                    sides='b', length=unit(0.06, 'npc'))
       }
       p2 <- p2 +
@@ -1130,7 +1130,7 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
   if (length(trans_ids) > 3) {trans_ids <- trans_ids[1:3]}
   fig_dir <- 'figs/transect_neighbors/'
   trans_id_lab <- paste0(trans_ids[1], '-', trans_ids[2], '-', trans_ids[3])
-  fig_paths <- list(paste0(fig_dir, trans_id_lab, '-transect-neighbors-ghfdb.png'),
+  fig_paths <- list(paste0(fig_dir, trans_id_lab, '-transect-neighbors-ghf.png'),
                     paste0(fig_dir, trans_id_lab, '-transect-neighbors-sim.png'),
                     paste0(fig_dir, trans_id_lab, '-transect-neighbors-krg.png'))
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
@@ -1185,7 +1185,7 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
           geom_sf(aes(geometry=trench), color='white', linewidth=1.5) +
           geom_sf(aes(geometry=transect), color='black', linewidth=1.5) +
           geom_sf(aes(geometry=volcano), color='black', fill='white', shape=24) +
-          geom_sf(data=x$ghfdb_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
+          geom_sf(data=x$ghf_large_buff[[1]], aes(color=obs), shape=20, size=hf_pt_size) +
           geom_sf(aes(geometry=small_buffer1), fill=NA, linewidth=0.5, color='black') +
           geom_sf(aes(geometry=small_buffer2), fill=NA, linewidth=0.5, color='black') +
           geom_sf(aes(geometry=small_buffer3), fill=NA, linewidth=0.5, color='black') +
@@ -1194,24 +1194,24 @@ plot_transect_neighbors_comp <- function(trans_ids, base_size=20) {
                                 breaks=c(0, 125, 250), na.value='transparent',
                                 guide='none') +
           coord_sf(expand=F, lims_method='geometry_bbox') + map_theme
-        if (is.null(x$ghfdb_projected1[[1]])) {
+        if (is.null(x$ghf_projected1[[1]])) {
           p2 <- ggplot(data=data.frame(), aes())
         } else {
           p2 <-
             ggplot() +
-            geom_point(data=x$ghfdb_projected1[[1]], aes(projected_distances, obs), shape=20,
+            geom_point(data=x$ghf_projected1[[1]], aes(projected_distances, obs), shape=20,
                        color='grey20', size=2) +
-            geom_point(data=x$ghfdb_projected2[[1]], aes(projected_distances, obs), shape=20,
+            geom_point(data=x$ghf_projected2[[1]], aes(projected_distances, obs), shape=20,
                        color='grey20', size=2) +
-            geom_point(data=x$ghfdb_projected3[[1]], aes(projected_distances, obs), shape=20,
+            geom_point(data=x$ghf_projected3[[1]], aes(projected_distances, obs), shape=20,
                        color='grey20', size=2) +
-            geom_path(data=x$ghfdb_loess1[[1]], aes(projected_distances, obs),
+            geom_path(data=x$ghf_loess1[[1]], aes(projected_distances, obs),
                       color='black') +
-            geom_path(data=x$ghfdb_loess2[[1]], aes(projected_distances, obs),
+            geom_path(data=x$ghf_loess2[[1]], aes(projected_distances, obs),
                       color='black') +
-            geom_path(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs),
+            geom_path(data=x$ghf_loess3[[1]], aes(projected_distances, obs),
                       color='black') +
-            geom_rug(data=x$ghfdb_loess3[[1]], aes(projected_distances, obs, color=obs),
+            geom_rug(data=x$ghf_loess3[[1]], aes(projected_distances, obs, color=obs),
                      sides='b', length=unit(0.06, 'npc'))
         }
         p2 <- p2 +
@@ -1374,13 +1374,13 @@ plot_transect_strip_comp <- function(trans_ids=NULL, fname=NULL, buff=1, base_si
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
   if (is.null(fname)) {fname <- 'test'}
   if (buff == 1) {
-    select_cols <- c('short_name', 'ghfdb_loess1', 'krg_loess1', 'sim_loess1')
+    select_cols <- c('short_name', 'ghf_loess1', 'krg_loess1', 'sim_loess1')
   } else if (buff == 2) {
-    select_cols <- c('short_name', 'ghfdb_loess2', 'krg_loess2', 'sim_loess2')
+    select_cols <- c('short_name', 'ghf_loess2', 'krg_loess2', 'sim_loess2')
   } else if (buff == 3) {
-    select_cols <- c('short_name', 'ghfdb_loess3', 'krg_loess3', 'sim_loess3')
+    select_cols <- c('short_name', 'ghf_loess3', 'krg_loess3', 'sim_loess3')
   } else {
-    select_cols <- c('short_name', 'ghfdb_loess1', 'krg_loess1', 'sim_loess1')
+    select_cols <- c('short_name', 'ghf_loess1', 'krg_loess1', 'sim_loess1')
   }
   fig_dir <- 'figs/summary/'
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
@@ -1432,7 +1432,8 @@ plot_transect_strip_comp <- function(trans_ids=NULL, fname=NULL, buff=1, base_si
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plot cross correlation !!
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-plot_cross_correlation <- function(trans_id1, trans_id2, min_ccf=0.8, base_size=14) {
+plot_cross_correlation <- function(trans_id1, trans_id2, ccf_thresh=0.8, lag_thresh=0.2,
+                                   max_lags=1e3, base_size=14) {
   fig_dir <- 'figs/transect_xcorr/'
   fig_path <- paste0(fig_dir, trans_id1, '-', trans_id2, '-transect-xcorr.png')
   if (!dir.exists(fig_dir)) {dir.create(fig_dir, recursive=T, showWarnings=F)}
@@ -1462,93 +1463,120 @@ plot_cross_correlation <- function(trans_id1, trans_id2, min_ccf=0.8, base_size=
             legend.title=element_text(vjust=0, size=base_size),
             legend.background=element_blank())
     )
-    smooth1_ghfdb <- x$ghfdb_loess3[[1]]
-    points1_ghfdb <- x$ghfdb_projected3[[1]]
-    smooth2_ghfdb <- y$ghfdb_loess3[[1]]
-    points2_ghfdb <- y$ghfdb_projected3[[1]]
-    ccf_result_ghfdb <- ccf(smooth1_ghfdb$obs, smooth2_ghfdb$obs, na.action=na.pass)
-    max_ccf_ghfdb <- max(ccf_result_ghfdb$acf)
-    max_lag_ghfdb <- ccf_result_ghfdb$lag[which(ccf_result_ghfdb$acf == max_ccf_ghfdb)]
+    smooth1_ghf <- x$ghf_loess3[[1]]
+    points1_ghf <- x$ghf_projected3[[1]]
+    smooth2_ghf <- y$ghf_loess3[[1]]
+    points2_ghf <- y$ghf_projected3[[1]]
+    ccf_result_ghf <-
+      ccf(smooth1_ghf$obs, smooth2_ghf$obs, na.action=na.pass, lag.max=max_lags, plot=F)
+    ccf_result_ghf$lag <- ccf_result_ghf$lag * (1 / (nrow(smooth1_ghf) - 1))
+    max_ccf_ghf <- max(ccf_result_ghf$acf, na.rm=T)
+    max_lag_ghf <- ccf_result_ghf$lag[which(ccf_result_ghf$acf == max_ccf_ghf)]
     smooth1_sim <- x$sim_loess3[[1]]
     points1_sim <- x$sim_projected3[[1]]
     smooth2_sim <- y$sim_loess3[[1]]
     points2_sim <- y$sim_projected3[[1]]
-    ccf_result_sim <- ccf(smooth1_sim$obs, smooth2_sim$obs, na.action=na.pass)
-    max_ccf_sim <- max(ccf_result_sim$acf)
+    ccf_result_sim <-
+      ccf(smooth1_sim$obs, smooth2_sim$obs, na.action=na.pass, lag.max=max_lags, plot=F)
+    ccf_result_sim$lag <- ccf_result_sim$lag * (1 / (nrow(smooth1_sim) - 1))
+    max_ccf_sim <- max(ccf_result_sim$acf, na.rm=T)
     max_lag_sim <- ccf_result_sim$lag[which(ccf_result_sim$acf == max_ccf_sim)]
     smooth1_krg <- x$krg_loess3[[1]]
     points1_krg <- x$krg_projected3[[1]]
     smooth2_krg <- y$krg_loess3[[1]]
     points2_krg <- y$krg_projected3[[1]]
-    ccf_result_krg <- ccf(smooth1_krg$obs, smooth2_krg$obs, na.action=na.pass)
-    max_ccf_krg <- max(ccf_result_krg$acf)
+    ccf_result_krg <-
+      ccf(smooth1_krg$obs, smooth2_krg$obs, na.action=na.pass, lag.max=max_lags, plot=F)
+    ccf_result_krg$lag <- ccf_result_krg$lag * (1 / (nrow(smooth1_krg) - 1))
+    max_ccf_krg <- max(ccf_result_krg$acf, na.rm=T)
     max_lag_krg <- ccf_result_krg$lag[which(ccf_result_krg$acf == max_ccf_krg)]
-    if (max_ccf_ghfdb > min_ccf | max_ccf_sim > min_ccf | max_ccf_krg > min_ccf) {
+#    if ((max_lag_ghf > -lag_thresh & max_lag_ghf < lag_thresh & max_ccf_ghf > ccf_thresh) |
+#        (max_lag_sim > -lag_thresh & max_lag_sim < lag_thresh & max_ccf_sim > ccf_thresh) |
+#        (max_lag_krg > -lag_thresh & max_lag_krg < lag_thresh & max_ccf_krg > ccf_thresh)) {
       p1 <-
         ggplot() +
-        geom_point(data=points1_ghfdb, aes(projected_distances, obs, color=trans_id1),
+        geom_point(data=points1_ghf, aes(projected_distances, obs, color=trans_id1),
                    na.rm=T, shape=20, size=0.7) +
-        geom_point(data=points2_ghfdb, aes(projected_distances, obs, color=trans_id2),
+        geom_point(data=points2_ghf, aes(projected_distances, obs, color=trans_id2),
                    na.rm=T, shape=20, size=0.7) +
-        geom_path(data=smooth1_ghfdb, aes(projected_distances, obs, color=trans_id1),
-                  na.rm=T) +
-        geom_path(data=smooth2_ghfdb, aes(projected_distances, obs, color=trans_id2),
-                  na.rm=T) +
+        geom_path(data=smooth1_ghf, aes(projected_distances, obs, color=trans_id1),
+                  linewidth=1, na.rm=T) +
+        geom_path(data=smooth2_ghf, aes(projected_distances, obs, color=trans_id2),
+                  linewidth=1, na.rm=T) +
+        geom_path(data=smooth2_ghf,
+                  aes(projected_distances + max_lag_ghf, obs, color=trans_id2),
+                  linewidth=1, linetype=2, na.rm=T) +
         labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
         ggtitle('Global Heat Flow') +
         scale_color_manual(name=NULL, values=color_mapping) + p_theme
       p2 <-
-        ggplot(tibble(acf=ccf_result_ghfdb$acf, lag=ccf_result_ghfdb$lag)) +
-        geom_hline(yintercept=min_ccf, linetype=2) +
-        geom_hline(yintercept=-min_ccf, linetype=2) +
-        geom_path(aes(lag, acf)) +
-        geom_point(data=tibble(acf=max_ccf_ghfdb, lag=max_lag_ghfdb), aes(lag, acf)) +
-        labs(x='Lag', y='Correlation') +
-        scale_y_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) + p_theme
+        ggplot(tibble(acf=ccf_result_ghf$acf, lag=ccf_result_ghf$lag)) +
+        geom_hline(yintercept=ccf_thresh, linetype=2) +
+        geom_hline(yintercept=-ccf_thresh, linetype=2) +
+        geom_hline(yintercept=0) +
+        geom_path(aes(lag, acf), linewidth=1, na.rm=T) +
+        geom_point(data=tibble(acf=max_ccf_ghf, lag=max_lag_ghf), aes(lag, acf)) +
+        labs(x='Normalized Lag Distance', y='Correlation') +
+        scale_y_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) +
+        scale_x_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) +
+        p_theme
       p3 <-
-        ggplot() +
-        geom_point(data=points1_sim, aes(projected_distances, obs, color=trans_id1),
-                   na.rm=T, shape=20, size=0.7) +
-        geom_point(data=points2_sim, aes(projected_distances, obs, color=trans_id2),
-                   na.rm=T, shape=20, size=0.7) +
-        geom_path(data=smooth1_sim, aes(projected_distances, obs, color=trans_id1),
-                  na.rm=T) +
-        geom_path(data=smooth2_sim, aes(projected_distances, obs, color=trans_id2),
-                  na.rm=T) +
-        labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
-        ggtitle('Similarity') +
-        scale_color_manual(name=NULL, values=color_mapping) + p_theme
-      p4 <-
-        ggplot(tibble(acf=ccf_result_sim$acf, lag=ccf_result_sim$lag)) +
-        geom_hline(yintercept=min_ccf, linetype=2) +
-        geom_hline(yintercept=-min_ccf, linetype=2) +
-        geom_path(aes(lag, acf)) +
-        geom_point(data=tibble(acf=max_ccf_sim, lag=max_lag_sim), aes(lag, acf)) +
-        labs(x='Lag', y='Correlation') +
-        scale_y_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) + p_theme
-      p5 <-
         ggplot() +
         geom_point(data=points1_krg, aes(projected_distances, obs, color=trans_id1),
                    na.rm=T, shape=20, size=0.7) +
         geom_point(data=points2_krg, aes(projected_distances, obs, color=trans_id2),
                    na.rm=T, shape=20, size=0.7) +
         geom_path(data=smooth1_krg, aes(projected_distances, obs, color=trans_id1),
-                  na.rm=T) +
+                  linewidth=1, na.rm=T) +
         geom_path(data=smooth2_krg, aes(projected_distances, obs, color=trans_id2),
-                  na.rm=T) +
+                  linewidth=1, na.rm=T) +
+        geom_path(data=smooth2_krg,
+                  aes(projected_distances + max_lag_krg, obs, color=trans_id2),
+                  linewidth=1, linetype=2, na.rm=T) +
         labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
         ggtitle('Krige') +
         scale_color_manual(name=NULL, values=color_mapping) + p_theme
-      p6 <-
+      p4 <-
         ggplot(tibble(acf=ccf_result_krg$acf, lag=ccf_result_krg$lag)) +
-        geom_hline(yintercept=min_ccf, linetype=2) +
-        geom_hline(yintercept=-min_ccf, linetype=2) +
-        geom_path(aes(lag, acf)) +
+        geom_hline(yintercept=ccf_thresh, linetype=2) +
+        geom_hline(yintercept=-ccf_thresh, linetype=2) +
+        geom_hline(yintercept=0) +
+        geom_path(aes(lag, acf), linewidth=1, na.rm=T) +
         geom_point(data=tibble(acf=max_ccf_krg, lag=max_lag_krg), aes(lag, acf)) +
-        labs(x='Lag', y='Correlation') +
-        scale_y_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) + p_theme
+        labs(x='Normalized Lag Distance', y='Correlation') +
+        scale_y_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) +
+        scale_x_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) +
+        p_theme
+      p5 <-
+        ggplot() +
+        geom_point(data=points1_sim, aes(projected_distances, obs, color=trans_id1),
+                   na.rm=T, shape=20, size=0.7) +
+        geom_point(data=points2_sim, aes(projected_distances, obs, color=trans_id2),
+                   na.rm=T, shape=20, size=0.7) +
+        geom_path(data=smooth1_sim, aes(projected_distances, obs, color=trans_id1),
+                  linewidth=1, na.rm=T) +
+        geom_path(data=smooth2_sim, aes(projected_distances, obs, color=trans_id2),
+                  linewidth=1, na.rm=T) +
+        geom_path(data=smooth2_sim,
+                  aes(projected_distances + max_lag_sim, obs, color=trans_id2),
+                  linewidth=1, linetype=2, na.rm=T) +
+        labs(x='Normalized Distance', y=bquote('Q'~(mWm^-2))) +
+        ggtitle('Similarity') +
+        scale_color_manual(name=NULL, values=color_mapping) + p_theme
+      p6 <-
+        ggplot(tibble(acf=ccf_result_sim$acf, lag=ccf_result_sim$lag)) +
+        geom_hline(yintercept=ccf_thresh, linetype=2) +
+        geom_hline(yintercept=-ccf_thresh, linetype=2) +
+        geom_hline(yintercept=0) +
+        geom_path(aes(lag, acf), linewidth=1, na.rm=T) +
+        geom_point(data=tibble(acf=max_ccf_sim, lag=max_lag_sim), aes(lag, acf)) +
+        labs(x='Normalized Lag Distance', y='Correlation') +
+        scale_y_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) +
+        scale_x_continuous(limits=c(-1, 1), breaks=seq(-1, 1, 0.5)) +
+        p_theme
       p_title <- paste0('Cross-correlation: ', trans_id1, ' ', trans_id2)
-      p_rax <- theme(axis.title.y=element_blank(), axis.text.y=element_blank())
+      p_rax <- theme(axis.title.y=element_blank(), axis.text.y=element_blank(),
+                     axis.ticks.y=element_blank())
       p <-
         (p1 + (p3 + p_rax) + (p5 + p_rax)) / (p2 + (p4 + p_rax) + (p6 + p_rax)) +
         plot_annotation(title=p_title,
@@ -1557,9 +1585,9 @@ plot_cross_correlation <- function(trans_id1, trans_id2, min_ccf=0.8, base_size=
                                                             margin=margin()))) &
         theme(plot.tag=element_text(size=base_size * 1.5, margin=margin(0, 0, -10, 0)))
       ggsave(file=fig_path, plot=p, width=13, height=5, dpi=300, bg='white')
-    } else {
-      cat('\n   No significant cross-correlations at 95% CI ...')
-    }
+#    } else {
+#      cat('\n   No significant correlation found between lag threshold!')
+#    }
   }, error=function(e) {
     cat('\n!! ERROR occurred in plot_cross_correlation:\n!!', conditionMessage(e))
   })
