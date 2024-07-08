@@ -1471,7 +1471,7 @@ plot_cross_correlation <- function(trans_id1, trans_id2, ccf_thresh=0.8, lag_thr
       ccf(smooth1_ghf$obs, smooth2_ghf$obs, na.action=na.pass, lag.max=max_lags, plot=F)
     ccf_result_ghf$lag <- ccf_result_ghf$lag * (1 / (nrow(smooth1_ghf) - 1))
     max_ccf_ghf <- max(ccf_result_ghf$acf, na.rm=T)
-    max_lag_ghf <- ccf_result_ghf$lag[which(ccf_result_ghf$acf == max_ccf_ghf)]
+    max_lag_ghf <- max(ccf_result_ghf$lag[which(ccf_result_ghf$acf == max_ccf_ghf)])
     smooth1_sim <- x$sim_loess3[[1]]
     points1_sim <- x$sim_projected3[[1]]
     smooth2_sim <- y$sim_loess3[[1]]
@@ -1480,7 +1480,7 @@ plot_cross_correlation <- function(trans_id1, trans_id2, ccf_thresh=0.8, lag_thr
       ccf(smooth1_sim$obs, smooth2_sim$obs, na.action=na.pass, lag.max=max_lags, plot=F)
     ccf_result_sim$lag <- ccf_result_sim$lag * (1 / (nrow(smooth1_sim) - 1))
     max_ccf_sim <- max(ccf_result_sim$acf, na.rm=T)
-    max_lag_sim <- ccf_result_sim$lag[which(ccf_result_sim$acf == max_ccf_sim)]
+    max_lag_sim <- max(ccf_result_sim$lag[which(ccf_result_sim$acf == max_ccf_sim)])
     smooth1_krg <- x$krg_loess3[[1]]
     points1_krg <- x$krg_projected3[[1]]
     smooth2_krg <- y$krg_loess3[[1]]
@@ -1489,7 +1489,7 @@ plot_cross_correlation <- function(trans_id1, trans_id2, ccf_thresh=0.8, lag_thr
       ccf(smooth1_krg$obs, smooth2_krg$obs, na.action=na.pass, lag.max=max_lags, plot=F)
     ccf_result_krg$lag <- ccf_result_krg$lag * (1 / (nrow(smooth1_krg) - 1))
     max_ccf_krg <- max(ccf_result_krg$acf, na.rm=T)
-    max_lag_krg <- ccf_result_krg$lag[which(ccf_result_krg$acf == max_ccf_krg)]
+    max_lag_krg <- max(ccf_result_krg$lag[which(ccf_result_krg$acf == max_ccf_krg)])
 #    if ((max_lag_ghf > -lag_thresh & max_lag_ghf < lag_thresh & max_ccf_ghf > ccf_thresh) |
 #        (max_lag_sim > -lag_thresh & max_lag_sim < lag_thresh & max_ccf_sim > ccf_thresh) |
 #        (max_lag_krg > -lag_thresh & max_lag_krg < lag_thresh & max_ccf_krg > ccf_thresh)) {
