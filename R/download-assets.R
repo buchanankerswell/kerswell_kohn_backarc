@@ -8,7 +8,7 @@ main <- function() {
                          'NjQ1MzM5ODAxLjE3MDA2NTIyMTc.*_ga_YE9BMGGWX8*',
                          'MTcwNzk4OTgzNC4yMi4xLjE3MDc5OTAyOTguNjAuMC4w')
     tryCatch({
-      cat('Downloading assets from osf: https://osf.io/ca6zu/files/osfstorage')
+      cat('\nDownloading assets from osf: https://osf.io/ca6zu/files/osfstorage')
       download.file(assets_url, 'assets.zip', quiet=T)
       unzip('assets.zip', exdir='assets')
       file.remove('assets.zip')

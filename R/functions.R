@@ -12,8 +12,8 @@ sshhh <- function(package_list) {
 package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'readxl', 'purrr', 'furrr',
                   'tibble', 'dplyr', 'magrittr', 'units', 'ggplot2', 'colorspace', 'metR',
                   'ggrepel', 'ggridges', 'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel',
-                  'marmap', 'scales', 'ggspatial', 'gstat', 'rgeos', 'sp', 'sf',
-                  'rnaturalearth', 'nloptr', 'zoo', 'jsonlite')
+                  'marmap', 'scales', 'ggspatial', 'gstat', 'sp', 'sf', 'rnaturalearth',
+                  'nloptr', 'zoo', 'jsonlite')
 
 # Load packages quietly
 sapply(package_list, sshhh)
@@ -624,7 +624,7 @@ nlopt_transects <- function(trans_ids=NULL, v_mods=c('Sph', 'Exp', 'Lin'),
   if (is.null(trans_ids)) {stop('\nMissing submap transect ids!')}
   if (length(list.files('assets/map_data/relief')) < length(trans_ids)) {parallel <- F}
   x <- expand.grid(id=trans_ids, vm=v_mods, stringsAsFactors=F) %>% arrange(id, vm)
-  cat('Optimizing krige models after Li et al. (2018) ...\n')
+  cat('\nOptimizing krige models after Li et al. (2018) ...\n')
   if (parallel) {
     plan(multisession, workers=availableCores() - 2)
     future_walk2(x$id, x$vm, ~nlopt_krige(..., alg, max_eval, iwt, vwt),

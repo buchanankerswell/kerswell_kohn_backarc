@@ -16,6 +16,11 @@ check_dependencies <- function(packages) {
   }
   req <- unlist(lapply(pkgs, sshhh))
   need <- pkgs[req == FALSE]
+  if ('ggsflabel' %in% need) {
+    devtools::install_github('yutannihilation/ggsflabel')
+  }
+  req <- unlist(lapply(pkgs, sshhh))
+  need <- pkgs[req == FALSE]
   if (length(need) > 0) {
     cat('\n', rep('~', 45), sep='')
     cat('\nFailed to install packages:\n')
@@ -28,12 +33,12 @@ check_dependencies <- function(packages) {
 }
 
 main <- function() {
-  package_list <- c('tictoc', 'stringr', 'tidyr', 'readr', 'readxl', 'purrr', 'furrr',
-                    'tibble', 'dplyr', 'magrittr', 'units', 'ggplot2', 'colorspace', 'metR',
-                    'ggrepel', 'ggridges', 'ggnewscale', 'patchwork', 'cowplot', 'ggsflabel',
-                    'marmap', 'scales', 'ggspatial', 'gstat', 'rgeos', 'sp', 'sf',
+  package_list <- c('devtools', 'tictoc', 'stringr', 'tidyr', 'readr', 'readxl', 'purrr',
+                    'furrr', 'tibble', 'dplyr', 'magrittr', 'units', 'ggplot2', 'colorspace',
+                    'metR', 'ggrepel', 'ggridges', 'ggnewscale', 'patchwork', 'cowplot',
+                    'ggsflabel', 'marmap', 'scales', 'ggspatial', 'gstat', 'sp', 'sf',
                     'rnaturalearth', 'nloptr', 'zoo', 'jsonlite')
-  cat('Checking required packages ...')
+  cat('Checking required packages ...\n')
   check_dependencies(package_list)
   cat('\n', rep('~', 45), '\n', sep='')
   print(sessionInfo())
