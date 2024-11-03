@@ -1,47 +1,78 @@
-# Logging config
-DATE = $(shell date +"%d-%m-%Y")
-LOGFILE := log/log-$(DATE)
-LOG := 2>&1 | tee -a $(LOGFILE)
-# R scripts
-R = R/nloptr.R \
-		R/check-packages.R \
-		R/download-assets.R \
-		R/goutorbe-analysis.R \
-		R/preprocess-map-data.R
-# Directories with data and scripts
-DATADIR = assets
-# Cleanup directories
-DATAPURGE = log
-DATACLEAN = $(DATADIR)
-FIGSPURGE = figs
+# Top-level dirs
+PROJECT_ROOT := $(CURDIR)
+R := $(PROJECT_ROOT)/R
+DRAFT := $(PROJECT_ROOT)/draft
 
-all: nlopt
+# Targets
+.PHONY: build all visualize postprocess test krige preprocess environment clean deep-clean help
 
-test: preprocess
-	@R/test.R $(LOG)
+all: build
 
-nlopt: preprocess
-	@R/nloptr.R $(LOG)
+build: check-deps environment preprocess krige visualize manuscript
+	@echo "    --------------------------------------------------"
+	@echo "    Study built successfully!"
+	@echo "    --------------------------------------------------"
+	@open draft/manuscript.pdf
 
-preprocess: $(DATADIR)
-	@R/preprocess-map-data.R $(LOG)
+visualize:
+	@$(MAKE) --no-print-directory -C $(R) visualize
 
-$(DATADIR): check_packages
-	@R/download-assets.R $(LOG);
+postprocess: krige
+	@$(MAKE) --no-print-directory -C $(R) postprocess
 
-check_packages: $(LOGFILE) $(R)
-	@R/check-packages.R $(LOG)
+test:
+	@$(MAKE) --no-print-directory -C $(R) test
 
-$(LOGFILE):
-	@if [ ! -e "$(LOGFILE)" ]; then \
-		mkdir -p log; \
-		touch $(LOGFILE); \
+krige:
+	@$(MAKE) --no-print-directory -C $(R) krige
+
+preprocess: $(LOG_FILE)
+	@$(MAKE) --no-print-directory -C $(R) preprocess
+
+manuscript:
+	@$(MAKE) --no-print-directory -C $(DRAFT)
+
+environment: $(LOG_FILE)
+	@Rscript $(R)/environment.R
+
+check-deps:
+	@echo "    --------------------------------------------------"
+	@echo "    Checking required dependencies"
+	@echo "    --------------------------------------------------"
+	@if ! command -v R >/dev/null 2>&1; then \
+	    echo "ERROR: R not found in PATH."; \
+	    exit 1; \
 	fi
+	@if ! command -v pandoc >/dev/null 2>&1; then \
+	    echo " !! ERROR: pandoc not found in PATH!"; \
+	    exit 1; \
+	fi
+	@echo " -- All dependencies found"
 
-purge:
-	@rm -rf $(DATAPURGE) $(FIGSPURGE)
+clean:
+	@echo "    --------------------------------------------------"
+	@echo "    Cleaning ..."
+	@echo "    --------------------------------------------------"
+	@$(MAKE) --no-print-directory -C $(R) clean || true
+	@$(MAKE) --no-print-directory -C $(DRAFT) clean || true
+	@find . -name ".DS_Store" -type f -delete
 
-clean: purge
-	@rm -rf $(DATACLEAN)
+deep-clean: clean
+	@echo "    --------------------------------------------------"
+	@echo "    Deep cleaning ..."
+	@echo "    --------------------------------------------------"
+	@$(MAKE) --no-print-directory -C $(R) deep-clean || true
+	@$(MAKE) --no-print-directory -C $(DRAFT) deep-clean || true
 
-.PHONY: clean purge check_packages preprocess nlopt test all
+help:
+	@echo "    --------------------------------------------------"
+	@echo "    Available targets:"
+	@echo "    --------------------------------------------------"
+	@echo "    visualize         Visualize all results"
+	@echo "    postprocess       Process kriging results"
+	@echo "    krige             Krige with non-linear optimization"
+	@echo "    preprocess        Fetch required datasets and preprocess"
+	@echo "    environment       Check and install R packages"
+	@echo "    clean             Cleanup unnecessary files and directories (safe)"
+	@echo "    deep-clean        Deep clean results, figures, and data files (use with caution!)"
+	@echo "    help              Show this help message"

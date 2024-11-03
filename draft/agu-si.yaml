@@ -1,0 +1,22 @@
+---
+journal: "Geochemistry, Geophysics, Geosystems"
+classoption: "draft,linenumbers"
+title: "A Comparison of Heat Flow Interpolations Near Subduction Zones"
+authors:
+  - name: "Buchanan Kerswell"
+    affil: 1,2
+  - name: "Matthew J. Kohn"
+    affil: 1
+affiliations:
+  - number: 1
+    name: "Department of Geosicences, Boise State University, Boise, ID 83725"
+  - number: 2
+    name: "Department of Earth, Oceans and Ecological Sciences, University of Liverpool, Liverpool L69 3BX, UK"
+corresponding_author:
+  - name: "Buchanan Kerswell"
+    email: "b.kerswell@liverpool.ac.uk"
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{amsfonts}
+  - \usepackage{amssymb}
+---

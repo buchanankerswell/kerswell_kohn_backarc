@@ -2,13 +2,7 @@
 
 # Load packages and functions
 source('R/functions.R')
-
-# Define map projections
-proj4.wgs <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
-proj4.rp <- paste0('+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0 +ellps=WGS84 ',
-                   '+datum=WGS84 +units=m +no_defs')
-
-load('data/hf.RData')
+load('assets/map_data/map-data.RData')
 
 # Create directory
 dir.create('figs/global_density', recursive=T, showWarnings=F)
@@ -20,11 +14,11 @@ encode_ordinal <- function(x, order=unique(x)) {
 }
 
 # Read goutorbe2011 data
-g <- read_csv('data/g11-sim.csv', show_col_types=F)
+g <- read_csv('assets/hf_data/g11-sim.csv', show_col_types=F)
 names(g) <- str_to_lower(names(g))
 
 # Tidy data
-g.full <-
+g_full <-
   g %>%
   mutate(
     `age ocean (999 on continents)` =
@@ -34,37 +28,39 @@ g.full <-
         `distance to young rift` < 0,
         abs(`distance to young rift`),
         `distance to young rift`
-      )
+      ),
+    `thermo-tectonic age` = encode_ordinal(`thermo-tectonic age`),
+    `rift type` = encode_ordinal(`rift type`)
   ) %>%
   rename(`age ocean`=`age ocean (999 on continents)`)
-g.colocated <- g.full %>% filter(!is.na(`observed heat flow`))
+g_colocated <- g_full %>% filter(!is.na(`observed heat flow`))
 
 # Make into sf object
-shp.g.full <-
-  st_as_sf(g.full, coords=c(1,2), crs=proj4.wgs) %>%
-  st_transform(proj4.rp)
-shp.g.colocated <-
-  st_as_sf(g.colocated, coords=c(1,2), crs=proj4.wgs) %>%
-  st_transform(proj4.rp)
+shp_g_full <-
+  st_as_sf(g_full, coords=c(1,2), crs=wgs) %>%
+  reproject_center_pacific()
+shp_g_colocated <-
+  st_as_sf(g_colocated, coords=c(1,2), crs=wgs) %>%
+  reproject_center_pacific()
 
 # Compute global point density
 dns <-
   MASS::kde2d(
-  map_dbl(shp.g.colocated$geometry, ~.x[1]),
-  map_dbl(shp.g.colocated$geometry, ~.x[2]),
+  map_dbl(shp_g_colocated$geometry, ~.x[1]),
+  map_dbl(shp_g_colocated$geometry, ~.x[2]),
     n=100,
     lims=c(
-      c(st_bbox(shp.world)$xmin, st_bbox(shp.world)$xmax),
-      c(st_bbox(shp.world)$ymin, st_bbox(shp.world)$ymax)
+      c(st_bbox(shp_world)$xmin, st_bbox(shp_world)$xmax),
+      c(st_bbox(shp_world)$ymin, st_bbox(shp_world)$ymax)
     )
   )
-dns.colocated <-
+density_colocated <-
   expand.grid(dns$x, dns$y) %>%
   as_tibble() %>%
   rename(x=Var1, y=Var2) %>%
   mutate(
     dens=as.vector(dns$z),
-    cnt=nrow(shp.g.colocated) / sum(dens) * dens
+    cnt=nrow(shp_g_colocated) / sum(dens) * dens
   )
 
 # Units for goutorbe2011 dataset
@@ -81,126 +77,99 @@ unts <- c(
 # Plot global density
 p1 <-
   ggplot() +
-  ggtitle('a) Sediment thickness') +
-  geom_sf(data=shp.relief.world, aes(color=elevation), shape=15, size=0.01) +
+  geom_sf(data=shp_relief_world, aes(color=elev), shape=15, size=0.01) +
   scale_color_etopo(guide='none') +
   new_scale_color() +
-  geom_sf(data=st_union((bind_rows(shp.buffer))), linewidth=0.3, fill=NA) +
-  geom_sf(data=shp.ridge, linewidth=0.3) +
-  geom_sf(data=shp.trench, linewidth=0.3) +
-  geom_sf(data=shp.transform, linewidth=0.3) +
-  geom_sf(
-    data=shp.g.colocated,
-    aes(color=`sediment thickness`),
-    shape=15,
-    size=0.3
-  ) +
-  geom_sf(data=st_union(bind_rows(shp.segs)), linewidth=1, color='white') +
-  scale_color_viridis_c(
-    option='viridis',
-    name='km',
-    limits=c(
-      round(min(shp.g.colocated[['sediment thickness']])),
-      round(max(shp.g.colocated[['sediment thickness']]))
-    ),
-    breaks=c(
-      round(min(shp.g.colocated[['sediment thickness']])),
-      round(max(shp.g.colocated[['sediment thickness']]))
-    ),
-    na.value='transparent',
-    guide=guide_colorbar(title.vjust=1, show.limits=T)
-  ) +
-  coord_sf() +
+  geom_sf(data=shp_ridge, linewidth=0.3, color='white') +
+  geom_sf(data=shp_transform, linewidth=0.3, color='white') +
+  geom_sf(data=shp_trench, linewidth=0.3, color='white') +
+  geom_sf(data=shp_g_colocated, aes(color=`sediment thickness`), size=0.1, shape=20) +
+  geom_sf(data=st_union(bind_rows(shp_submap)), linewidth=1) +
+  scale_color_viridis_c(option='viridis', name='km',
+                        limits=c(
+                          round(min(shp_g_colocated[['sediment thickness']])),
+                          round(max(shp_g_colocated[['sediment thickness']]))
+                        ),
+                        breaks=c(
+                          round(min(shp_g_colocated[['sediment thickness']])),
+                          round(max(shp_g_colocated[['sediment thickness']]))
+                        ),
+                        na.value='transparent',
+                        guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                             frame.colour='black',
+                                             ticks.colour='black')) +
+  ggtitle('Sediment Thickness') +
+  coord_sf(expand=F, lims_method='geometry_bbox') +
   theme_map(font_size=14)
 p2 <-
   ggplot() +
-  ggtitle('b) Observational frequency') +
-  geom_sf(data=shp.relief.world, aes(color=elevation), shape=15, size=0.01) +
+  geom_sf(data=shp_relief_world, aes(color=elev), shape=15, size=0.01) +
   scale_color_etopo(guide='none') +
   new_scale_color() +
-  geom_contour_fill(data=dns.colocated, aes(x, y, z=cnt), alpha=0.6) +
-  geom_contour2(data=dns.colocated, aes(x, y, z=cnt), size=0.3) +
-  scale_fill_viridis_c(
-    option='viridis',
-    name='frequency',
-    limits=c(min(dns.colocated$cnt), max(dns.colocated$cnt)),
-    breaks=c(min(dns.colocated$cnt), max(dns.colocated$cnt)),
-    labels=c('low', 'high'),
-    na.value='transparent',
-    guide=guide_colorbar(title.vjust=1, show.limits=T)
-  ) +
-  geom_sf(data=st_union((bind_rows(shp.buffer))), linewidth=0.3, fill=NA) +
-  geom_sf(data=shp.ridge, linewidth=0.3) +
-  geom_sf(data=shp.trench, linewidth=0.3) +
-  geom_sf(data=shp.transform, linewidth=0.3) +
-  geom_sf(data=shp.g.colocated, shape=15, size=0.3) +
-  geom_sf(data=st_union(bind_rows(shp.segs)), linewidth=1, color='white') +
+  geom_contour_fill(data=density_colocated, aes(x, y, z=cnt), alpha=0.6) +
+  geom_contour2(data=density_colocated, aes(x, y, z=cnt), size=0.3) +
+  scale_fill_viridis_c(option='viridis', name='density',
+                       limits=c(min(density_colocated$cnt), max(density_colocated$cnt)),
+                       breaks=c(min(density_colocated$cnt), max(density_colocated$cnt)),
+                       labels=c('low', 'high'),
+                       na.value='transparent',
+                       guide=guide_colorbar(title.vjust=1, show.limits=T,
+                                            frame.colour='black',
+                                            ticks.colour='black')) +
+  geom_sf(data=shp_ridge, linewidth=0.3, color='white') +
+  geom_sf(data=shp_transform, linewidth=0.3, color='white') +
+  geom_sf(data=shp_trench, linewidth=0.3, color='white') +
+  geom_sf(data=shp_g_colocated, size=0.1, shape=20) +
+  geom_sf(data=st_union(bind_rows(shp_submap)), linewidth=1) +
+  ggtitle('Observational Density') +
   coord_sf() +
   theme_map(font_size=14)
-p <-
-  (p1 + theme(axis.text=element_blank())) / p2 &
-  theme(
-    plot.margin=margin(1, 1, 1, 1),
-    legend.position='top',
-    legend.justification='right',
-    legend.direction='horizontal',
-    axis.text=element_text(hjust=1),
-    legend.margin=margin(-4, 0, -12, 0),
-    legend.box.margin=margin(0, 10, 0, 0),
-    legend.key.height=unit(0.125, 'in'),
-    legend.key.width=unit(0.2, 'in'),
-    legend.title=element_text(vjust=0, color='black', size=14),
-    panel.grid=element_line(size=0.01, color='grey60'),
-    plot.title=element_text(vjust=0, margin=margin(0, 0, -10, 0))
-  )
-cat('\nSaving plot to: figs/global_density/global-dens.png')
-ggsave(
-  file='figs/global_density/global-dens.png',
-  plot=p,
-  device='png',
-  type='cairo',
-  width=6.5,
-  height=6.5,
-  dpi=330
-)
+p <- p1 / p2 &
+   theme(plot.margin=margin(), legend.position='bottom',
+         legend.justification='center', legend.direction='horizontal',
+         axis.text=element_blank(), legend.margin=margin(),
+         legend.box.margin=margin(5, 5, 5, 5), legend.key.height=unit(0.5, 'cm'),
+         legend.key.width=unit(1, 'cm'),
+         legend.title=element_text(vjust=0, color='black', size=14),
+         panel.grid=element_line(linewidth=0.05, color='grey20'),
+         plot.title=element_text(vjust=0, hjust=0.5, margin=margin(10, 10, 10, 10)))
+fig_path <- 'figs/global_density/global-dens.png'
+cat('\nSaving plot to: ', fig_path)
+ggsave(file=fig_path, plot=p, width=6.5, height=6.5, bg='white')
 
 # Plot colocated maps
 plts1 <-
-  map2(names(shp.g.full)[1:20], unts[1:20], ~{
+  map2(names(shp_g_full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
       cat('\nPlotting colocated grids for ', .x, sep='')
-      shp.g.colocated <- shp.g.colocated[!is.na(shp.g.colocated[[.x]]),]
-      if(!is.numeric(shp.g.colocated[[.x]])) {
-        shp.g.colocated[[.x]] <- encode_ordinal(shp.g.colocated[[.x]])
-      }
+      shp_g_colocated <- shp_g_colocated[!is.na(shp_g_colocated[[.x]]),]
       p <-
         ggplot() +
         ggtitle(paste0('a) ', .x)) +
-        geom_sf(data=shp.relief.world, aes(color=elevation), shape=15, size=0.01) +
+        geom_sf(data=shp_relief_world, aes(color=elev), shape=15, size=0.01) +
         scale_color_etopo(guide='none') +
         new_scale_color() +
-        geom_sf(data=st_union((bind_rows(shp.buffer))), linewidth=0.3, fill=NA) +
-        geom_sf(data=shp.ridge, linewidth=0.3) +
-        geom_sf(data=shp.trench, linewidth=0.3) +
-        geom_sf(data=shp.transform, linewidth=0.3) +
+        geom_sf(data=shp_ridge, linewidth=0.3) +
+        geom_sf(data=shp_trench, linewidth=0.3) +
+        geom_sf(data=shp_transform, linewidth=0.3) +
         geom_sf(
-          data=shp.g.colocated[.x],
+          data=shp_g_colocated[.x],
           aes(color=get(.x)),
           shape=15,
           size=0.3,
           show.legend=F
         ) +
-        geom_sf(data=st_union(bind_rows(shp.segs)), linewidth=1, color='white') +
+        geom_sf(data=st_union(bind_rows(shp_submap)), linewidth=1) +
         scale_color_viridis_c(
           option='viridis',
           name=.y,
           limits=c(
-            round(min(shp.g.colocated[[.x]])),
-            round(max(shp.g.colocated[[.x]]))
+            round(min(shp_g_colocated[[.x]])),
+            round(max(shp_g_colocated[[.x]]))
           ),
           breaks=c(
-            round(min(shp.g.colocated[[.x]])),
-            round(max(shp.g.colocated[[.x]]))
+            round(min(shp_g_colocated[[.x]])),
+            round(max(shp_g_colocated[[.x]]))
           ),
           na.value='transparent',
           guide=guide_colorbar(title.vjust=1, show.limits=T)
@@ -219,7 +188,7 @@ plts1 <-
           legend.key.height=unit(0.125, 'in'),
           legend.key.width=unit(0.2, 'in'),
           legend.title=element_text(vjust=0, color='black', size=14),
-          panel.grid=element_line(size=0.01, color='grey60'),
+          panel.grid=element_line(linewidth=0.01, color='grey60'),
           plot.title=element_text(vjust=0, margin=margin(0, 0, -10, 0))
         )
     } else {
@@ -230,40 +199,31 @@ plts1 <-
 
 # Plot full grid maps
 plts2 <-
-  map2(names(shp.g.full)[1:20], unts[1:20], ~{
+  map2(names(shp_g_full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
-      cat('\nPlotting full grids for ', .x, sep='')
-      shp.g.full <- shp.g.full[!is.na(shp.g.full[[.x]]),]
-      if(!is.numeric(shp.g.full[[.x]])) {
-        shp.g.full[[.x]] <- encode_ordinal(shp.g.full[[.x]])
-      }
+      cat('\nPlotting_full grids for ', .x, sep='')
+      shp_g_full <- shp_g_full[!is.na(shp_g_full[[.x]]),]
       p <-
         ggplot() +
         ggtitle(paste0('b) ', .x)) +
-        geom_sf(
-          data=shp.g.full[.x],
-          aes(color=get(.x)),
-          shape=15,
-          size=0.3
-        ) +
-        geom_sf(data=shp.relief.world, aes(color=elevation), shape=15, size=0.01) +
+        geom_sf(data=shp_g_full[.x], aes(color=get(.x)), shape=15, size=0.3) +
+        geom_sf(data=shp_relief_world, aes(color=elev), shape=15, size=0.01) +
         scale_color_etopo(guide='none') +
         new_scale_color() +
-        geom_sf(data=st_union((bind_rows(shp.buffer))), linewidth=0.3, fill=NA) +
-        geom_sf(data=shp.ridge, linewidth=0.3) +
-        geom_sf(data=shp.trench, linewidth=0.3) +
-        geom_sf(data=shp.transform, linewidth=0.3) +
-        geom_sf(data=st_union(bind_rows(shp.segs)), linewidth=1, color='white') +
+        geom_sf(data=shp_ridge, linewidth=0.3) +
+        geom_sf(data=shp_trench, linewidth=0.3) +
+        geom_sf(data=shp_transform, linewidth=0.3) +
+        geom_sf(data=st_union(bind_rows(shp_submap)), linewidth=1) +
         scale_color_viridis_c(
           option='viridis',
           name=.y,
           limits=c(
-            round(min(shp.g.colocated[[.x]])),
-            round(max(shp.g.colocated[[.x]]))
+            round(min(shp_g_colocated[[.x]])),
+            round(max(shp_g_colocated[[.x]]))
           ),
           breaks=c(
-            round(min(shp.g.colocated[[.x]])),
-            round(max(shp.g.colocated[[.x]]))
+            round(min(shp_g_colocated[[.x]])),
+            round(max(shp_g_colocated[[.x]]))
           ),
           na.value='transparent',
           guide=guide_colorbar(title.vjust=1, show.limits=T)
@@ -282,7 +242,7 @@ plts2 <-
           legend.key.height=unit(0.125, 'in'),
           legend.key.width=unit(0.2, 'in'),
           legend.title=element_text(vjust=0, color='black', size=14),
-          panel.grid=element_line(size=0.01, color='grey60'),
+          panel.grid=element_line(linewidth=0.01, color='grey60'),
           plot.title=element_text(vjust=0, margin=margin(0, 0, -10, 0))
         )
     } else {
@@ -293,12 +253,12 @@ plts2 <-
 
 # Plot parameter densities
 plts3 <-
-  map2(names(shp.g.full)[1:20], unts[1:20], ~{
+  map2(names(shp_g_full)[1:20], unts[1:20], ~{
     if(!(.x %in% c('geometry', 'segment'))) {
       cat('\nPlotting densities for ', .x, sep='')
-      if(!is.numeric(shp.g.full[[.x]]) | .x %in% c('Up mantle velocity structure (class)')) {
-        X <- encode_ordinal(g.full[[.x]][!is.na(g.full[[.x]])])
-        Y <- encode_ordinal(g.colocated[[.x]][!is.na(g.colocated[[.x]])])
+      if(!is.numeric(shp_g_full[[.x]]) | .x %in% c('Up mantle velocity structure (class)')) {
+        X <- g_full[[.x]]
+        Y <- g_colocated[[.x]]
         d <-
           as_tibble(table(X)) %>%
           rename(type=X, full.count=n) %>%
@@ -328,18 +288,8 @@ plts3 <-
             color=NA,
             position='dodge'
           ) +
-          annotate(
-            'label',
-            label='c',
-            x=-Inf,
-            y=Inf,
-            size=5,
-            hjust=0,
-            vjust=1,
-            fill='grey90',
-            label.padding=unit(0.02, 'in'),
-            label.r=unit(0, 'in')
-          ) +
+          annotate('label', label='c', x=-Inf, y=Inf, size=5, hjust=0, vjust=1, fill='grey90',
+                   label.padding=unit(0.02, 'in'), label.r=unit(0, 'in')) +
           scale_y_continuous(breaks=c(0), position='right') +
           scale_fill_manual(
             values =
@@ -365,8 +315,8 @@ plts3 <-
             legend.margin=margin()
           )
       } else {
-        X <- g.full[[.x]][!is.na(g.full[[.x]])]
-        Y <- g.colocated[[.x]][!is.na(g.colocated[[.x]])]
+        X <- g_full[[.x]][!is.na(g_full[[.x]])]
+        Y <- g_colocated[[.x]][!is.na(g_colocated[[.x]])]
         dns.full <-
           tibble(
             x =
@@ -386,7 +336,7 @@ plts3 <-
                 n=1000
               )$y / length(X)
           )
-        dns.colocated <-
+        density_colocated <-
           tibble(
             x =
               density(
@@ -436,57 +386,37 @@ plts3 <-
           geom_ribbon(
             data=filter(dns.diff, dns <= 0),
             aes(x, ymin=dns, ymax=0, fill='oversampling'),
-            size=0.1
+            linewidth=0.1
           ) +
           geom_ribbon(
             data=filter(dns.diff, dns >= 0),
             aes(x, ymin=0, ymax=dns, fill='undersampling'),
-            size=0.1
+            linewidth=0.1
           ) +
           geom_path(
             data=dns.full,
             aes(x, dns, color='global'),
-            size=1
+            linewidth=1
           ) +
           geom_path(
-            data=dns.colocated,
+            data=density_colocated,
             aes(x, dns, color='hf obs'),
-            size=1
+            linewidth=1
           ) +
-          annotate(
-            'label',
-            label='c',
-            x=-Inf,
-            y=Inf,
-            size=5,
-            hjust=0,
-            vjust=1,
-            fill='grey90',
-            label.padding=unit(0.02, 'in'),
-            label.r=unit(0, 'in')
-          ) +
+          annotate('label', label='c', x=-Inf, y=Inf, size=5, hjust=0, vjust=1, fill='grey90',
+                   label.padding=unit(0.02, 'in'), label.r=unit(0, 'in')) +
           scale_y_continuous(breaks=c(0), position='right') +
           scale_color_grey(
-            guide =
-              guide_legend(
-                override.aes=list(size=2),
-                title.position='top',
-                title.vjust=1,
-                nrow=1
-              )
+            guide = guide_legend(override.aes=list(size=2), title.position='top',
+                                 title.vjust=1, nrow=1)
           ) +
           scale_fill_manual(
             values=c(
               'oversampling'='firebrick',
               'undersampling'='navy'
             ),
-            guide =
-              guide_legend(
-                override.aes=list(size=2),
-                title.position='top',
-                title.vjust=1,
-                nrow=1
-              )
+            guide = guide_legend(override.aes=list(size=2), title.position='top',
+                                 title.vjust=1, nrow=1)
           ) +
           labs(x=.y, y='density', color=NULL, fill=NULL) +
           theme_dark(base_size=12) +
@@ -504,7 +434,7 @@ plts3 <-
   })
 
 # Save composite plots
-pwalk(list(plts1, plts2, plts3, names(shp.g.full)[1:20]), ~{
+pwalk(list(plts1, plts2, plts3, names(shp_g_full)[1:20]), ~{
   if(!(..4 %in% c('geometry', 'segment'))) {
     cat('\nComposing plots for ', ..4, sep='')
     p <-

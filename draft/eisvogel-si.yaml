@@ -1,0 +1,27 @@
+---
+title: "Supplementary Information"
+subtitle: "A Comparison of Heat Flow Interpolations Near Subduction Zones"
+author: ["Kerswell B.", "Kohn Matthew J."]
+date: "24 November 2025"
+subject: "Heat Flow"
+keywords: [heat flow, subduction zone, interpolation, kriging, similarity]
+lang: "en-US"
+titlepage: true
+titlepage-color: "2E7A40"
+titlepage-text-color: "FFFFFF"
+titlepage-rule-color: "FFFFFF"
+titlepage-rule-height: 2
+tables: true
+graphics: true
+caption-justification: "justified"
+numbersections: true
+toc: false
+colorlinks: true
+link-citations: true
+header-includes:
+  - \makeatletter
+  - \newcounter{none}
+  - \renewcommand{\thenone}{}
+  - \makeatother
+---
+
