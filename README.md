@@ -2,13 +2,13 @@
 
 ***Figure:*** *Global heat flow data compared to (a) Similarity (b) and Kriging (c) interpolations for near Japan. Volcanoes (white triangles) defined by Syracuse & Abers ([2006](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2005gc001045)). Global heat flow data from the International Heat Flow Commission 2024 release (Global Heat Flow Data Assessment Group, [2024](https://doi.org/10.5880/fidgeo.2024.014)). Similarity interpolation from Lucazeau ([2019](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2019GC008389)). Plate boundaries (thick white lines) defined by Lawver et al. ([2018](https://repositories.lib.utexas.edu/handle/2152/65415)). Transect is from Submap Lallemand & Heuret ([2017](https://submap.gm.umontpellier.fr)).*
 
-# Kerswell & Kohn (2024; in prep)
+# Kerswell & Kohn (2026; in prep)
 
 This work investigates the spatial continuity of surface heat flow near subduction zones. We compared two different interpolations methods, *Similarity* and *Kriging* to the 2024 release of the Global Heat Flow Database (Global Heat Flow Data Assessment Group, [2024](https://doi.org/10.5880/fidgeo.2024.014)). Interpolations show that surface heat flow is complex and often discontinuous along strike near subduction zones, thus implying that the deep thermal structure and/or near-surface modifications are also discontinuous.
 
 ## Repository
 
-This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2024; in prep).
+This repository provides all materials for the manuscript *A Comparison of Heat Flow Interpolations Near Subduction Zones* (Kerswell & Kohn 2026; in prep).
 
 This repository includes:
 
