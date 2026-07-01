@@ -1,0 +1,16 @@
+# Mark LaTeX/TeX files as documentation
+*.tex linguist-documentation
+*.sty linguist-documentation
+*.cls linguist-documentation
+
+# Mark PostScript/Vector images as data or documentation
+*.eps linguist-documentation
+*.ps linguist-documentation
+
+# Mark Gnuplot scripts as documentation (or vendored)
+*.plt linguist-documentation
+*.gnu linguist-documentation
+
+figs/* linguist-vendored
+draft/* linguist-documentation
+draft/bak/* linguist-documentation

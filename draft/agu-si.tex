@@ -1,0 +1,156 @@
+\documentclass[$if(classoption)$$classoption$$else$draft,linenumbers$endif$]{agujournal2019}
+\usepackage{url}
+\usepackage{lineno}
+\usepackage{soul}
+
+\usepackage{xcolor}
+\definecolor{default-linkcolor}{HTML}{A50000}
+\definecolor{default-filecolor}{HTML}{A50000}
+\definecolor{default-citecolor}{HTML}{4077C0}
+\definecolor{default-urlcolor}{HTML}{4077C0}
+
+\usepackage{hyperref}
+\hypersetup{
+$if(colorlinks)$
+  colorlinks=true,
+  linkcolor={$if(linkcolor)$$linkcolor$$else$default-linkcolor$endif$},
+  filecolor={$if(filecolor)$$filecolor$$else$default-filecolor$endif$},
+  citecolor={$if(citecolor)$$citecolor$$else$default-citecolor$endif$},
+  urlcolor={$if(urlcolor)$$urlcolor$$else$default-urlcolor$endif$},
+$else$
+$if(boxlinks)$
+$else$
+  hidelinks,
+$endif$
+$endif$
+  breaklinks=true
+}
+
+$if(highlighting-macros)$
+$highlighting-macros$
+$endif$
+
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\listfigurename}{List of Figures}
+\providecommand{\listtablename}{List of Tables}
+\newcounter{none}
+\setcounter{none}{0}
+
+\makeatletter
+\@ifundefined{pandocbounded}{
+  \usepackage{graphicx}
+  \newcommand{\pandocbounded}[1]{\setbox0=\hbox{#1}\ifdim\wd0>\linewidth\resizebox{\linewidth}{!}{#1}\else#1\fi}
+}{}
+\makeatother
+
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+$if(tables)$
+\usepackage{longtable,booktabs,array}
+$if(multirow)$
+\usepackage{multirow}
+$endif$
+\usepackage{calc}
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+$endif$
+
+$if(csl-refs)$
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{\begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ \let\@cite@ofmt\@firstofone
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2]
+ {\begin{list}{}{
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-\cslhangindent}
+  \fi
+  \setlength{\itemsep}{#2\baselineskip}
+  }
+  \item\relax}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+$endif$
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+\journalname{$journal$}
+
+\makeatletter
+\def\titlepageheadlinefont{\fontsize{9}{11}\selectfont}
+
+\def\ps@headings{
+  \def\@oddfoot{\centerline{\small --\the\c@page--}}
+  \let\@evenfoot\@oddfoot
+  \def\@oddhead{}
+  \let\@evenhead\@oddhead
+}
+\ps@headings
+
+\def\ps@front{
+  \def\@oddhead{
+    \vbox to 0pt{
+      \vskip-30pt
+      \centerline{\titlepageheadlinefont $journal$}
+      \vss
+    }
+  }
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{\centerline{\small --\the\c@page--}}
+  \let\@evenfoot\@oddfoot
+}
+
+\let\oldtitle\title
+\renewcommand{\title}[1]{\oldtitle{#1}\thispagestyle{front}}
+\makeatother
+
+\begin{document}
+
+$for(include-before)$
+$include-before$
+$endfor$
+
+\title{Supplementary Information for "$title$"}
+
+\authors{$for(authors)$$it.name$\affil{$it.affil$}$sep$, $endfor$}
+
+$for(affiliations)$
+\affiliation{$it.number$}{$it.name$}
+$endfor$
+
+$for(corresponding_author)$
+\correspondingauthor{$it.name$}{$it.email$}
+$endfor$
+
+$body$
+
+$for(include-after)$
+$include-after$
+$endfor$
+
+\end{document}

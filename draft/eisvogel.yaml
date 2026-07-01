@@ -1,0 +1,29 @@
+---
+title: "Along-Strike Surface Heat Flow Continuity Near Subduction Zones Is Ambiguous or Geographically Limited, Not Globally Uniform"
+author: ["Kerswell B.", "Kohn M.J."]
+date: "01 July 2026"
+subject: "Heat Flow"
+keywords: [heat flow, subduction zone, interpolation, kriging, similarity]
+lang: "en-US"
+titlepage: true
+titlepage-color: "2E7A40"
+titlepage-text-color: "FFFFFF"
+titlepage-rule-color: "FFFFFF"
+titlepage-rule-height: 2
+tables: true
+graphics: true
+caption-justification: "justified"
+figPrefix: "Figure"
+eqnPrefix: "Equation"
+secPrefix: "Section"
+tblPrefix: "Table"
+numbersections: true
+toc: true
+toc-own-page: true
+colorlinks: true
+link-citations: true
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{amssymb}
+  - \usepackage{amsfonts}
+---
