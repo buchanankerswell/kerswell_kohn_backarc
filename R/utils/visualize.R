@@ -480,8 +480,12 @@ draw_global_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
         sort() |>
         as.character()
 
-      cols <- pal_d3("category10")(length(region_order))
-      names(cols) <- region_order
+      region_palette <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7")
+      cols <- setNames(region_palette[seq_along(region_order)], region_order)
+
+      region_shapes <- c(21, 22, 23, 24)
+      shapes <- setNames(region_shapes[seq_along(region_order)], region_order)
+
       ccf_long <- ccf_long |> mutate(region = factor(region, levels = region_order))
 
       label_map <- ccf_long |>
@@ -510,11 +514,27 @@ draw_global_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           "ambiguous" = "Ambiguous"
         ))
 
+      rect_data <- rect_data |>
+        mutate(
+          interpretation = factor(interpretation, levels = c("Inferred Continuous", "Inferred Discontinuous", "Method Disagreement", "Ambiguous")),
+          pattern_type = case_when(
+            interpretation == "Inferred Continuous" ~ "crosshatch",
+            interpretation == "Inferred Discontinuous" ~ "stripe",
+            interpretation == "Method Disagreement" ~ "stripe",
+            interpretation == "Ambiguous" ~ "none"
+          ),
+          pattern_angle = case_when(
+            interpretation == "Inferred Discontinuous" ~ 45,
+            interpretation == "Method Disagreement" ~ 135,
+            TRUE ~ 45
+          )
+        )
+
       interpretation_colors <- c(
-        "Inferred Continuous" = "#E2F0D9",
-        "Inferred Discontinuous" = "#FCD6DB",
-        "Method Disagreement" = "#FFF2CC",
-        "Ambiguous" = "grey90"
+        "Inferred Continuous" = "#BFE5D9",
+        "Inferred Discontinuous" = "#FFD1B3",
+        "Method Disagreement" = "#E1D5E7",
+        "Ambiguous" = "#E6E6E6"
       )
 
       p <- ggplot(
@@ -528,11 +548,41 @@ draw_global_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           size = n_total
         )
       ) +
-        geom_rect(data = rect_data, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = interpretation), inherit.aes = FALSE) +
-        scale_fill_manual(name = "Classification", values = c(cols, interpretation_colors), breaks = names(interpretation_colors)) +
+        geom_rect_pattern(
+          data = rect_data,
+          aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, pattern = interpretation, pattern_angle = interpretation),
+          inherit.aes = FALSE,
+          fill = NA,
+          color = NA,
+          pattern_color = "black",
+          pattern_fill = NA,
+          pattern_density = 0.08,
+          pattern_spacing = 0.025,
+          pattern_alpha = 0.5,
+          pattern_size = 0.3
+        ) +
+        scale_pattern_manual(
+          name = "Classification",
+          values = c(
+            "Inferred Continuous" = "crosshatch",
+            "Inferred Discontinuous" = "stripe",
+            "Method Disagreement" = "stripe",
+            "Ambiguous" = "none"
+          ),
+          guide = guide_legend(override.aes = list(fill = "transparent"))
+        ) +
+        scale_pattern_angle_manual(
+          name = "Classification",
+          values = c(
+            "Inferred Continuous" = 45,
+            "Inferred Discontinuous" = 45,
+            "Method Disagreement" = 135,
+            "Ambiguous" = 0
+          )
+        ) +
         geom_hline(yintercept = 0, linewidth = 0.5, linetype = "dashed") +
         geom_line(linewidth = 1.2, na.rm = TRUE) +
-        geom_point(na.rm = TRUE, shape = 21, color = "black", stroke = 0.8) +
+        geom_point(aes(shape = region), na.rm = TRUE, color = "black", stroke = 0.8) +
         geom_text(
           data = text_data,
           aes(x = global_pair_uid, y = -1.0, label = submap_transect_set, fontface = fontface),
@@ -543,7 +593,9 @@ draw_global_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           size = base_size * 0.22
         ) +
         scale_size_continuous(name = "Observations", range = c(0, 7), breaks = c(0, 50, 100, 1000)) +
+        scale_fill_manual(name = "SubMap Region", values = cols, limits = region_order, breaks = region_order) +
         scale_color_manual(name = "SubMap Region", values = cols, limits = region_order, breaks = region_order) +
+        scale_shape_manual(name = "SubMap Region", values = shapes, limits = region_order, breaks = region_order) +
         scale_y_continuous(name = "Cross Correlation Function (CCF)", limits = c(-1, 1), breaks = seq(-1, 1, 0.5)) +
         scale_x_discrete(name = "Adjacent SubMap Transect Pairs", labels = label_map, expand = expansion(add = c(2, 2))) +
         coord_cartesian(clip = "off") +
@@ -602,8 +654,12 @@ draw_method_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
         sort() |>
         as.character()
 
-      cols <- pal_d3("category10")(length(region_order))
-      names(cols) <- region_order
+      region_palette <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7")
+      cols <- setNames(region_palette[seq_along(region_order)], region_order)
+
+      region_shapes <- c(21, 22, 23, 24)
+      shapes <- setNames(region_shapes[seq_along(region_order)], region_order)
+
       ccf_long <- ccf_long |> mutate(region = factor(region, levels = region_order))
 
       label_map <- ccf_long |>
@@ -635,11 +691,27 @@ draw_method_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           "ambiguous" = "Ambiguous"
         ))
 
+      rect_data <- rect_data |>
+        mutate(
+          interpretation = factor(interpretation, levels = c("Inferred Continuous", "Inferred Discontinuous", "Method Disagreement", "Ambiguous")),
+          pattern_type = case_when(
+            interpretation == "Inferred Continuous" ~ "crosshatch",
+            interpretation == "Inferred Discontinuous" ~ "stripe",
+            interpretation == "Method Disagreement" ~ "stripe",
+            interpretation == "Ambiguous" ~ "none"
+          ),
+          pattern_angle = case_when(
+            interpretation == "Inferred Discontinuous" ~ 45,
+            interpretation == "Method Disagreement" ~ 135,
+            TRUE ~ 45
+          )
+        )
+
       interpretation_colors <- c(
-        "Inferred Continuous" = "#E2F0D9",
-        "Inferred Discontinuous" = "#FCD6DB",
-        "Method Disagreement" = "#FFF2CC",
-        "Ambiguous" = "grey90"
+        "Inferred Continuous" = "#BFE5D9",
+        "Inferred Discontinuous" = "#FFD1B3",
+        "Method Disagreement" = "#E1D5E7",
+        "Ambiguous" = "#E6E6E6"
       )
 
       p <- ggplot(
@@ -653,11 +725,41 @@ draw_method_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           size = n
         )
       ) +
-        geom_rect(data = rect_data, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = interpretation), inherit.aes = FALSE) +
-        scale_fill_manual(name = "Classification", values = c(cols, interpretation_colors), breaks = names(interpretation_colors)) +
+        geom_rect_pattern(
+          data = rect_data,
+          aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, pattern = interpretation, pattern_angle = interpretation),
+          inherit.aes = FALSE,
+          fill = NA,
+          color = NA,
+          pattern_color = "black",
+          pattern_fill = NA,
+          pattern_density = 0.08,
+          pattern_spacing = 0.025,
+          pattern_alpha = 0.5,
+          pattern_size = 0.3
+        ) +
+        scale_pattern_manual(
+          name = "Classification",
+          values = c(
+            "Inferred Continuous" = "crosshatch",
+            "Inferred Discontinuous" = "stripe",
+            "Method Disagreement" = "stripe",
+            "Ambiguous" = "none"
+          ),
+          guide = guide_legend(override.aes = list(fill = "transparent"))
+        ) +
+        scale_pattern_angle_manual(
+          name = "Classification",
+          values = c(
+            "Inferred Continuous" = 45,
+            "Inferred Discontinuous" = 45,
+            "Method Disagreement" = 135,
+            "Ambiguous" = 0
+          )
+        ) +
         geom_hline(yintercept = 0, linewidth = 0.5, linetype = "dashed") +
         geom_line(linewidth = 1.2, na.rm = TRUE) +
-        geom_point(na.rm = TRUE, shape = 21, color = "black", stroke = 0.8) +
+        geom_point(aes(shape = region), na.rm = TRUE, color = "black", stroke = 0.8) +
         geom_text(
           data = text_data,
           aes(x = global_pair_uid, y = -1.0, label = submap_transect_set, fontface = fontface),
@@ -668,7 +770,9 @@ draw_method_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           size = base_size * 0.22
         ) +
         scale_size_continuous(name = "Observations", range = c(0, 7), breaks = c(0, 50, 100, 1000)) +
+        scale_fill_manual(name = "SubMap Region", values = cols, limits = region_order, breaks = region_order) +
         scale_color_manual(name = "SubMap Region", values = cols, limits = region_order, breaks = region_order) +
+        scale_shape_manual(name = "SubMap Region", values = shapes, limits = region_order, breaks = region_order) +
         scale_y_continuous(name = "Cross Correlation Function (CCF)", limits = c(-1, 1), breaks = seq(-1, 1, 0.5)) +
         scale_x_discrete(name = "SubMap Transects", labels = label_map, expand = expansion(add = c(2, 2))) +
         coord_cartesian(clip = "off") +
@@ -935,7 +1039,7 @@ draw_nlopt_summary <- function(fig_dir, nlopt_summary, base_size = 14, quiet = F
 
       suppressWarnings({
         suppressMessages({
-          p <- nlopt_summary |>
+          df <- nlopt_summary |>
             mutate(max_point_pair_distance = max_point_pair_distance / 1e3) |>
             select(-c(
               variogram_weight,
@@ -956,14 +1060,30 @@ draw_nlopt_summary <- function(fig_dir, nlopt_summary, base_size = 14, quiet = F
               "Max Obs" = max_n_point_pairs
             ) |>
             pivot_longer(-c(submap_transect_set, variogram_model, total_cost)) |>
-            mutate(region = str_extract(submap_transect_set, "^[^_]+")) |>
-            ggplot(aes(value, total_cost, fill = region)) +
-            geom_point(size = 2.5, shape = 21, color = "black") +
-            scale_fill_d3(palette = "category10") +
-            labs(x = NULL, y = "Cost", fill = NULL) +
+            mutate(region = str_extract(submap_transect_set, "^[^_]+"))
+
+          region_order <- df |>
+            distinct(region) |>
+            pull(region) |>
+            sort() |>
+            as.character()
+
+          region_palette <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7")
+          region_shapes <- c(21, 22, 23, 24)
+
+          cols <- setNames(region_palette[seq_along(region_order)], region_order)
+          shapes <- setNames(region_shapes[seq_along(region_order)], region_order)
+
+          p <- df |>
+            mutate(region = factor(region, levels = region_order)) |>
+            ggplot(aes(value, total_cost, fill = region, shape = region)) +
+            geom_point(size = 2.5, color = "black") +
+            scale_fill_manual(name = "Region", values = cols, limits = region_order, breaks = region_order) +
+            scale_shape_manual(name = "Region", values = shapes, limits = region_order, breaks = region_order) +
+            labs(x = NULL, y = "Cost", fill = NULL, shape = NULL) +
             scale_x_continuous(breaks = pretty_breaks(n = 4), guide = guide_axis(check.overlap = TRUE), expand = expansion(mult = 0.10)) +
             scale_y_continuous(expand = expansion(mult = 0.10)) +
-            guides(fill = guide_legend(ncol = 4)) +
+            guides(fill = guide_legend(ncol = 4, override.aes = list(size = 3.5)), shape = guide_legend(ncol = 4)) +
             facet_wrap(~name, scales = "free_x") +
             theme_facet(base_size, show_legend = TRUE) +
             theme(strip.text = element_text(size = base_size * 1.0))

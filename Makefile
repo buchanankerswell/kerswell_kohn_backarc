@@ -2,21 +2,20 @@
 include project.mk
 
 # Targets
-.PHONY: all build visualize postprocess test krige preprocess environment clean deep-clean help
+.PHONY: all build build-from-scratch build-from-repo manuscript visualize postprocess krige preprocess download upload environment clean deep-clean help
 
 all: build
 
-build: environment preprocess krige postprocess visualize manuscript
+build: build-from-repo
+
+build-from-scratch: environment preprocess krige postprocess visualize manuscript
 	@open draft/manuscript.pdf
 
-test:
-	@$(MAKE) --no-print-directory -C $(R) test
+build-from-repo: environment download visualize manuscript
+	@open draft/manuscript.pdf
 
-download:
-	@$(MAKE) --no-print-directory -C $(R) download
-
-upload: $(OUT)
-	@$(MAKE) --no-print-directory -C $(R) upload
+manuscript:
+	@$(MAKE) --no-print-directory -C $(DRAFT)
 
 visualize: postprocess
 	@$(MAKE) --no-print-directory -C $(R) visualize
@@ -30,8 +29,11 @@ krige:
 preprocess:
 	@$(MAKE) --no-print-directory -C $(R) preprocess
 
-manuscript:
-	@$(MAKE) --no-print-directory -C $(DRAFT)
+download:
+	@$(MAKE) --no-print-directory -C $(R) download
+
+upload: $(OUT)
+	@$(MAKE) --no-print-directory -C $(R) upload
 
 environment:
 	@Rscript $(R)/environment.R
@@ -55,10 +57,14 @@ help:
 	@echo "    --------------------------------------------------"
 	@echo "    Available targets:"
 	@echo "    --------------------------------------------------"
-	@echo "    visualize    Visualize results"
-	@echo "    postprocess  Process Kriging results"
-	@echo "    krige        Krige with non-linear optimization"
-	@echo "    preprocess   Fetch and preprocess required datasets"
-	@echo "    environment  Create R environment"
-	@echo "    clean        Remove generated files (safe)"
-	@echo "    deep-clean   Remove results and data (use with caution!)"
+	@echo "    build-from-repo    Build study from data in OSF repo"
+	@echo "    build-from-scratch Build study from scratch (time consuming)"
+	@echo "    manuscript         Render manuscript"
+	@echo "    visualize          Visualize results"
+	@echo "    postprocess        Process Kriging results"
+	@echo "    krige              Krige with non-linear optimization"
+	@echo "    preprocess         Fetch and preprocess required datasets"
+	@echo "    download           Download data from OSF repo"
+	@echo "    environment        Create R environment"
+	@echo "    clean              Remove generated files (safe)"
+	@echo "    deep-clean         Remove results and data (use with caution!)"

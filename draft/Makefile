@@ -11,9 +11,10 @@ DEEP_CLEAN :=
 .PRECIOUS: $(DRAFT)/%.tex
 
 # Targets
-.PHONY: all diff clean deep-clean help
+.PHONY: all manuscript diff clean deep-clean help
 
-all: $(PDFS) $(DOCXS)
+all: manuscript
+manuscript: $(PDFS) $(DOCXS)
 diff: all $(DRAFT)/diff-manuscript.pdf $(DRAFT)/diff-supplementary-information.pdf $(DRAFT)/response.pdf
 
 $(DRAFT)/%.docx: $(DRAFT)/%.md
@@ -52,9 +53,7 @@ help:
 	@echo "    --------------------------------------------------"
 	@echo "    Available targets:"
 	@echo "    --------------------------------------------------"
-	@echo "    all                                 Render manuscript and SI"
-	@echo "    diff-manuscript.pdf                 Generate manuscript diff"
-	@echo "    diff-supplementary-information.pdf  Generate SI diff"
-	@echo "    clean                               Cleanup unnecessary files"
-	@echo "    --------------------------------------------------"
-	@echo "    Note: Use BACKUP_DATE=DD-MMM-YYYY to change diff source."
+	@echo "    manuscript Render manuscript and SI"
+	@echo "    diff       Generate manuscript diff"
+	@echo "    clean      Cleanup unnecessary files"
+	@echo "    deep-clean Remove results and data (use with caution!)"

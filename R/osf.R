@@ -20,9 +20,9 @@ main <- function() {
   lapply(list.files(util_dir, pattern = "\\.R$", full.names = TRUE), source)
 
   if (sync_dir == "download") {
-    download_simulation_results_from_osf(data_dir)
+    download_results_from_osf(data_dir)
   } else if (sync_dir == "upload") {
-    upload_simulation_results_to_osf(data_dir)
+    upload_results_to_osf(data_dir)
   } else {
     cat(" !! Error: unknown sync command '", sync_dir, "'. Use 'upload' or 'download'.\n", sep = "")
   }

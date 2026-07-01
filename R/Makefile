@@ -6,7 +6,7 @@ CLEAN := $(LOGS)/log*.log
 DEEP_CLEAN := $(OUT) $(FIGS)
 
 # Targets
-.PHONY: all visualize postprocess test krige preprocess clean deep-clean help
+.PHONY: all download upload visualize postprocess test krige preprocess clean deep-clean help
 
 all: preprocess krige postprocess visualize
 
@@ -49,10 +49,12 @@ help:
 	@echo "    --------------------------------------------------"
 	@echo "    Available targets:"
 	@echo "    --------------------------------------------------"
-	@echo "    visualize    Visualize all results"
-	@echo "    postprocess  Process interpolation results"
-	@echo "    krige        Krige with non-linear optimization"
-	@echo "    preprocess   Fetch required datasets and preprocess"
-	@echo "    clean        Cleanup unnecessary files and directories (safe)"
-	@echo "    deep-clean   Deep clean figures and results (use with caution!)"
-	@echo "    help         Show this help message"
+	@echo "    download    Download data from OSF repo"
+	@echo "    upload      Upload data from OSF repo"
+	@echo "    visualize   Visualize all results"
+	@echo "    postprocess Process interpolation results"
+	@echo "    krige       Krige with non-linear optimization"
+	@echo "    preprocess  Fetch required datasets and preprocess"
+	@echo "    clean       Cleanup unnecessary files and directories (safe)"
+	@echo "    deep-clean  Deep clean figures and results (use with caution!)"
+	@echo "    help        Show this help message"

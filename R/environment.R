@@ -18,7 +18,8 @@ main <- function() {
       "tidyverse", "readxl", "jsonlite", "rlang", "units", "nloptr", "lhs", "zoo",
       "mgcv", "quantreg", "furrr", "concaveman", "sp", "sf", "stars", "terra",
       "gstat", "tidyterra", "marmap", "ggOceanMaps", "scales", "ggsci", "ggspatial",
-      "ggrepel", "ggnewscale", "ggridges", "cowplot", "patchwork", "knitr", "osfr"
+      "ggrepel", "ggnewscale", "ggridges", "ggpattern", "cowplot", "patchwork",
+      "knitr", "osfr"
     )
 
     github_pkgs <- c("yutannihilation/ggsflabel", "ropensci/rnaturalearthhires")

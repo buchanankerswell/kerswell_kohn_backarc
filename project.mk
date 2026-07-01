@@ -33,9 +33,9 @@ ifeq ($(shell command -v Rscript 2>/dev/null),)
   $(error !! ERROR: 'Rscript' not found in PATH. This project requires R)
 endif
 
-# ifeq ($(shell command -v pandoc 2>/dev/null),)
-#   $(error !! ERROR: 'pandoc' not found in PATH. Required for rendering the manuscript)
-# endif
+ifeq ($(shell command -v pandoc 2>/dev/null),)
+  $(error !! ERROR: 'pandoc' not found in PATH. Required for rendering the manuscript)
+endif
 
 # --------------------------------------------------
 # Logging
