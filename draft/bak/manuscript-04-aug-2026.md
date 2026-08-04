@@ -7,7 +7,7 @@ A common class of subduction zone thermal models assumes slab-mantle coupling ne
 
 # Plain Language Summary {.unnumbered #sec:plain-language-summary}
 
-When one tectonic plate dives beneath another at a subduction zone, the two plates lock together and drive flow of warm rock in Earth's mantle. Scientists measure the heat escaping through Earth's surface to locate this "sticking-point" because its depth controls earthquake hazards. For decades, a few intensely studied regions were used to identify a sticking-point depth of 70--80 km, assuming that a single cross-section could represent the thermal structure for hundreds of kilometers laterally. We tested this assumption by analyzing more than 60,000 heat flow measurements across 34 subduction zone segments worldwide using two independent mapping methods. Thermal structure was consistent in four well-studied regions, supporting the conventional model, but thermal structure changed abruptly over distances of 100--150 km in three other well-sampled regions, challenging the conventional model's assumptions. Two additional regions gave contradictory results, while nearly three quarters of all regions had too few measurements to evaluate thermal structure. Importantly, in one region, both methods indicate a uniform thermal structure while 190 measurements directly contradict that conclusion; agreement does not prove accuracy. Improving the subduction zone thermal models requires strategically placed field surveys combined with mapping strategies that integrate local measurements and geological patterns in a principled way.
+When one tectonic plate dives beneath another at a subduction zone, the two plates lock together and drive flow of warm rock in Earth's mantle. Scientists measure the heat escaping through Earth's surface to locate this "sticking-point" because its depth controls fault behavior and earthquake hazards. For decades, a few intensely studied regions were used to identify a sticking-point depth of 70--80 km, assuming that a single cross-section could represent the thermal structure for hundreds of km laterally. We tested this assumption by analyzing more than 60,000 heat flow measurements across 34 subduction zone segments worldwide using two independent mapping methods. Thermal structure was consistent in four well-studied regions, supporting the classic model, but thermal structure changed abruptly over distances of 100--150 km in three other well-sampled regions, challenging the classic model's assumptions. Two additional regions gave contradictory results, while nearly three quarters of all regions we analyzed had too few measurements to evaluate thermal structure. Importantly, in one region, both methods indicate a uniform thermal structure while 190 measurements directly contradict that conclusion; agreement does not prove accuracy. Improving the subduction zone thermal models requires strategically placed field surveys combined with mapping strategies that integrate local measurements and global geological patterns in a principled way.
 
 # Keypoints {.unnumbered #sec:key-points}
 
@@ -259,17 +259,13 @@ Sparse observations are the dominant limitation on geodynamic interpretation of 
 
 \clearpage
 
-# Acknowledgments {.unnumbered #sec:acknowledgements}
-
-We express our sincere gratitude to the communities, institutions, and research teams who develop and maintain the open-source datasets used in this study. Specifically, we thank the creators of the SubMap tool (Géosciences Montpellier); the University of Texas Institute for Geophysics for the plate boundary compilation; the NOAA National Centers for Environmental Information for the ETOPO 2022 global relief model; the Global Heat Flow Data Assessment Group for maintaining the Global Heat Flow Database; and F. Lucazeau for providing the Similarity interpolations. This work was supported by the National Science Foundation grants OIA 1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman and EAR 2118114 to M. Kohn.
-
 # Data Availability {.unnumbered #sec:data-availability}
 
 All data, code, and relevant information for reproducing this work are archived on the OSF [@kerswell2026a] and Zenodo [@kerswell2026b] repositories. All code within these repositories is MIT Licensed and free for use and distribution (see license details). All spatial datasets used in this study are open-source: transects from the SubMap tool version 7.1 [@lallemand2026]; present-day plate boundaries from @coffin2018; global relief model from @noaa2022; surface heat flow observations from the @ihfc2024; and Similarity interpolations from @lucazeau2019.
 
-# Conflict of Interest {.unnumbered #sec:conflict-of-interest}
+# Acknowledgments {.unnumbered #sec:acknowledgements}
 
-The authors declare there are no conflicts of interest for this manuscript.
+We express our sincere gratitude to the communities, institutions, and research teams who develop and maintain the open-source datasets used in this study. Specifically, we thank the creators of the SubMap tool (Géosciences Montpellier); the University of Texas Institute for Geophysics for the plate boundary compilation; the NOAA National Centers for Environmental Information for the ETOPO 2022 global relief model; the Global Heat Flow Data Assessment Group for maintaining the Global Heat Flow Database; and F. Lucazeau for providing the Similarity interpolations. This work was supported by the National Science Foundation grants OIA 1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman and EAR 2118114 to M. Kohn.
 
 \clearpage
 

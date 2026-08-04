@@ -1,7 +1,7 @@
 # --------------------------------------------------
 # Pandoc pipeline
 # --------------------------------------------------
-TEMPLATE      := $(DRAFT)/eisvogel.tex
+TEMPLATE      := $(DRAFT)/agu.tex
 TEMPLATE_NAME := $(notdir $(TEMPLATE))
 BIB           := $(DRAFT)/main.bib
 

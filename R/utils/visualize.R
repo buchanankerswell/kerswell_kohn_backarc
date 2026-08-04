@@ -530,13 +530,6 @@ draw_global_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
           )
         )
 
-      interpretation_colors <- c(
-        "Inferred Continuous" = "#BFE5D9",
-        "Inferred Discontinuous" = "#FFD1B3",
-        "Method Disagreement" = "#E1D5E7",
-        "Ambiguous" = "#E6E6E6"
-      )
-
       p <- ggplot(
         ccf_long,
         aes(
@@ -706,13 +699,6 @@ draw_method_ccf_summary <- function(fig_dir, global_ccf_summary, method_ccf_summ
             TRUE ~ 45
           )
         )
-
-      interpretation_colors <- c(
-        "Inferred Continuous" = "#BFE5D9",
-        "Inferred Discontinuous" = "#FFD1B3",
-        "Method Disagreement" = "#E1D5E7",
-        "Ambiguous" = "#E6E6E6"
-      )
 
       p <- ggplot(
         ccf_long,
